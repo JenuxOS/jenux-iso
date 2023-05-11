@@ -1,0 +1,113 @@
+#!/bin/zsh
+#NBD Disk Exporter
+#ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)
+#Copyright © 2020 Daniel Nash
+#This is anti-capitalist software, released for free use by individuals and organizations that do not operate by capitalist principles. Permission is hereby granted, free of charge, to any person or organization (the "User") obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, distribute, and/or sell copies of the Software, subject to the following conditions:
+#1. The above copyright notice and this permission notice shall be included in all copies or modified versions of the Software. 
+#2. The User is one of the following:
+#a. An individual person, laboring for themselves
+#b. A non-profit organization
+#c. An educational institution
+#d. An organization that seeks shared profit for all of its members, and allows non-members to set the cost of their labor
+#3. If the User is an organization with owners, then all owners are workers and all workers are owners with equal equity and/or equal vote.
+#4. If the User is an organization, then the User is not law enforcement or military, or working for or under either. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT EXPRESS OR IMPLIED WARRANTY OF ANY KIND, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+function createmenu
+{
+if [ -z $tempdir ];then
+export pathcomp=`mktemp -u --suffix a|tr / "\\n"`
+export temppath=`echo $pathcomp|tr / "\\n"|grep -nw tmp.|cut -f 1 -d :`
+export tempdir=`echo $pathcomp|head -n $(($temppath-1))|tr "\\n" /`
+fi
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+cat $1|tail -n 1 >$tempdir/itemlist
+export numitems=`cat $tempdir/itemlist|wc -l`
+export linecounter=1
+while true;do
+cat $tempdir/itemlist|head -n $linecounter|tail -n 1 >>$tempdir/items
+export linecounter=$(($linecounter+1))
+if [ $linecounter -gt $numitems ];then
+break
+else
+continue
+fi
+done
+echo whiptail --menu --nocancel `cat $1|head -n 1` `echo -n $menudesc` `cat $1|tail -n 1`>$tempdir/menu
+chmod 755 $tempdir/menu
+$tempdir/menu 2>$tempdir/choice
+export choice=`cat $tempdir/choice|cut -f 2 -d \;`
+cat $tempdir/itemlist|sed s/"\"\ /\\n/g"|sed "s/\"//g" > $tempdir/items
+export testnum=`cat $tempdir/items|grep -nw $choice|cut -f 1 -d :|head -n 1`
+export itemname=`cat $tempdir/items|head -n $(($testnum+1))|tail -n 1`
+rm $tempdir/choice $tempdir/menu $tempdir/itemlist $tempdir/items $tempdir/dynmenu > /dev/null 2>/dev/null
+clear
+}
+function createdynamicmenu
+{
+if [ -z $tempdir ];then
+export pathcomp=`mktemp -u --suffix a|tr / "\\n"`
+export temppath=`echo $pathcomp|tr / "\\n"|grep -nw tmp.|cut -f 1 -d :`
+export tempdir=`echo $pathcomp|head -n $(($temppath-1))|tr "\\n" /`
+fi
+$@>$tempdir/itemlist
+export numitems=`cat $tempdir/itemlist|wc -l`
+export counter=1
+if [ -f $tempdir/menutitle ];then
+export title=`cat $tempdir/menutitle|head -n 1`
+else
+export title="$numitems items available"
+fi
+echo \"$title\" > $tempdir/dynmenu
+while true;do
+export ltr=`cat $tempdir/itemlist|head -n $counter|tail -n 1|cut -c 1`
+export item=`cat $tempdir/itemlist|head -n $counter|tail -n 1`
+echo -n \" >> $tempdir/dynmenu
+if [ $ltr = \" ];then
+export ltr="|"
+fi
+echo -n $ltr\;$counter >> $tempdir/dynmenu
+echo -n \"\  >>$tempdir/dynmenu
+echo -n \" >> $tempdir/dynmenu
+if echo $item|grep -q \";then
+export item=`echo $item|sed "s/\"/\|/g"`
+fi
+echo -n $item >> $tempdir/dynmenu
+echo -n \"\  >>$tempdir/dynmenu
+export counter=$(($counter+1))
+if [ $counter -gt $numitems ];then
+break
+else
+continue
+fi
+done
+createmenu $tempdir/dynmenu
+rm $tempdir/menutitle > /dev/null 2>/dev/null
+}
+export disk=$1
+if [ -z $disk ];then
+sh -c 'echo -n "print devices"|parted|grep /dev|grep \(>/tmp/disk;cat /tmp/disk|tr \  \:>/tmp/disks;rm /tmp/disk'
+createdynamicmenu cat /tmp/disks
+export disk=`echo $itemname|cut -f 1 -d \:|cut -f 2 -d \"`
+unset choice
+rm /tmp/disks
+fi
+export expname=`echo $disk|tr / \\\\n|tail -n 1`
+export baseport=10809
+export port=$baseport
+while true;do
+if fuser -n tcp $port > /dev/null 2>/dev/null;then
+export port=$(($port+1))
+continue
+else
+break
+fi
+done
+echo access $disk through nbd protocol using any of the following uris:
+for addr in `nmcli -t d show|grep -i ip4.address|cut -f 2 -d :|cut -f 1 -d /`;do
+if echo $port|grep -qw $baseport;then
+echo nbd://$addr/$expname
+qemu-nbd -t -f raw -x $expname $disk
+else
+echo nbd://$addr:$port/$expname
+qemu-nbd -t -f raw -x $expname -p $port $disk
+fi
+done

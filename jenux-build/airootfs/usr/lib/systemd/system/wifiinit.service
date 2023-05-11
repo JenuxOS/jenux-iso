@@ -1,0 +1,9 @@
+[Unit]
+Description=setup broadcom wireless cards using wl module
+After=systemd-udev-settle.service getty.target sound.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/wifiinit
+
+[Install]
+WantedBy=getty.target

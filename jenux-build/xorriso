@@ -1,0 +1,83 @@
+#!/bin/zsh
+export sbgen=1
+export dir=$PWD
+export tmpdir=`mktemp -d`
+export xorriso=`which -a xorriso|tail -n 1`
+export tmpespsize=256M
+truncate -s $tmpespsize efi.img
+mkfs.vfat efi.img
+mount efi.img /mnt
+export grubver=`grub-mkstandalone --version|sed "s|grub-mkstandalone (GRUB) ||g"`
+cat > $tmpdir/sbat.csv <<EOF
+sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+grub,$sbgen,Free Software Foundation,grub,$grubver,https://www.gnu.org/software/grub/
+EOF
+truncate -s 6G rootfs
+export loopdev=`losetup -P -f --show rootfs`
+sgdisk -o -n 1:0:4096:ef02 -n 2:4097:500M:ef00 -N 3 $loopdev
+partprobe $loopdev
+mkfs.ext4 -q -L root $loopdev"p3"
+mkfs.vfat -n EFI $loopdev"p2"
+if [ -e /fs ];then
+sleep .01
+else
+mkdir /fs
+fi
+mount $loopdev"p3" /fs
+mkdir -p /fs/boot/EFI
+mount $loopdev"p2" /fs/boot
+rm -rf ../x86_64/airootfs/boot
+cp -rf ../x86_64/airootfs/* /fs
+cp -rf ../aarch64/airootfs/usr/lib/grub/arm64-efi /fs/usr/lib/grub
+cp $tmpdir/sbat.csv /fs/sbat.csv
+arch-chroot /fs grub-install --boot-directory /boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat /sbat.csv --target x86_64-efi --efi-directory /boot
+arch-chroot /fs grub-install --boot-directory /boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat /sbat.csv --target i386-efi --efi-directory /boot
+arch-chroot /fs grub-install --boot-directory /boot --force-file-id --modules="echo part_gpt part_msdos iso9660 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat /sbat.csv --target arm64-efi --efi-directory /boot
+cp -rf /fs/boot/* /mnt
+umount /fs/boot /fs
+losetup -d $loopdev
+rm rootfs
+cd $dir
+cp boot/grub/grub.cfg /mnt/grub
+cp -rf ../aarch64/airootfs/boot/* /mnt
+cp -rf ../x86_64/airootfs/usr/share/shim-signed/EFI /mnt
+openssl req -new -x509 -newkey rsa:4096 -days 365000 -keyout /mnt/jenux.key -out /mnt/jenux.crt -nodes -subj "/CN=Jenux ISO Secure Boot/"
+openssl x509 -in /mnt/jenux.crt -out /mnt/jenux-iso.cer -outform DER
+grub-mknetdir --net-directory=. --sbat=$tmpdir/sbat.csv -d ../x86_64/airootfs/usr/lib/grub/i386-efi
+grub-mknetdir --net-directory=. --sbat=$tmpdir/sbat.csv -d ../aarch64/airootfs/usr/lib/grub/arm64-efi
+grub-mknetdir --net-directory=. --sbat=$tmpdir/sbat.csv -d ../x86_64/airootfs/usr/lib/grub/x86_64-efi
+grub-mknetdir --net-directory=. -d ../i686/airootfs/usr/lib/grub/i386-pc
+for f in `find . -type f|grep vmlinuz`;do
+mv $f $f.unsigned
+sbsign --key /mnt/jenux.key --cert /mnt/jenux.crt --output $f $f.unsigned
+rm $f.unsigned
+done
+for f in `find . -type f|grep core.efi`;do
+mv $f $f.unsigned
+sbsign --key /mnt/jenux.key --cert /mnt/jenux.crt --output $f $f.unsigned
+rm $f.unsigned
+done
+for f in `find /mnt -type f|sed "/shim/d;/mm/d;/fb/d;/EFI\/boot/d"|grep .efi`;do
+mv $f $f.unsigned
+sbsign --key /mnt/jenux.key --cert /mnt/jenux.crt --output $f $f.unsigned
+rm $f.unsigned
+done
+rm /mnt/jenux.key
+mv /mnt/jenux.crt .
+cd /mnt
+tar -cf $dir/efi.tar .
+cd $dir
+umount /mnt
+rm efi.img
+export tarsize=`wc -c efi.tar|cut -f 1 -d \  `
+export espsize=$(($tarsize+512000))
+truncate -s $espsize efi.img
+mkfs.vfat efi.img
+mount efi.img /mnt
+cd /mnt
+tar -xf $dir/efi.tar
+cd $dir
+tar -xf efi.tar
+umount /mnt
+rm -rf $tmpdir efi.tar
+$xorriso $@

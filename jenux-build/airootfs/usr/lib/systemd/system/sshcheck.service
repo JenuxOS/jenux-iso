@@ -1,0 +1,10 @@
+[Unit]
+Description=set root password for ssh if supplied
+After=systemd-udev-settle.service getty.target sound.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sshcheck
+TimeoutSec=300
+
+[Install]
+WantedBy=getty.target

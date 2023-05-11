@@ -1,0 +1,48 @@
+#!/bin/zsh
+export IFS=$(echo -en \\n\\b)
+for c in `ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"`;do
+for d in `amixer scontrols -c $c|sed 's|Simple mixer control ||g'|tr -d \'`;do
+amixer sset $d 100 -c $c > /dev/null 2>/dev/null
+done
+done
+if ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"|wc -l|grep -qw 1;then
+exit 1
+fi
+for c in `ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"`;do
+cat /proc/cmdline|tr \  \\n|grep lang=|sed "s|lang=||g"|tr -d \\n|read -r -s lang
+if [ -z $lang ];then
+export lang="en_US.UTF-8"
+fi
+case "$lang" in
+en_US.UTF-8)
+export sndseltext="Hello and welcome to jenux, an accessible distribution based on Arch Linux! since you have booted the installer with accessibility enabled and this device has multiple sound cards, please press enter within 10 seconds to select card $c. If this is the last device in the list and no device is selected, your platform\'s default audio device will be used, which may not be desireable depending on your setup."
+echo $sndseltext|RHVoice-test -p bdl -o sndsel.wav
+echo $sndseltext
+;;
+pt_BR.UTF-8)
+export esv=`echo $lang|cut -f 1 -d _`
+export sndseltext="Olá e bem-vindo ao jenux, uma distribuição acessível baseada no Arch Linux! como você inicializou o instalador com a acessibilidade habilitada e este dispositivo possui várias placas de som, pressione enter em 10 segundos para selecionar a placa $ c. Se este for o último dispositivo da lista e nenhum dispositivo for selecionado, o dispositivo de áudio padrão de sua plataforma será usado, o que pode não ser desejável dependendo de sua configuração."
+echo $sndseltext|espeak -v $esv -w sndsel.wav
+echo $sndseltext
+;;
+esac
+aplay -D plughw:$c sndsel.wav > /dev/null 2>/dev/null
+rm sndsel.wav
+if read -t 10 var;then
+cat > /etc/asound.conf <<EOF
+pcm.!default {
+        type plug
+        slave.pcm {
+                type hw
+                card $c
+        }
+}
+                                                                                                                                                                          
+ctl.!default {
+        type hw
+        card $c
+}
+EOF
+exit 0
+fi
+done

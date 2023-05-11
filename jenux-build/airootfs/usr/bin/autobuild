@@ -1,0 +1,46 @@
+#!/bin/zsh
+export baseurl="https://nashcentral.duckdns.org/autobuildres"
+case `basename $0` in
+androidbuild)
+export dirname="android"
+export productname="android"
+export scriptname="androidbuild"
+;;
+autobuild)
+export dirname="linux"
+export productname="jenux"
+export scriptname="autobuild"
+;;
+pibuild)
+export dirname="pi"
+export productname="your raspberry pi"
+export scriptname="pibuild"
+;;
+winreset)
+export dirname="winreset"
+export productname="Resetting Your Windows Password"
+export scriptname="winreset"
+;;
+esac
+if cat /proc/cmdline|grep -iq unattend;then
+source $unattend
+else
+echo Welcome! To set up the installation of $productname, you must have a working internet connection. Will you be using wifi to connect\? If so, type y and press enter, otherwise, type n and press enter.
+read wifianswer
+if [ $wifianswer = "y" ];then
+wificonnect
+else
+echo "not using wifi, continuing to next step"
+fi
+if curl -s -o index.html https://nashcentral.duckdns.org;rm index.html; then
+echo "connected to internet, proceding to install phase! "
+else
+echo "Sorry, your system cannot be automatically connected to the internet. Connect manually to try the installation again. Please press enter to return to the main menu."
+read var
+exit 1
+fi
+fi
+echo Downloading $productname installation script...
+curl -o $scriptname $baseurl/$dirname/$scriptname
+chmod 755 $scriptname
+./$scriptname $@

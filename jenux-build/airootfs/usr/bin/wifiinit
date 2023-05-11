@@ -1,0 +1,7 @@
+#!/bin/zsh
+if lspci -vnn -d 14e4:|grep -qw DeviceName;then
+rmmod `lspci -nv -d 14e4:|grep -iw 'kernel modules'|cut -f 2 -d :|tr \\n \  |tr , \  `
+modprobe wl
+else
+sleep .01
+fi

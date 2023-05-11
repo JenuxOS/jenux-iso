@@ -1,0 +1,92 @@
+#!/bin/zsh
+function createmenu
+{
+if [ -z $tempdir ];then
+export pathcomp=`mktemp -u --suffix a|tr / "\\n"`
+export temppath=`echo $pathcomp|tr / "\\n"|grep -nw tmp.|cut -f 1 -d :`
+export tempdir=`echo $pathcomp|head -n $(($temppath-1))|tr "\\n" /`
+fi
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+cat $1|tail -n 1 >$tempdir/itemlist
+export numitems=`cat $tempdir/itemlist|wc -l`
+export linecounter=1
+while true;do
+cat $tempdir/itemlist|head -n $linecounter|tail -n 1 >>$tempdir/items
+export linecounter=$(($linecounter+1))
+if [ $linecounter -gt $numitems ];then
+break
+else
+continue
+fi
+done
+echo whiptail --menu --nocancel `cat $1|head -n 1` `echo -n $menudesc` `cat $1|tail -n 1`>$tempdir/menu
+chmod 755 $tempdir/menu
+$tempdir/menu 2>$tempdir/choice
+export choice=`cat $tempdir/choice|cut -f 2 -d \;`
+cat $tempdir/itemlist|sed s/"\"\ /\\n/g"|sed "s/\"//g" > $tempdir/items
+export testnum=`cat $tempdir/items|grep -nw $choice|cut -f 1 -d :|head -n 1`
+export itemname=`cat $tempdir/items|head -n $(($testnum+1))|tail -n 1`
+rm $tempdir/choice $tempdir/menu $tempdir/itemlist $tempdir/items $tempdir/dynmenu > /dev/null 2>/dev/null
+clear
+}
+function createdynamicmenu
+{
+if [ -z $tempdir ];then
+export pathcomp=`mktemp -u --suffix a|tr / "\\n"`
+export temppath=`echo $pathcomp|tr / "\\n"|grep -nw tmp.|cut -f 1 -d :`
+export tempdir=`echo $pathcomp|head -n $(($temppath-1))|tr "\\n" /`
+fi
+$@>$tempdir/itemlist
+export numitems=`cat $tempdir/itemlist|wc -l`
+export counter=1
+if [ -f $tempdir/menutitle ];then
+export title=`cat $tempdir/menutitle|head -n 1`
+else
+export title="$numitems items available"
+fi
+echo \"$title\" > $tempdir/dynmenu
+while true;do
+export ltr=`cat $tempdir/itemlist|head -n $counter|tail -n 1|cut -c 1`
+export item=`cat $tempdir/itemlist|head -n $counter|tail -n 1`
+echo -n \" >> $tempdir/dynmenu
+if [ $ltr = \" ];then
+export ltr="|"
+fi
+echo -n $ltr\;$counter >> $tempdir/dynmenu
+echo -n \"\  >>$tempdir/dynmenu
+echo -n \" >> $tempdir/dynmenu
+if echo $item|grep -q \";then
+export item=`echo $item|sed "s/\"/\|/g"`
+fi
+echo -n $item >> $tempdir/dynmenu
+echo -n \"\  >>$tempdir/dynmenu
+export counter=$(($counter+1))
+if [ $counter -gt $numitems ];then
+break
+else
+continue
+fi
+done
+createmenu $tempdir/dynmenu
+rm $tempdir/menutitle > /dev/null 2>/dev/null
+}
+nmcli -t -f ssid,signal d wifi|sed "s|--||g" > /tmp/networks
+echo other >> /tmp/networks
+echo "Please select a network. " > /tmp/menutitle
+createdynamicmenu cat /tmp/networks
+export netname=`echo $itemname|cut -f 1 -d \:`
+if echo $itemname|grep -q -w other;then
+echo "enter network name"
+read netname
+echo -n 'nmcli --ask d wifi connect' \"$netname\" 'hidden yes 2>/dev/null'>/tmp/connect
+else
+echo -n 'nmcli --ask d wifi connect' \"$netname\" '2>/dev/null'>/tmp/connect
+fi
+chmod 755 /tmp/connect
+while true; do
+if /tmp/connect;then
+exit 0
+else
+sleep .01
+fi
+done

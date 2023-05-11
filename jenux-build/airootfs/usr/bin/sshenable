@@ -1,0 +1,61 @@
+#!/bin/zsh
+if [ -e ~/unattend ];then
+source ~/unattend
+else
+echo \#remote > ~/unattend
+fi
+if [ -z $wifianswer ];then
+echo Welcome! To set up remote access to this environment, you must have a working network connection. Will you be using wifi to connect\? If so, type y and press enter, otherwise, type n and press enter.
+read wifianswer
+if [ $wifianswer = "y" ];then
+wificonnect
+else
+sleep .01
+fi
+fi
+echo export wifianswer=$wifianswer >> ~/unattend
+if [ -z $passwd ];then
+echo please enter a root password. This password will not be shown as you type.
+read -r -s passwd
+fi
+echo export passwd=$passwd >> ~/unattend
+if [ -z $port ];then
+echo please enter the port on which ssh should run, from 1 to 65535.
+read -r port
+fi
+echo export port=$port >> ~/unattend
+if [ -z $extport ];then
+echo please enter the external\(internet facing\) port that the connection should be accepted on.
+read -r extport
+fi
+echo export extport=$extport >> ~/unattend
+if [ -z $fwdport ];then
+echo Should attempts be made to forward this port to the outside world using upnp\? y/n
+read -r fwdport
+case "$fwdport" in
+y)
+export fwdport=1
+;;
+n)
+unset fwdport
+;;
+*)
+unset fwdport
+;;
+esac
+fi
+echo export fwdport=$fwdport >> ~/unattend
+cp /proc/cmdline /
+chmod 600 /cmdline
+if [ -z $fwdport ];then
+echo -n " passwd=$passwd port=$port extport=$extport" >> /cmdline
+else
+echo -n " passwd=$passwd port=$port extport=$extport fwdport=$fwdport" >> /cmdline
+fi
+cat /cmdline|tr -d \\n > /c
+mv /c /cmdline
+mount -o bind /cmdline /proc/cmdline
+systemctl --no-block restart sshcheck
+sleep 1
+umount /proc/cmdline
+rm /cmdline

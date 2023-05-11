@@ -1,0 +1,30 @@
+#!/bin/zsh
+if [ -f /run/speech ];then
+exit 1
+else
+cat /proc/cmdline|tr \  \\n|grep reader=|sed "s|reader=||g"|tr -d \\n|read -r -s reader
+case "$reader" in
+espeakup)
+true
+;;
+fenrir)
+true
+;;
+speechd-up)
+true
+;;
+*)
+export reader="fenrir"
+;;
+esac
+if cat /proc/cmdline|grep -qw nospeech;then
+speechctl stop $reader systemd
+touch /run/speech
+else
+pick-a-card
+rmmod speakup_soft speakup
+clear
+speechctl restart $reader systemd
+touch /run/speech
+fi
+fi

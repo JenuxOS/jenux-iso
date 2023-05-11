@@ -1,0 +1,232 @@
+#!/bin/zsh
+cat /proc/cmdline|tr \  \\n|grep -w archisolabel|sed "s|archisolabel=||g"|tr -d \\n|head -n 1|read -r -s label
+cat /proc/cmdline|tr \  \\n|grep -w passwd|sed "s|passwd=||g"|tr -d \\n|head -n 1|read -r -s passwd
+cat /proc/cmdline|tr \  \\n|grep -w port|sed "s|port=||g"|tr -d \\n|head -n 1|read -r -s port
+cat /proc/cmdline|tr \  \\n|grep -w wifissid|sed "s|wifissid=||g"|tr -d \\n|head -n 1|read -r -s wifissid
+cat /proc/cmdline|tr \  \\n|grep -w wifipass|sed "s|wifipass=||g"|tr -d \\n|head -n 1|read -r -s wifipass
+cat /proc/cmdline|tr \  \\n|grep -w unattend|sed "s|unattend=||g"|tr -d \\n|head -n 1|read -r -s unattend
+cat /proc/cmdline|tr \  \\n|grep -w lang|sed "s|lang=||g"|tr -d \\n|head -n 1|read -r -s lang
+cat /proc/cmdline|tr \  \\n|grep -w fwdport|sed "s|fwdport=||g"|tr -d \\n|head -n 1|read -r -s fwdport
+cat /proc/cmdline|tr \  \\n|grep -w extport|sed "s|extport=||g"|tr -d \\n|head -n 1|read -r -s extport
+cat /proc/cmdline|tr \  \\n|grep -w unattenddev|sed "s|unattenddev=||g"|tr -d \\n|head -n 1|read -r -s unattenddev
+cat /proc/cmdline|tr \  \\n|grep -w scriptdev|sed "s|scriptdev=||g"|tr -d \\n|head -n 1|read -r -s scriptdev
+cat /proc/cmdline|tr \  \\n|grep -w script|sed "s|script=||g"|tr -d \\n|head -n 1|read -r -s script
+cat /proc/cmdline|tr \  \\n|grep -w postscriptdev|sed "s|postscriptdev=||g"|tr -d \\n|head -n 1|read -r -s postscriptdev
+cat /proc/cmdline|tr \  \\n|grep -w postscript|sed "s|postscript=||g"|tr -d \\n|head -n 1|read -r -s postscript
+cat /proc/cmdline|tr \  \\n|grep -w sshkey|sed "s|sshkey=||g"|tr -d \\n|head -n 1|read -r -s sshkey
+cat /proc/cmdline|tr \  \\n|grep -w sshkeydev|sed "s|sshkeydev=||g"|tr -d \\n|head -n 1|read -r -s sshkeydev
+if [ -z $lang ];then
+sleep .01
+else
+mv /etc/locale.gen /etc/locale.gen.sample
+echo $lang `echo $lang|cut -f 2 -d .` > /etc/locale.gen
+locale-gen
+echo LANG=$lang > /etc/locale.conf
+if cat /proc/cmdline|grep -qw nospeech;then
+sleep .01
+else
+cp /proc/cmdline /tmp/cl
+if cat /tmp/cl|grep reader=espeakup;then
+sleep .01
+else
+echo -n " "reader=espeakup >> /tmp/cl
+fi
+cat /tmp/cl|tr -d \\n > /tmp/cmdline
+mount -o bind,nodev,noexec,nosuid /tmp/cmdline /proc/cmdline
+export esv=`echo $lang|cut -f 1 -d _|tr _ -`
+if espeak --voices|grep -qw $esv;then
+sed "s|Environment=\"default_voice=\"|Environment=\"default_voice=$esv\"|g" /lib/systemd/system/espeakup.service
+systemctl daemon-reload
+fi
+fi
+fi
+if [ -z $port ];then
+sleep .01
+else
+echo setting ssh port
+sed -i s/#Port\ 22/Port\ $port/g /etc/ssh/sshd_config
+systemctl restart sshd
+fi
+if [ -z $passwd ];then
+true
+else
+echo setting root password
+passwd root <<EOF
+$passwd
+$passwd
+EOF
+sed -i s/#PermitRootLogin\ prohibit-password/PermitRootLogin\ yes/g /etc/ssh/sshd_config
+systemctl restart sshd
+fi
+echo waiting for NetworkManager
+while true;do
+if pgrep -af NetworkManager|wc -l|grep -qw 0;then
+continue
+else
+break
+fi
+done
+if [ -z $wifissid ];then
+true
+else
+if nmcli d|grep -iqw wifi;then
+if [ -z $wifipass ];then
+while true;do
+echo connecting to $wifissid without security
+if nmcli d wifi connect $wifissid;then
+systemctl restart sshd
+break
+else
+continue
+fi
+done
+else
+while true;do
+echo connecting to $wifissid
+if echo -n $wifipass|nmcli --ask d wifi connect $wifissid;then
+systemctl restart sshd
+break
+else
+continue
+fi
+done
+fi
+else
+echo no wifi adapter found!
+fi
+fi
+if [ -z $unattend ];then
+echo no unattend file supplied!
+else
+if [ -z $unattenddev ];then
+export unattenddev=/dev/disk/by-label/$label
+fi
+mount $unattenddev /mnt
+if [ -e /mnt/$unattend ];then
+export unattend=file:///mnt/$unattend
+fi
+echo downloading unattend file
+while true;do
+if curl -Lo /root/unattend $unattend;then
+source /root/unattend
+if [ -z $nospeech ];then
+export accessibility=1
+else
+export accessibility=0
+fi
+cat /proc/cmdline|tr \  \\n|grep -w host|sed "s|host=||g"|tr -d \\n|read -r -s host
+cat /proc/cmdline|tr \  \\n|grep -w name|sed "s|name=||g"|tr -d \\n|tr _ \  |read -r -s name
+cat /proc/cmdline|tr \  \\n|grep -w user|sed "s|user=||g"|tr -d \\n|read -r -s user
+cat /proc/cmdline|tr \  \\n|grep -w pass|sed "s|pass=||g"|tr -d \\n|read -r -s pass
+if [ -z $accessibility ]||[ -z $host ]||[ -z $name ]||[ -z $user ]||[ -z $pass ];then
+echo some parameters needed to complete first time setup are missing. The unattend file has been left unmodified.
+else
+echo export accessibility=\'$accessibility\' >> /root/unattend
+echo export host=\'$host\' >> /root/unattend
+echo export name=\'$name\' >> /root/unattend
+echo export user=\'$user\' >> /root/unattend
+echo export pass=\'$pass\' >> /root/unattend
+fi
+break
+else
+continue
+fi
+done
+if mountpoint -q /mnt;then
+umount /mnt
+fi
+fi
+if [ -z $sshkey ];then
+echo no ssh key supplied!
+else
+if [ -z $sshkeydev ];then
+export sshkeydev=/dev/disk/by-label/$label
+fi
+mount $sshkeydev /mnt
+if [ -e /mnt/$sshkey ];then
+export sshkey=file:///mnt/$sshkey
+fi
+echo downloading ssh key
+mkdir -p /root/.ssh
+while true;do
+if curl -Lo /root/.ssh/authorized_keys $sshkey;then
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+sed -i "s|#PasswordAuthentication yes|PasswordAuthentication no|g" /etc/ssh/sshd_config
+break
+else
+systemctl restart sshcheck
+fi
+done
+if mountpoint -q /mnt;then
+umount /mnt
+fi
+fi
+if [ -z $script ];then
+echo no post login script supplied!
+else
+if [ -z $scriptdev ];then
+export scriptdev=/dev/disk/by-label/$label
+fi
+mount $scriptdev /mnt
+if [ -e /mnt/$script ];then
+export script=file:///mnt/$script
+fi
+echo downloading post login script
+while true;do
+if curl -Lo /root/postlogin $script;then
+chmod 755 /root/postlogin
+break
+else
+systemctl restart sshcheck
+fi
+done
+if mountpoint -q /mnt;then
+umount /mnt
+fi
+fi
+if [ -z $postscript ];then
+echo no additional post install script supplied!
+else
+if [ -z $postscriptdev ];then
+export postscriptdev=/dev/disk/by-label/$label
+fi
+mount $postscriptdev /mnt
+if [ -e /mnt/$postscript ];then
+export postscript=file:///mnt/$postscript
+fi
+echo downloading additional post install script
+while true;do
+if curl -Lo /root/postinstall $postscript;then
+chmod 755 /root/postinstall
+break
+else
+systemctl restart sshcheck
+fi
+done
+if mountpoint -q /mnt;then
+umount /mnt
+fi
+fi
+if cat /proc/cmdline|grep -q console=;then
+true
+else
+systemctl start getty@tty1
+fi
+if [ -z $fwdport ];then
+sleep .01
+else
+if [ -z $port ];then
+export port=22
+fi
+if [ -z $extport ];then
+export extport=$port
+fi
+while true;do
+if upnpc -r $port $extport tcp $port $extport udp;then
+break
+else
+continue
+fi
+done
+fi
