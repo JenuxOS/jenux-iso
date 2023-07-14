@@ -102,7 +102,7 @@ if [ $arch = "aarch64" ];then
 sed -i "/qemu-img/d;/qemu-base/d" packages.${arch}
 fi
 if [ $arch = "i686" ];then
-sed -i "/qemu-img/d;/alsa-ucm-conf/d;s|qemu-base|qemu-headless|g" packages.${arch}
+sed -i "/qemu-img/d;s|qemu-base|qemu-headless|g" packages.${arch}
 fi
 echo -n pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syyp\   > installtest.${arch}
 cat packages.${arch}|tr \\n \  >> installtest.${arch}
