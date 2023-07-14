@@ -112,7 +112,7 @@ sed -i "/$f/d" ${script_path}/packages.${arch}
 done
 rm installtest.${arch}
     if [ $arch = "aarch64" ];then
-cat ${script_path}/packages.${arch}|tr \\n \  |sed "s| linux | linux-rpi linux-rpi-headers raspberrypi-bootloader firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect |g;s| linux-headers | |g"|tr \  \\n |sort|uniq > pkg.$arch
+cat ${script_path}/packages.${arch}|tr \\n \  |sed "s| linux | linux-aarch64 linux-aarch64-headers raspberrypi-bootloader firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect |g;s| linux-headers | |g"|tr \  \\n |sort|uniq > pkg.$arch
 mv pkg.$arch ${script_path}/packages.${arch}
 fi
 }
@@ -270,6 +270,7 @@ export host="myhostname"
 export name="My_Name"
 export user=myname
 export pass=mysupersecretandsecurepassword12345
+export encrypthome=1
 echo \#jenux > unattends/jenux/$presetname-$disk-$crypttype-erase
 if echo $disk|grep -qw root_only;then
 echo export disk=\'$disk\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
@@ -292,6 +293,7 @@ echo \#export host=\'$host\' >> unattends/jenux/$presetname-$disk-$crypttype-era
 echo \#export name=\'$name\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
 echo \#export user=\'$user\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
 echo \#export pass=\'$pass\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export encrypthome=\'$encrypthome\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
 done
 done
 done
@@ -323,21 +325,21 @@ export devtype=`echo $device|cut -f 2 -d \||cut -f 1 -d _|cut -f 1 -d \"`
 export devid=`echo $device|cut -f 2 -d \||cut -f 1 -d \"`
 case "$devid" in
 rpi_02)
-export devpkgs="linux-raspberrypi linux-raspberrypi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
 ;;
 rpi_2)
-export devpkgs="linux-raspberrypi linux-raspberrypi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi"
 ;;
 rpi_3)
 if echo $arch|grep -qw armv7h;then
-export devpkgs="linux-raspberrypi linux-raspberrypi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
 fi
 if echo $arch|grep -qw aarch64;then
 export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
 fi
 ;;
 rpi_4)
-export devpkgs="linux-raspberrypi4 linux-raspberrypi4-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
 ;;
 pine_phone)
 export devpkgs="alsa-ucm-pinephone anx7688-firmware danctnix-tweaks danctnix-usb-tethering device-pine64-pinephone eg25-manager libgpiod linux-pine64 linux-pine64-headers ov5640-firmware rtl8723bt-firmware uboot-tools zramswap bluez-utils pi-bluetooth"
@@ -351,6 +353,7 @@ export host="myhostname"
 export name="My_Name"
 export user=myname
 export pass=mysupersecretandsecurepassword12345
+export encrypthome=1
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 for preset in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch" "all";do
 echo \#pi > unattends/pi/$disk-$arch-$devid-$preset
@@ -374,6 +377,7 @@ echo \#export host=\'$host\' >> unattends/pi/$disk-$arch-$devid-$preset
 echo \#export name=\'$name\' >> unattends/pi/$disk-$arch-$devid-$preset
 echo \#export user=\'$user\' >> unattends/pi/$disk-$arch-$devid-$preset
 echo \#export pass=\'$pass\' >> unattends/pi/$disk-$arch-$devid-$preset
+echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$disk-$arch-$devid-$preset
 done
 done
 done
@@ -470,23 +474,27 @@ cat >> "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #unattenddev=/dev/sda3
 #unattenddev=/dev/disk/by-label/data
 #host:
-#if installing jenux or creating an image for an arm device, specifies the hostname of the new system. If set, host, name, user, and pass must be set to complete setup. If all values are not set, setup will run interactively.
+#if installing jenux or creating an image for an arm device, specifies the hostname of the new system. If set, host, name, user, pass, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
 #example:
 #host=myhostname
 #name:
-#if installing jenux or creating an image for an arm device, specifies the full name of the user of the new system. Underscores will be replaced with spaces for this field. If set, host, name, user, and pass must be set to complete setup. If all values are not set, setup will run interactively.
+#if installing jenux or creating an image for an arm device, specifies the full name of the user of the new system. Underscores will be replaced with spaces for this field. If set, host, name, user, pass, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
 #example:
 #name=my_name
 #user:
-#if installing jenux or creating an image for an arm device, specifies the system's username. If set, host, name, user, and pass must be set to complete setup. If all values are not set, setup will run interactively.
+#if installing jenux or creating an image for an arm device, specifies the system's username. If set, host, name, user, pass, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
 #example:
 #user=myname
 #pass:
-#if installing jenux or creating an image for an arm device, specifies the password for the system's first user. If set, host, name, user, and pass must be set to complete setup. If all values are not set, setup will run interactively.
+#if installing jenux or creating an image for an arm device, specifies the password for the system's first user. If set, host, name, user, pass, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
 #example:
 #pass=mysupersecretandsecurepassword12345
+#encrypthome:
+#if installing jenux or creating an image for an arm device, specifies if the system's first user should have home directory encryption. If set, host, name, user, pass, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#encrypthome=1
 #reader
-#used to select a specific screen reader, either espeakup or speechd-up, if accessibility is enabled.
+#used to select a specific screen reader, either fenrir, espeakup, or speechd-up if accessibility is enabled.
 #example:
 #reader=fenrir
 #reader=speechd-up
@@ -638,18 +646,12 @@ export PATH=${script_path}:$PATH
 cd ${script_path}/${work_dir}/iso
 grub-mkrescue -o "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso" . -volid ${iso_label}
 cd "${script_path}/${out_dir}"
-gdisk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso" > /dev/null 2>/dev/null<<EOF
-r
-h
-2 3
-y
+sgdisk -h 2:EE "${iso_name}-${iso_version}-tripple.iso"
+fdisk -t dos "${iso_name}-${iso_version}-tripple.iso"<<EOF
+t
+1
 c
-y
-
-n
-n
 w
-y
 EOF
 sha512sum "${iso_name}-${iso_version}-tripple.iso" > "${iso_name}-${iso_version}-tripple.iso.sha512"
 cd ${script_path}

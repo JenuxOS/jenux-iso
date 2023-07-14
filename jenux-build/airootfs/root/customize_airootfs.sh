@@ -1,8 +1,5 @@
 #!/bin/bash
 set -e -u
-if [ -e /boot/kernel8.img ];then
-mv /boot/kernel8.img /boot/vmlinuz-linux
-fi
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 sed -i 's/#\(en_US\.UTF-8\)/\1/' /etc/locale.gen
 locale-gen
@@ -34,16 +31,35 @@ sed -i "s|export reader=speechd-up|export reader=espeakup|g" /bin/talk-to-me
 ;;
 aarch64)
 while true;do
-if curl -s https://nashcentral.duckdns.org/autobuildres/pi/aarch64.conf|sed "s|Architecture = armv7h|Architecture = aarch64|g" > /etc/pacman.conf;then
+if curl -s -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.aarch64.conf;then
 break
 else
 continue
 fi
 done
-mv /boot/vmlinuz-linux /boot/kernel8.img
-echo archisobasedir=arch archisolabel="JENUX_"`date +%Y` nochecksum nolowram loglevel=0 > /boot/cmdline.txt
-sed -i "s|initramfs initramfs-linux.img followkernel|initramfs archiso.img followkernel|g;s|\#dtparam=krnbt=on|dtparam=krnbt=on|g" /boot/config.txt
-sed -i "s|dtoverlay=vc4-kms-v3d|arm_64bit=1|g;s|display_auto_detect=1|kernel=kernel8.img|g;s|dtparam=krnbt=on|initramfs archiso.img followkernel|g;s|\[pi4\]|dtparam=audio=on|g;/\#/d" /boot/config.txt
+ln -s /boot/Image /boot/vmlinuz-linux
+cd /boot
+curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
+unzip efi4.zip
+rm efi4.zip Readme.md firmware/Readme.txt
+mv config.txt config4.txt
+mv RPI_EFI.fd RPI4_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
+curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
+unzip efi3.zip
+rm efi3.zip Readme.md firmware/Readme.txt
+mv config.txt config3.txt
+mv RPI_EFI.fd RPI3_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI3_EFI.fd|g" config3.txt
+echo \[pi3\] > config.txt
+cat config3.txt >> config.txt
+rm config3.txt
+echo \[pi4\] >> config.txt
+cat config4.txt >> config.txt
+rm config4.txt
+echo \[all\] >> config.txt
+echo dtparam=audio=on >> config.txt
+echo dtparam=krnbt=on >> config.txt
 ;;
 x86_64)
 while true;do
