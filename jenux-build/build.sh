@@ -59,7 +59,7 @@ done
 local _cache_dirs
     _cache_dirs=($(pacman -v 2>&1 | grep '^Cache Dirs:' | sed 's/Cache Dirs:\s*//g'))
     if [ $arch = "aarch64" ];then
-    curl -s https://nashcentral.duckdns.org/autobuildres/pi/$arch.conf|sed "s|Architecture = armv7h|Architecture = $arch|g" > ${script_path}/pacman.${arch}.conf
+    curl -s -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.$arch.conf
 mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
 export prepkgdir=$PWD
 cd "${work_dir}/${arch}/airootfs"
