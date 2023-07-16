@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e -u
+if [ -e /boot/vmlinuz-linux ];then
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
+fi
 sed -i 's/#\(en_US\.UTF-8\)/\1/' /etc/locale.gen
 locale-gen
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
@@ -38,7 +40,9 @@ continue
 fi
 done
 ln -s /boot/Image /boot/vmlinuz-linux
+mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 cd /boot
+rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
 curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
 unzip efi4.zip
 rm efi4.zip Readme.md firmware/Readme.txt
@@ -46,6 +50,7 @@ mv config.txt config4.txt
 mv RPI_EFI.fd RPI4_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
+rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
 unzip efi3.zip
 rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
