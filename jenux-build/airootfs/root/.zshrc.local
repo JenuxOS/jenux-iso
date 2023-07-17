@@ -1,3 +1,1 @@
-autoload -Uz promptinit
-prompt grml-large
 alias ls="ls -A1 --sort=version"

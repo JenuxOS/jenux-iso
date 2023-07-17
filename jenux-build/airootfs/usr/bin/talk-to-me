@@ -14,7 +14,7 @@ speechd-up)
 true
 ;;
 *)
-export reader="fenrir"
+export reader=fenrir
 ;;
 esac
 if cat /proc/cmdline|grep -qw nospeech;then
