@@ -28,8 +28,8 @@ continue
 fi
 done
 ln -s /lib/libespeak-ng.so /lib/libespeak.so.1
-sed -i "s|export reader=speechd-up|export reader=espeakup|g" /bin/speechctl
-sed -i "s|export reader=speechd-up|export reader=espeakup|g" /bin/talk-to-me
+sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/speechctl
+sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/talk-to-me
 ;;
 aarch64)
 while true;do
