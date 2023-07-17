@@ -198,7 +198,7 @@ sed -i "s|%ARCHISO_LABEL%|${iso_label}|g" ${work_dir}/iso/boot/grub/grub.cfg
 }
 # Build airootfs filesystem image
 make_prepare() {
-    cp -a -l -f ${work_dir}/${arch}/airootfs ${work_dir}
+    cp -a -l -r -f ${work_dir}/${arch}/airootfs ${work_dir}
     mv ${work_dir}/${arch}/airootfs/pkg "${work_dir}/iso/arch/pkglist.${arch}.txt"
 if [ -e "${work_dir}/iso/arch/${arch}" ];then
 sleep .01
@@ -529,67 +529,6 @@ cat >> "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #example:
 #nointelmicrocode=1
 EOF
-export dev=/dev/nbd15
-vboxmanage createmedium disk --format vmdk --filename template.vmdk --size 1
-qemu-nbd -c $dev template.vmdk
-partprobe $dev > /dev/null 2>/dev/null
-sgdisk -o -n 1:0:-0s:8300 -U 4A656E6E694F53526F636B7321444A4E $dev
-while true;do
-if [ -e $dev"p1" ];then
-mkfs.ext4 $dev"p1"
-break
-else
-sleep .5
-partprobe $dev
-continue
-fi
-done
-qemu-nbd -d $dev > /dev/null 2>/dev/null
-vboxmanage closemedium template.vmdk
-for unattend in `find unattends -type f|sort|uniq`;do
-for access in "speech" "nospeech";do
-export len=`echo $unattend|tr / \\\n|wc -l`
-export diskpath=`echo -n vm-disks/$unattend|tr / \\\n|head -n $len|tr \\\n /`
-export diskname=$diskpath`basename $unattend`"-"$access".vmdk"
-if [ -e $diskname ];then
-sleep .01
-else
-mkdir -p $diskpath
-cp template.vmdk $diskname
-qemu-nbd -c $dev $diskname
-partprobe $dev > /dev/null 2>/dev/null
-sleep 1
-while true;do
-if [ -e $dev"p1" ];then
-mount $dev"p1" /mnt
-echo -n creating auto-install vm sample file for $unattend with
-echo lowram=1 > /mnt/rootpasswd
-echo nochecksum=1 >> /mnt/rootpasswd
-if echo $access|grep -qw nospeech;then
-echo out speech
-echo nospeech=1 >> /mnt/rootpasswd
-else
-echo \ speech
-fi
-echo unattend=\""/"$unattend\" >> /mnt/rootpasswd
-if echo $unattend|grep -qw nbd;then
-echo nokeyrings=1 >> /mnt/rootpasswd
-fi
-umount /mnt
-qemu-nbd -d $dev > /dev/null 2>/dev/null
-break
-else
-qemu-nbd -d $dev > /dev/null 2>/dev/null
-cp template.vmdk $diskname
-qemu-nbd -c $dev $diskname
-partprobe $dev > /dev/null 2>/dev/null
-continue
-fi
-done
-fi
-done
-done
-rm template.vmdk
 base64 -d > pxeboot<<EOF
 IyEvYmluL3NoCmV4cG9ydCBpZj0kMQppZiBbIC16ICRpZiBdO3RoZW4KZWNobyBlbnRlciBpbnRl
 cmZhY2UgbmFtZQpyZWFkIGlmCmZpCmlmIGlwIGFkZHIgbHN8Z3JlcCAxOTIuMTY4LjEyMC4xfGdy

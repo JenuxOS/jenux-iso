@@ -39,7 +39,7 @@ else
 continue
 fi
 done
-ln -s /boot/Image /boot/vmlinuz-linux
+mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 cd /boot
 rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
@@ -50,7 +50,6 @@ mv config.txt config4.txt
 mv RPI_EFI.fd RPI4_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
-rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
 unzip efi3.zip
 rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
