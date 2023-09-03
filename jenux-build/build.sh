@@ -583,9 +583,60 @@ sleep .01
 else
 mkdir -p ${out_dir}
 fi
-export PATH=${script_path}:$PATH
 cd ${script_path}/${work_dir}/iso
-grub-mkrescue -o "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso" . -volid ${iso_label}
+truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
+sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:8300 -c 3:linuxiso $loopdev
+partprobe $loopdev
+mkfs.vfat -n ISOEFI $loopdev"p2"
+mkfs.ext4 -q -L ${iso_label} $loopdev"p3"
+mount $loopdev"p3" /mnt
+mkdir -p /mnt/EFI
+mount $loopdev"p2" /mnt/EFI
+cp -rf * /mnt
+cp -rf ../x86_64/airootfs/usr/share/shim-signed/EFI /mnt/EFI
+export tmpdir=`mktemp -d`
+export sbgen=1
+export grubver=`grub-mkstandalone --version|sed "s|grub-mkstandalone (GRUB) ||g"`
+cat > $tmpdir/sbat.csv <<EOF
+sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+grub,$sbgen,Free Software Foundation,grub,$grubver,https://www.gnu.org/software/grub/
+EOF
+grub-install -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos iso9660 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
+grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
+grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
+grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi
+grub-mknetdir --net-directory=/mnt -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc
+openssl req -new -x509 -newkey rsa:4096 -days 365000 -keyout $tmpdir/jenux.key -out $tmpdir/jenux.crt -nodes -subj "/CN=Jenux ISO Secure Boot/"
+openssl x509 -in $tmpdir/jenux.crt -out $tmpdir/jenux-iso.cer -outform DER
+for f in `find /mnt -type f|grep vmlinuz`;do
+mv $f $f.unsigned
+sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
+rm $f.unsigned
+done
+for f in `find /mnt -type f|grep core.efi`;do
+if file $f|grep -qw EFI\ application;then
+mv $f $f.unsigned
+sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
+rm $f.unsigned
+fi
+done
+for f in `find /mnt -type f|sed "/shim/d;/mm/d;/fb/d;/EFI\/boot/d"|grep .efi|sed /mod/d`;do
+if file $f|grep -qw EFI\ application;then
+mv $f $f.unsigned
+sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
+rm $f.unsigned
+fi
+done
+rm $tmpdir/jenux.key
+mv $tmpdir/jenux.crt /mnt/EFI
+umount /mnt/EFI /mnt
+losetup -d $loopdev
+rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
 sgdisk -h 2:EE "${iso_name}-${iso_version}-tripple.iso"
 fdisk -t dos "${iso_name}-${iso_version}-tripple.iso"<<EOF
