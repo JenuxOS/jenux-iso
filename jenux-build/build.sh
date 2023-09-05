@@ -584,7 +584,7 @@ else
 mkdir -p ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
-truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+truncate -s 4096M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:8300 -c 3:linuxiso $loopdev
@@ -603,6 +603,8 @@ cat > $tmpdir/sbat.csv <<EOF
 sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
 grub,$sbgen,Free Software Foundation,grub,$grubver,https://www.gnu.org/software/grub/
 EOF
+cp -rf ${script_path}/${work_dir}/aarch64/airootfs/boot/* /mnt/EFI
+rm -rf /mnt/EFI/Image.gz /mnt/EFI/vmlinuz-linux /mnt/EFI/initramfs-linux* /mnt/EFI/amd-ucode.img /mnt/EFI/archiso.img /mnt/EFI/firmware
 grub-install -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos iso9660 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
 grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
 grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
