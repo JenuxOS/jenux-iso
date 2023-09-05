@@ -584,7 +584,7 @@ else
 mkdir -p ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
-truncate -s 4096M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:8300 -c 3:linuxiso $loopdev
