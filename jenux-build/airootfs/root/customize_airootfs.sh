@@ -17,7 +17,11 @@ locale-gen
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 usermod -s /usr/bin/zsh root
 cp -aT /etc/skel/ /root/
-chmod 700 /root
+mv /root/.zlogin.iso /root/.zlogin
+mv /root/.zshrc.local.iso /root/.zshrc.local
+rm -rf /etc/systemd/system/getty@tty1.service.d
+mv /lib/systemd/system/getty@.service.sys /lib/systemd/system/getty@.service
+chmod -R 700 /root
 sed -i "s/#Server/Server/g" /etc/pacman.d/mirrorlist
 if [ -e /etc/pacman.d/blackarch-mirrorlist ];then
 sed -i "s/# Server/Server/g" /etc/pacman.d/blackarch-mirrorlist
