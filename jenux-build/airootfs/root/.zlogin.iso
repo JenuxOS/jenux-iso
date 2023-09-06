@@ -2,9 +2,6 @@ clear
 talk-to-me
 setopt singlelinezle
 ~/.automated_script.sh
-autoload -Uz promptinit
-prompt grml-large
-alias ls="ls -A1 --sort=version"
 if cat /proc/cmdline|grep -q nokeyrings;then
 sleep .01
 else
