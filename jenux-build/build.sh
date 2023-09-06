@@ -577,6 +577,7 @@ Ukc6ClRJVExFOlRlY2huaWNhbCBDb25zdWx0YW50CkVNQUlMO0hPTUU6ZG5sLm5hc2hAZ21haWwu
 Y29tClRFTDtDRUxMOisxICg5MTQpIDk3OS0xMzk1ClVSTDpodHRwczovL25hc2hjZW50cmFsLmR1
 Y2tkbnMub3JnCmVuZDp2Y2FyZAo=
 EOF
+git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
 cd ${script_path}
 if [ -e ${out_dir} ];then
 sleep .01
@@ -587,7 +588,7 @@ cd ${script_path}/${work_dir}/iso
 truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
-sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:8300 -c 3:linuxiso $loopdev
+sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
 sgdisk -h 2:EE $loopdev
 fdisk -t dos $loopdev<<EOF
 t
@@ -597,7 +598,7 @@ w
 EOF
 partprobe $loopdev
 mkfs.vfat -n ISOEFI $loopdev"p2"
-mkfs.ext4 -O encrypt -q -L ${iso_label} $loopdev"p3"
+mkfs.vfat -n ${iso_label} $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
