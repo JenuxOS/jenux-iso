@@ -588,9 +588,16 @@ truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-trippl
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:8300 -c 3:linuxiso $loopdev
+sgdisk -h 2:EE $loopdev
+fdisk -t dos $loopdev<<EOF
+t
+1
+c
+w
+EOF
 partprobe $loopdev
 mkfs.vfat -n ISOEFI $loopdev"p2"
-mkfs.ext4 -q -L ${iso_label} $loopdev"p3"
+mkfs.ext4 -O encrypt -q -L ${iso_label} $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
@@ -640,13 +647,6 @@ umount /mnt/EFI /mnt
 losetup -d $loopdev
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
-sgdisk -h 2:EE "${iso_name}-${iso_version}-tripple.iso"
-fdisk -t dos "${iso_name}-${iso_version}-tripple.iso"<<EOF
-t
-1
-c
-w
-EOF
 sha512sum "${iso_name}-${iso_version}-tripple.iso" > "${iso_name}-${iso_version}-tripple.iso.sha512"
 cd ${script_path}
 ls -sh "${out_dir}/${iso_name}-${iso_version}-tripple.iso"
