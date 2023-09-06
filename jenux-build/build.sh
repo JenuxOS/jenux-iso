@@ -620,6 +620,8 @@ grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${w
 grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi
 grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi
 grub-mknetdir --net-directory=/mnt -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc
+mv /mnt/EFI/EFI/boot/bootaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi.shim
+mv /mnt/EFI/EFI/arch/grubaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi
 openssl req -new -x509 -newkey rsa:4096 -days 365000 -keyout $tmpdir/jenux.key -out $tmpdir/jenux.crt -nodes -subj "/CN=Jenux ISO Secure Boot/"
 openssl x509 -in $tmpdir/jenux.crt -out $tmpdir/jenux-iso.cer -outform DER
 for f in `find /mnt -type f|grep vmlinuz`;do
