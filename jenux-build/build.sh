@@ -198,7 +198,6 @@ sed -i "s|%ARCHISO_LABEL%|${iso_label}|g" ${work_dir}/iso/boot/grub/grub.cfg
 }
 # Build airootfs filesystem image
 make_prepare() {
-    cp -a -l -r -f ${work_dir}/${arch}/airootfs ${work_dir}
     mv ${work_dir}/${arch}/airootfs/pkg "${work_dir}/iso/arch/pkglist.${arch}.txt"
 if [ -e "${work_dir}/iso/arch/${arch}" ];then
 sleep .01

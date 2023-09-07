@@ -20,7 +20,7 @@ usermod -s /usr/bin/zsh root
 cp -aT /etc/skel/ /root/
 mv /root/.zlogin.iso /root/.zlogin
 mv /root/.zshrc.local.iso /root/.zshrc.local
-rm -rf /etc/systemd/system/getty@tty1.service.d
+rm -rf /etc/systemd/system/getty@tty1.service.d/firstboot.conf
 mv /lib/systemd/system/getty@.service.sys /lib/systemd/system/getty@.service
 chmod -R 700 /root
 sed -i "s/#Server/Server/g" /etc/pacman.d/mirrorlist
