@@ -577,6 +577,7 @@ Y29tClRFTDtDRUxMOisxICg5MTQpIDk3OS0xMzk1ClVSTDpodHRwczovL25hc2hjZW50cmFsLmR1
 Y2tkbnMub3JnCmVuZDp2Y2FyZAo=
 EOF
 git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
+git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
 cd ${script_path}
 if [ -e ${out_dir} ];then
 sleep .01

@@ -78,6 +78,8 @@ rm config4.txt
 echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
+sed -i "/dtoverlay=miniuart-bt/d" config.txt
+unix2dos config.txt
 ;;
 x86_64)
 while true;do
