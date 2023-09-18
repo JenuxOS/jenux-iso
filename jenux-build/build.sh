@@ -576,8 +576,6 @@ Ukc6ClRJVExFOlRlY2huaWNhbCBDb25zdWx0YW50CkVNQUlMO0hPTUU6ZG5sLm5hc2hAZ21haWwu
 Y29tClRFTDtDRUxMOisxICg5MTQpIDk3OS0xMzk1ClVSTDpodHRwczovL25hc2hjZW50cmFsLmR1
 Y2tkbnMub3JnCmVuZDp2Y2FyZAo=
 EOF
-git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
-git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
 cd ${script_path}
 if [ -e ${out_dir} ];then
 sleep .01
@@ -585,6 +583,8 @@ else
 mkdir -p ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
+git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
+git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
 truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
