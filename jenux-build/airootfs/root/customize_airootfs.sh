@@ -71,7 +71,7 @@ continue
 fi
 done
 while true;do
-if gpg --recv-key $archarmkey;then
+if gpg --recv-key $archarmkeyid;then
 break
 else
 continue
