@@ -53,18 +53,51 @@ else
 continue
 fi
 done
+export archarmkeyid="68B3537F39A313B3E574D06777193F152BDBE6A6"
+export archarmkeyringurl=`lynx -listonly -nonumbers --dump http://mirror.archlinuxarm.org/aarch64/core|grep archlinuxarm-keyring|sed /sig/d|tail -n 1`
+export archarmsigurl=`lynx -listonly -nonumbers --dump http://mirror.archlinuxarm.org/aarch64/core|grep archlinuxarm-keyring|sed /sig/d|tail -n 1`".sig"
+while true;do
+if curl -LO $archarmkeyringurl;then
+break
+else
+continue
+fi
+done
+while true;do
+if curl -LO $archarmsigurl;then
+break
+else
+continue
+fi
+done
+while true;do
+if gpg --recv-key $archarmkey;then
+break
+else
+continue
+fi
+done
+for f in `ls *.pkg*|sed /sig/d`;do
+if gpg --verify $f".sig" 2>/dev/stdout|grep -qw $archarmkeyid;then
+rm $f".sig"
+pacman --noconfirm -U $f
+rm *.pkg*
+else
+rm *.pkg*
+fi
+done
 mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 cd /boot
 rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
 curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
-unzip efi4.zip
+unzip -o efi4.zip
 rm efi4.zip Readme.md firmware/Readme.txt
 mv config.txt config4.txt
 mv RPI_EFI.fd RPI4_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
-unzip efi3.zip
+unzip -o efi3.zip
 rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
 mv RPI_EFI.fd RPI3_EFI.fd

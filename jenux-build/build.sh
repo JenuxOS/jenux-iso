@@ -99,7 +99,7 @@ mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
 export preset="base"
 curl -s https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
 if [ $arch = "aarch64" ];then
-sed -i "/qemu-img/d;/qemu-base/d" packages.${arch}
+sed -i "/qemu-system-arm/d;/qemu-system-x86/d" packages.${arch}
 fi
 if [ $arch = "i686" ];then
 sed -i "/qemu-img/d;s|qemu-base|qemu-headless|g" packages.${arch}
@@ -585,7 +585,7 @@ fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
 git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
-truncate -s 4300M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+truncate -s 4500M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
@@ -611,7 +611,7 @@ cat > $tmpdir/sbat.csv <<EOF
 sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
 grub,$sbgen,Free Software Foundation,grub,$grubver,https://www.gnu.org/software/grub/
 EOF
-cp -rf ${script_path}/${work_dir}/aarch64/airootfs/boot/* /mnt/EFI
+cp -Lrf ${script_path}/${work_dir}/aarch64/airootfs/boot/* /mnt/EFI
 rm -rf /mnt/EFI/Image.gz /mnt/EFI/vmlinuz-linux /mnt/EFI/initramfs-linux* /mnt/EFI/amd-ucode.img /mnt/EFI/archiso.img /mnt/EFI/firmware
 grub-install -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos iso9660 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
 grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
@@ -646,6 +646,31 @@ fi
 done
 rm $tmpdir/jenux.key
 mv $tmpdir/jenux.crt /mnt/EFI
+cd /mnt/EFI
+curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
+unzip -o efi4.zip
+rm efi4.zip Readme.md firmware/Readme.txt
+mv config.txt config4.txt
+mv RPI_EFI.fd RPI4_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
+curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
+unzip -o efi3.zip
+rm efi3.zip Readme.md firmware/Readme.txt
+mv config.txt config3.txt
+mv RPI_EFI.fd RPI3_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI3_EFI.fd|g" config3.txt
+echo \[pi3\] > config.txt
+cat config3.txt >> config.txt
+rm config3.txt
+echo \[pi4\] >> config.txt
+cat config4.txt >> config.txt
+rm config4.txt
+echo \[all\] >> config.txt
+echo dtparam=audio=on >> config.txt
+echo dtparam=krnbt=on >> config.txt
+sed -i "/dtoverlay=miniuart-bt/d" config.txt
+unix2dos config.txt
+cd $OLDPWD
 umount /mnt/EFI /mnt
 losetup -d $loopdev
 rm -rf $tmpdir
