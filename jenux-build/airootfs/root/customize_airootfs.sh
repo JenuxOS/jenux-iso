@@ -79,11 +79,13 @@ fi
 done
 for f in `ls *.pkg*|sed /sig/d`;do
 if gpg --verify $f".sig" 2>/dev/stdout|grep -qw $archarmkeyid;then
+sed -i "s|CheckSpace|#CheckSpace|g" /etc/pacman.conf
 rm $f".sig"
 pacman --noconfirm -U $f
-rm *.pkg*
+sed -i "s|#CheckSpace|CheckSpace|g" /etc/pacman.conf
+rm $f
 else
-rm *.pkg*
+rm $f
 fi
 done
 mv /boot/Image /boot/vmlinuz-linux
