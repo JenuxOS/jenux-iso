@@ -3,6 +3,8 @@ cat /proc/cmdline|tr \  \\n|grep -w archisolabel|sed "s|archisolabel=||g"|tr -d 
 cat /proc/cmdline|tr \  \\n|grep -w passwd|sed "s|passwd=||g"|tr -d \\n|head -n 1|read -r -s passwd
 cat /proc/cmdline|tr \  \\n|grep -w port|sed "s|port=||g"|tr -d \\n|head -n 1|read -r -s port
 cat /proc/cmdline|tr \  \\n|grep -w wifissid|sed "s|wifissid=||g"|tr -d \\n|head -n 1|read -r -s wifissid
+cat /proc/cmdline|tr \  \\n|grep -w wifisectype|sed "s|wifisectype=||g"|tr -d \\n|head -n 1|read -r -s wifisectype
+cat /proc/cmdline|tr \  \\n|grep -w wifisecproto|sed "s|wifisecproto=||g"|tr -d \\n|head -n 1|read -r -s wifisecproto
 cat /proc/cmdline|tr \  \\n|grep -w wifipass|sed "s|wifipass=||g"|tr -d \\n|head -n 1|read -r -s wifipass
 cat /proc/cmdline|tr \  \\n|grep -w unattend|sed "s|unattend=||g"|tr -d \\n|head -n 1|read -r -s unattend
 cat /proc/cmdline|tr \  \\n|grep -w lang|sed "s|lang=||g"|tr -d \\n|head -n 1|read -r -s lang
@@ -40,6 +42,52 @@ systemctl daemon-reload
 fi
 fi
 fi
+echo waiting for NetworkManager
+while true;do
+if nmcli > /dev/null 2>/dev/null;then
+break
+else
+continue
+fi
+done
+if [ -z $wifissid ];then
+true
+else
+if nmcli d|grep -iqw wifi;then
+if [ -z $wifipass ];then
+while true;do
+echo connecting to $wifissid without security
+if nmcli d wifi connect $wifissid;then
+break
+else
+continue
+fi
+done
+else
+while true;do
+echo connecting to $wifissid
+if echo -n $wifipass|nmcli --ask d wifi connect $wifissid;then
+break
+else
+continue
+fi
+done
+fi
+else
+echo no wifi adapter found!
+if [ -z $wifipass ];then
+nmcli c add type wifi connection.id $wifissid connection.autoconnect yes wifi.ssid $wifissid
+else
+if [ -z $wifisectype ];then
+export wifisectype=wpa-psk
+fi
+if [ -z $wifisecproto ];then
+export wifisecproto=rsn
+fi
+nmcli c add type wifi connection.id $wifissid connection.autoconnect yes wifi.ssid $wifissid wifi-sec.key-mgmt $wifisectype wifi-sec.proto $wifisecproto wifi-sec.psk $wifipass
+fi
+fi
+fi
 if [ -z $port ];then
 sleep .01
 else
@@ -57,43 +105,6 @@ $passwd
 EOF
 sed -i s/#PermitRootLogin\ prohibit-password/PermitRootLogin\ yes/g /etc/ssh/sshd_config
 systemctl restart sshd
-fi
-echo waiting for NetworkManager
-while true;do
-if pgrep -af NetworkManager|wc -l|grep -qw 0;then
-continue
-else
-break
-fi
-done
-if [ -z $wifissid ];then
-true
-else
-if nmcli d|grep -iqw wifi;then
-if [ -z $wifipass ];then
-while true;do
-echo connecting to $wifissid without security
-if nmcli d wifi connect $wifissid;then
-systemctl restart sshd
-break
-else
-continue
-fi
-done
-else
-while true;do
-echo connecting to $wifissid
-if echo -n $wifipass|nmcli --ask d wifi connect $wifissid;then
-systemctl restart sshd
-break
-else
-continue
-fi
-done
-fi
-else
-echo no wifi adapter found!
-fi
 fi
 if [ -z $unattend ];then
 echo no unattend file supplied!

@@ -421,6 +421,14 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #triggers automatic connection to a wifi network with the given ssid, if a wifi adapter is present
 #example:
 #wifissid=mynetwork
+#wifisectype
+#a wireless security type supported by NetworkManager's wifi-sec.key-mgmt property, if left empty, defaults to wpa-psk
+#example:
+#wifisectype=wpa-psk
+#wifisecproto
+#a security protocol supported by NetworkManager's wifi-sec.proto property, If left empty, defaults to rsn
+#example:
+#wifisecproto=rsn
 #wifipass
 #gives the password, wep, wpa, wpa2, wpa3, for the network specified with wifissid. Not setting wifissid will result in undefined behavior
 #example:
