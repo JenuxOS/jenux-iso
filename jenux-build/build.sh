@@ -405,8 +405,6 @@ echo \#export pass=\'$pass\' >> unattends/pi/$preset-$disk-$arch-$devid
 echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$preset-$disk-$arch-$devid
 done
 done
-done
-done
 rm /tmp/devlist
 for f in `find ./unattends|grep root_only`;do
 for edit in "partmethod=" "disklayout=" "boot=" "root=" "fmtboot=" "fmtfs=";do
