@@ -198,7 +198,7 @@ sed -i "s|%ARCHISO_LABEL%|${iso_label}|g" ${work_dir}/iso/boot/grub/grub.cfg
 }
 # Build airootfs filesystem image
 make_prepare() {
-    mv ${work_dir}/${arch}/airootfs/pkg "${work_dir}/iso/arch/pkglist.${arch}.txt"
+    mv ${script_path}/${work_dir}/${arch}/airootfs/pkg "${work_dir}/iso/arch/pkglist.${arch}.txt"
 if [ -e "${work_dir}/iso/arch/${arch}" ];then
 sleep .01
 else
@@ -614,7 +614,7 @@ fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
 git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
-truncate -s 4500M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+truncate -s 4600M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
