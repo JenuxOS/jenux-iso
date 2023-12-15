@@ -302,6 +302,7 @@ echo \#nbd > unattends/nbd/$disk
 echo /dev/$disk >> unattends/nbd/$disk
 done
 mkdir -p unattends/pi
+for arch in "armv7h" "aarch64";do
 case "$arch" in
 armv7h)
 echo raspberry pi 2\|rpi_2 >> /tmp/devlist
@@ -310,6 +311,7 @@ echo raspberry pi 3\|rpi_3 >> /tmp/devlist
 echo raspberry pi 3 with vendor firmware\|rpi-vfw_3 >> /tmp/devlist
 echo raspberry pi 4\|rpi_4 >> /tmp/devlist
 echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
+export transtype=arm
 ;;
 aarch64)
 echo raspberry pi 02\|rpi_02 >> /tmp/devlist
@@ -320,8 +322,10 @@ echo raspberry pi 4\|rpi_4 >> /tmp/devlist
 echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
 echo raspberry pi 5 with vendor firmware\|rpi-vfw_5 >> /tmp/devlist
 echo Pinephone\|pine_phone >> /tmp/devlist
+export transtype=aarch64
 ;;
 esac
+for device in `cat /tmp/devlist|cut -f 2 -d \|`;do
 export devtype=`echo $device|cut -f 2 -d \||cut -f 1 -d _`
 export devid=`echo $device|cut -f 2 -d \|`
 case "$devid" in
@@ -394,6 +398,8 @@ echo \#export name=\'$name\' >> unattends/pi/$preset-$disk-$arch-$devid
 echo \#export user=\'$user\' >> unattends/pi/$preset-$disk-$arch-$devid
 echo \#export pass=\'$pass\' >> unattends/pi/$preset-$disk-$arch-$devid
 echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$preset-$disk-$arch-$devid
+done
+done
 done
 done
 rm /tmp/devlist
