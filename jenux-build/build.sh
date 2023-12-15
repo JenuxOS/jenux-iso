@@ -322,15 +322,6 @@ echo raspberry pi 5 with vendor firmware\|rpi-vfw_5 >> /tmp/devlist
 echo Pinephone\|pine_phone >> /tmp/devlist
 ;;
 esac
-while true;do
-if [ -z $device ];then
-echo -n "select your device" > /tmp/menutitle
-createdynamicmenu cat /tmp/devlist
-export device=`echo -n $itemname|sed "s|\?|\ |g;s|\"||g"`
-else
-break
-fi
-done
 export devtype=`echo $device|cut -f 2 -d \||cut -f 1 -d _`
 export devid=`echo $device|cut -f 2 -d \|`
 case "$devid" in
