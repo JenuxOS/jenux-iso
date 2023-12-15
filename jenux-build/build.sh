@@ -302,46 +302,72 @@ echo \#nbd > unattends/nbd/$disk
 echo /dev/$disk >> unattends/nbd/$disk
 done
 mkdir -p unattends/pi
-for arch in "armv7h" "aarch64";do
 case "$arch" in
 armv7h)
-echo raspberry pi 2\|rpi_2 > /tmp/devlist
+echo raspberry pi 2\|rpi_2 >> /tmp/devlist
+echo raspberry pi 2 with vendor firmware\|rpi-vfw_2 >> /tmp/devlist
 echo raspberry pi 3\|rpi_3 >> /tmp/devlist
+echo raspberry pi 3 with vendor firmware\|rpi-vfw_3 >> /tmp/devlist
 echo raspberry pi 4\|rpi_4 >> /tmp/devlist
-export transtype="arm"
+echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
 ;;
 aarch64)
-echo raspberry pi 02\|rpi_02 > /tmp/devlist
+echo raspberry pi 02\|rpi_02 >> /tmp/devlist
+echo raspberry pi 02 with vendor firmware\|rpi-vfw_02 >> /tmp/devlist
 echo raspberry pi 3\|rpi_3 >> /tmp/devlist
+echo raspberry pi 3 with vendor firmware\|rpi-vfw_3 >> /tmp/devlist
 echo raspberry pi 4\|rpi_4 >> /tmp/devlist
+echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
+echo raspberry pi 5 with vendor firmware\|rpi-vfw_5 >> /tmp/devlist
 echo Pinephone\|pine_phone >> /tmp/devlist
-export transtype="aarch64"
 ;;
 esac
-export IFS=$(echo -en \\n\\b)
-for device in `cat /tmp/devlist`;do
-export devtype=`echo $device|cut -f 2 -d \||cut -f 1 -d _|cut -f 1 -d \"`
-export devid=`echo $device|cut -f 2 -d \||cut -f 1 -d \"`
+while true;do
+if [ -z $device ];then
+echo -n "select your device" > /tmp/menutitle
+createdynamicmenu cat /tmp/devlist
+export device=`echo -n $itemname|sed "s|\?|\ |g;s|\"||g"`
+else
+break
+fi
+done
+export devtype=`echo $device|cut -f 2 -d \||cut -f 1 -d _`
+export devid=`echo $device|cut -f 2 -d \|`
 case "$devid" in
 rpi_02)
-export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi-vfw_02)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 ;;
 rpi_2)
-export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi"
+export devpkgs="linux-armv7 linux-armv7-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi fbdetect"
+;;
+rpi-vfw_2)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi fbdetect"
 ;;
 rpi_3)
 if echo $arch|grep -qw armv7h;then
-export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-armv7 linux-armv7-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 fi
 if echo $arch|grep -qw aarch64;then
-export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 fi
 ;;
+rpi-vfw_3)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
 rpi_4)
-export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3"
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi-vfw_4)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi-vfw_5)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 ;;
 pine_phone)
-export devpkgs="alsa-ucm-pinephone anx7688-firmware danctnix-tweaks danctnix-usb-tethering device-pine64-pinephone eg25-manager libgpiod linux-pine64 linux-pine64-headers ov5640-firmware rtl8723bt-firmware uboot-tools zramswap bluez-utils pi-bluetooth"
+export devpkgs="alsa-ucm-pinephone anx7688-firmware danctnix-tweaks danctnix-usb-tethering device-pine64-pinephone eg25-manager libgpiod linux-megi linux-megi-headers  ov5640-firmware rtl8723bt-firmware uboot-tools zramswap bluez-utils pi-bluetooth"
 ;;
 esac
 export blueans="n"
@@ -355,28 +381,28 @@ export pass=mysupersecretandsecurepassword12345
 export encrypthome=1
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 for preset in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch" "all";do
-echo \#pi > unattends/pi/$disk-$arch-$devid-$preset
+echo \#pi > unattends/pi/$preset-$disk-$arch-$devid
 if echo $disk|grep -qw root_only;then
-echo export disk=\'$disk\' >> unattends/pi/$disk-$arch-$devid-$preset
+echo export disk=\'$disk\' >> unattends/pi/$preset-$disk-$arch-$devid
 else
-echo export disk=\'/dev/$disk\' >> unattends/pi/$disk-$arch-$devid-$preset
+echo export disk=\'/dev/$disk\' >> unattends/pi/$preset-$disk-$arch-$devid
 fi
-echo export arch=\'$arch\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export transtype=\'$transtype\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export device=\'$device\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export devid=\'$devid\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export devpkgs=\'$devpkgs\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export devtype=\'$devtype\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export preset=\'$preset\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export blueans=\'$blueans\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export macaddr=\'$macaddr\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo export completeaction=\'$completeaction\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo \#export accessibility=\'$accessibility\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo \#export host=\'$host\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo \#export name=\'$name\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo \#export user=\'$user\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo \#export pass=\'$pass\' >> unattends/pi/$disk-$arch-$devid-$preset
-echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$disk-$arch-$devid-$preset
+echo export arch=\'$arch\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export transtype=\'$transtype\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export device=\'$device\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export devid=\'$devid\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export devpkgs=\'$devpkgs\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export devtype=\'$devtype\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export preset=\'$preset\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export blueans=\'$blueans\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export macaddr=\'$macaddr\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export completeaction=\'$completeaction\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo \#export accessibility=\'$accessibility\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo \#export host=\'$host\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo \#export name=\'$name\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo \#export user=\'$user\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo \#export pass=\'$pass\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$preset-$disk-$arch-$devid
 done
 done
 done

@@ -24,9 +24,6 @@ rm -rf /etc/systemd/system/getty@tty1.service.d/firstboot.conf
 mv /lib/systemd/system/getty@.service.sys /lib/systemd/system/getty@.service
 chmod -R 700 /root
 sed -i "s/#Server/Server/g" /etc/pacman.d/mirrorlist
-if [ -e /etc/pacman.d/blackarch-mirrorlist ];then
-sed -i "s/# Server/Server/g" /etc/pacman.d/blackarch-mirrorlist
-fi
 sed -i 's/#\(Storage=\)auto/\1volatile/' /etc/systemd/journald.conf
 systemctl enable NetworkManager.service polkit.service sshcheck.service wifiinit.service haveged.service
 for t in "1" "2" "3" "4" "5" "6";do
