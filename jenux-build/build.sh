@@ -81,6 +81,7 @@ fi
 done
 pacman --needed --noconfirm -U *.pkg*
 tar -xf mirrors.tar etc/pacman.d/mirrorlist
+sed -i "s|\# Server|Server|g" etc/pacman.d/mirrorlist
 rm *.pkg* mirrors.tar
 cd $prepkgdir
 else
