@@ -124,6 +124,5 @@ done
 ;;
 esac
 rm -rf /root/customize_airootfs.sh
-pacman -Q > /pkg
 rm -rf /var/lib/pacman/sync/*
 rm -rf /var/cache/pacman/pkg/*

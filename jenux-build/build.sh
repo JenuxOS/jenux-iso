@@ -199,12 +199,12 @@ sed -i "s|%ARCHISO_LABEL%|${iso_label}|g" ${work_dir}/iso/boot/grub/grub.cfg
 }
 # Build airootfs filesystem image
 make_prepare() {
-    mv ${script_path}/${work_dir}/${arch}/airootfs/pkg "${work_dir}/iso/arch/pkglist.${arch}.txt"
 if [ -e "${work_dir}/iso/arch/${arch}" ];then
 sleep .01
 else
 mkdir -p "${work_dir}/iso/arch/${arch}"
 fi
+arch-chroot ${script_path}/${work_dir}/${arch}/airootfs /bin/pacman -Q > "${work_dir}/iso/arch/pkglist.${arch}.txt"
 cd ${work_dir}/${arch}/airootfs
 mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -comp xz
     cd "${script_path}/${work_dir}/iso/arch/${arch}"
