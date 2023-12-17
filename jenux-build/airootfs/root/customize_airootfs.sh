@@ -29,7 +29,6 @@ systemctl enable NetworkManager.service polkit.service sshcheck.service wifiinit
 for t in "1" "2" "3" "4" "5" "6";do
 systemctl disable getty@tty$t
 done
-pacman -Q > /pkg
 case "$1" in
 i686)
 while true;do
@@ -125,5 +124,6 @@ done
 ;;
 esac
 rm -rf /root/customize_airootfs.sh
+pacman -Q > /pkg
 rm -rf /var/lib/pacman/sync/*
 rm -rf /var/cache/pacman/pkg/*
