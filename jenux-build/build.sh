@@ -216,10 +216,9 @@ cd ${script_path}
 make_iso() {
 cd ${script_path}/${work_dir}/iso
 mkdir -p unattends/android
-for presetname in "current" "legacy" "stable" "tv";do
+for presetname in "current" "legacy" "custom";do
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 export presetname=$presetname
-export url="https://nashcentral.duckdns.org/autobuildres/android/$presetname.iso"
 export disk=$disk
 export partmethod=e
 export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
@@ -228,9 +227,24 @@ export root="/dev/disk/by-partlabel/linux"
 export fmtboot=y
 export fmtfs=y
 export completeaction=poweroff
+case $presetname in
+current)
+export url="https://nashcentral.duckdns.org/autobuildres/android/$presetname.iso"
+;;
+legacy)
+export url="https://nashcentral.duckdns.org/autobuildres/android/$presetname.iso"
+;;
+custom)
+unset url
+;;
+esac
 echo \#android > unattends/android/$presetname-$disk-erase
 echo export presetname=\'$presetname\' >> unattends/android/$presetname-$disk-erase
+if [ -z $url ];then
+sleep .01
+else
 echo export url=\'$url\' >> unattends/android/$presetname-$disk-erase
+fi
 if echo $disk|grep -qw root_only;then
 echo export disk=\'$disk\' >> unattends/android/$presetname-$disk-erase
 else
@@ -615,7 +629,7 @@ fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
 git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
-truncate -s 4600M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+truncate -s 4800M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
@@ -635,7 +649,7 @@ mount $loopdev"p2" /mnt/EFI
 cp -rf * /mnt
 cp -rf ../x86_64/airootfs/usr/share/shim-signed/EFI /mnt/EFI
 export tmpdir=`mktemp -d`
-export sbgen=1
+export sbgen=2
 export grubver=`grub-mkstandalone --version|sed "s|grub-mkstandalone (GRUB) ||g"`
 cat > $tmpdir/sbat.csv <<EOF
 sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
