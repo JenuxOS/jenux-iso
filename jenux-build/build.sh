@@ -240,7 +240,7 @@ unset url
 esac
 echo \#android > unattends/android/$presetname-$disk-erase
 echo export presetname=\'$presetname\' >> unattends/android/$presetname-$disk-erase
-if [ -z $url ];then
+if [ $presetname == "custom" ];then
 sleep .01
 else
 echo export url=\'$url\' >> unattends/android/$presetname-$disk-erase
