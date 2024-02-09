@@ -335,6 +335,7 @@ echo raspberry pi 3\|rpi_3 >> /tmp/devlist
 echo raspberry pi 3 with vendor firmware\|rpi-vfw_3 >> /tmp/devlist
 echo raspberry pi 4\|rpi_4 >> /tmp/devlist
 echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
+echo raspberry pi 5\|rpi_5 >> /tmp/devlist
 echo raspberry pi 5 with vendor firmware\|rpi-vfw_5 >> /tmp/devlist
 echo Pinephone\|pine_phone >> /tmp/devlist
 export transtype=aarch64
@@ -372,6 +373,9 @@ export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspb
 ;;
 rpi-vfw_4)
 export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi_5)
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 ;;
 rpi-vfw_5)
 export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
@@ -629,7 +633,9 @@ fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
 git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
-truncate -s 4800M "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
+export rootsize=`du -m --total .|tail -n 1|cut -f 1`
+export contsize=$(($rootsize+600))"M"
+truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
@@ -691,24 +697,33 @@ done
 rm $tmpdir/jenux.key
 mv $tmpdir/jenux.crt /mnt/EFI
 cd /mnt/EFI
-curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
-unzip -o efi4.zip
-rm efi4.zip Readme.md firmware/Readme.txt
-mv config.txt config4.txt
-mv RPI_EFI.fd RPI4_EFI.fd
-sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
 unzip -o efi3.zip
 rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
 mv RPI_EFI.fd RPI3_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI3_EFI.fd|g" config3.txt
+curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
+unzip -o efi4.zip
+rm efi4.zip Readme.md firmware/Readme.txt
+mv config.txt config4.txt
+mv RPI_EFI.fd RPI4_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
+curl -Lo efi5.zip 'https://github.com/worproject/rpi5-uefi/releases/download/v0.2/RPi5_UEFI_Release_v0.2.zip'
+unzip -o efi5.zip
+mv config.txt config5.txt
+mv RPI_EFI.fd RPI5_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI5_EFI.fd|g" config5.txt
+rm efi5.zip
 echo \[pi3\] > config.txt
 cat config3.txt >> config.txt
 rm config3.txt
 echo \[pi4\] >> config.txt
 cat config4.txt >> config.txt
 rm config4.txt
+echo \[pi5\] >> config.txt
+cat config5.txt >> config.txt
+rm config5.txt
 echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
