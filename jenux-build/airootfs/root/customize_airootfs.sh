@@ -125,5 +125,6 @@ done
 esac
 rm -rf /root/customize_airootfs.sh
 rm -rf /etc/pacman.d/gnupg
+rm -rf /root/.zlogout
 rm -rf /var/lib/pacman/sync/*
 rm -rf /var/cache/pacman/pkg/*

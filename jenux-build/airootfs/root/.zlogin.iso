@@ -5,7 +5,7 @@ setopt singlelinezle
 if cat /proc/cmdline|grep -q nokeyrings;then
 sleep .01
 else
-if [ -e /etc/pacman.d/gnupg ];then
+if [ -e /etc/pacman.d/gnupg/pubring.gpg ];then
 sleep .01
 else
 echo initializing keyrings for package manager signature checking
