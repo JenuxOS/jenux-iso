@@ -1,3 +1,5 @@
+nmcli c add type gsm
+nmcli c modify gsm connection.autoconnect yes
 clear
 talk-to-me
 setopt singlelinezle

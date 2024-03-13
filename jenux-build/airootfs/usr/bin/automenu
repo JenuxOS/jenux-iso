@@ -73,8 +73,8 @@ rm $tempdir/menutitle > /dev/null 2>/dev/null
 if [ -f /run/brcm_fix_run ];then
 sleep .01
 else
-rmmod `lspci -nv -d 14e4:|grep -iw 'kernel modules'|cut -f 2 -d :|tr \\n \  |tr , \  `
-modprobe wl
+systemctl restart wifiinit
+systemctl restart NetworkManager
 touch /run/brcm_fix_run
 fi
 echo "\"Welcome to Jenux!\"">/tmp/automenu
