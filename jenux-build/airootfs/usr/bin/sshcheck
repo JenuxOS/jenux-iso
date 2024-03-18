@@ -17,6 +17,7 @@ cat /proc/cmdline|tr \  \\n|grep -w postscriptdev|sed "s|postscriptdev=||g"|tr -
 cat /proc/cmdline|tr \  \\n|grep -w postscript|sed "s|postscript=||g"|tr -d \\n|head -n 1|read -r -s postscript
 cat /proc/cmdline|tr \  \\n|grep -w sshkey|sed "s|sshkey=||g"|tr -d \\n|head -n 1|read -r -s sshkey
 cat /proc/cmdline|tr \  \\n|grep -w sshkeydev|sed "s|sshkeydev=||g"|tr -d \\n|head -n 1|read -r -s sshkeydev
+cat /proc/cmdline|tr \  \\n|grep -w torenable|sed "s|torenable=||g"|tr -d \\n|head -n 1|read -r -s torenable
 if [ -z $lang ];then
 sleep .01
 else
@@ -87,6 +88,27 @@ fi
 nmcli c add type wifi connection.id $wifissid connection.autoconnect yes wifi.ssid $wifissid wifi-sec.key-mgmt $wifisectype wifi-sec.proto $wifisecproto wifi-sec.psk $wifipass
 fi
 fi
+fi
+if [ -z $torenable ];then
+sleep .01
+else
+while true;do
+if pgrep -af tor|sed /grep/d|grep -w tor;then
+break
+else
+systemctl restart tor
+continue
+fi
+done
+mkdir -p /var/lib/tor/hidden_services/ssh
+chown -R tor:tor /var/lib/tor/hidden_services
+echo HiddenServiceDir /var/lib/tor/hidden_services/ssh >> /etc/tor/torrc
+if [ -z $port ];then
+echo HiddenServicePort 22 127.0.0.1:22 >> /etc/tor/torrc
+else
+echo HiddenServicePort $port 127.0.0.1:$port >> /etc/tor/torrc
+fi
+systemctl restart tor
 fi
 if [ -z $port ];then
 sleep .01

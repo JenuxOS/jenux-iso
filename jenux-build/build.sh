@@ -453,6 +453,10 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #if fwdport is set, specifies the external port that ssh will be available on. If not set, the external and internal ports will match
 #example:
 #extport=2222
+#torenable
+#if set to any value, remote access over ssh will also be enabled over the tor network
+#example:
+#torenable=1
 #kernelopts
 #used to pass parameters to the kernel
 #example:

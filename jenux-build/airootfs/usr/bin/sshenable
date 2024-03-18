@@ -45,12 +45,28 @@ unset fwdport
 esac
 fi
 echo export fwdport=$fwdport >> ~/unattend
+if [ -z $torenable ];then
+echo should a hidden service be set up to allow connections to this machine over the tor network\? y/n
+read -r torenable
+case "$torenable" in
+y)
+export torenable=1
+;;
+n)
+unset torenable
+;;
+*)
+unset torenable
+;;
+esac
+fi
+echo export torenable=$torenable >> ~/unattend
 cp /proc/cmdline /
 chmod 600 /cmdline
 if [ -z $fwdport ];then
-echo -n " passwd=$passwd port=$port extport=$extport" >> /cmdline
+echo -n " passwd=$passwd port=$port extport=$extport torenable=$torenable" >> /cmdline
 else
-echo -n " passwd=$passwd port=$port extport=$extport fwdport=$fwdport" >> /cmdline
+echo -n " passwd=$passwd port=$port extport=$extport fwdport=$fwdport torenable=$torenable" >> /cmdline
 fi
 cat /cmdline|tr -d \\n > /c
 mv /c /cmdline
@@ -59,3 +75,18 @@ systemctl --no-block restart sshcheck
 sleep 1
 umount /proc/cmdline
 rm /cmdline
+if [ -z $torenable ];then
+sleep .01
+else
+echo waiting for tor hostname
+while true;do
+if [ -e /var/lib/tor/hidden_services/ssh/hostname ];then
+echo connect to this host via tor at the following hostname:
+cat /var/lib/tor/hidden_services/ssh/hostname
+echo press enter to exit, remote access is enabled until reboot
+read var
+else
+sleep 1
+fi
+done
+fi
