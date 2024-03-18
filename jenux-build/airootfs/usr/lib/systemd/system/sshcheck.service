@@ -1,6 +1,6 @@
 [Unit]
 Description=set root password for ssh if supplied
-After=systemd-udev-settle.service getty.target sound.target
+After=NetworkManager.service graphical.target
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/sshcheck
