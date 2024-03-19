@@ -102,6 +102,7 @@ fi
 done
 mkdir -p /var/lib/tor/hidden_services/ssh
 chown -R tor:tor /var/lib/tor/hidden_services
+chmod -R 700 /var/lib/tor/hidden_services
 echo HiddenServiceDir /var/lib/tor/hidden_services/ssh >> /etc/tor/torrc
 if [ -z $port ];then
 echo HiddenServicePort 22 127.0.0.1:22 >> /etc/tor/torrc
