@@ -85,6 +85,8 @@ echo connect to this host via tor at the following hostname:
 cat /var/lib/tor/hidden_services/ssh/hostname
 echo press enter to exit, remote access is enabled until reboot
 read var
+systemctl restart sshd
+exit
 else
 sleep 1
 fi
