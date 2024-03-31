@@ -119,8 +119,7 @@ fi
 }
 make_packages() {
 while true;do
-if pacstrap -C "${work_dir}/pacman.${arch}.conf" "${work_dir}/${arch}/airootfs" --needed --overwrite \* `cat ${script_path}/packages.$arch|tr \\\\n \  `;then
-rm -rf "${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg"
+if pacstrap -C "${work_dir}/pacman.${arch}.conf" -M -G "${work_dir}/${arch}/airootfs" --needed --overwrite \* `cat ${script_path}/packages.$arch|tr \\\\n \  `;then
 break
 else
 continue
