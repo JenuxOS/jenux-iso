@@ -123,6 +123,12 @@ fi
 done
 ;;
 esac
+if [ -e /etc/pacman.d/blackarch-mirrorlist ];then
+sed -i "s|#Server|Server|g" /etc/pacman.d/blackarch-mirrorlist
+fi
+if [ -e /etc/pacman.d/mirrorlist ];then
+sed -i "s|#Server|Server|g" /etc/pacman.d/mirrorlist
+fi
 rm -rf /root/customize_airootfs.sh
 rm -rf /etc/pacman.d/gnupg
 rm -rf /root/.zlogout
