@@ -721,13 +721,18 @@ sed -i "s|RPI_EFI.fd|RPI5_EFI.fd|g" config5.txt
 rm efi5.zip
 echo \[pi3\] > config.txt
 cat config3.txt >> config.txt
+echo \[pi3+\] > config.txt
+cat config3.txt >> config.txt
 rm config3.txt
 echo \[pi4\] >> config.txt
 cat config4.txt >> config.txt
+echo \[pi400\] >> config.txt
+cat config4.txt >> config.txt
+echo \[cm4\] >> config.txt
+cat config4.txt >> config.txt
+echo \[cm4s\] >> config.txt
+cat config4.txt >> config.txt
 rm config4.txt
-echo \[pi5\] >> config.txt
-cat config5.txt >> config.txt
-rm config5.txt
 echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
