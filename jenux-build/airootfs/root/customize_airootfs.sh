@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -u
+set -u
 cd /
 while true;do
 if curl https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz|tar -xz;then
@@ -88,29 +88,47 @@ mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 cd /boot
 rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
-curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
-unzip -o efi4.zip
-rm efi4.zip Readme.md firmware/Readme.txt
-mv config.txt config4.txt
-mv RPI_EFI.fd RPI4_EFI.fd
-sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
 unzip -o efi3.zip
 rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
 mv RPI_EFI.fd RPI3_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI3_EFI.fd|g" config3.txt
+curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
+unzip -o efi4.zip
+rm efi4.zip Readme.md firmware/Readme.txt
+mv config.txt config4.txt
+mv RPI_EFI.fd RPI4_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
+curl -Lo efi5.zip 'https://github.com/worproject/rpi5-uefi/releases/download/v0.2/RPi5_UEFI_Release_v0.2.zip'
+unzip -o efi5.zip
+mv config.txt config5.txt
+mv RPI_EFI.fd RPI5_EFI.fd
+sed -i "s|RPI_EFI.fd|RPI5_EFI.fd|g" config5.txt
+rm efi5.zip
 echo \[pi3\] > config.txt
+cat config3.txt >> config.txt
+echo \[pi3+\] >> config.txt
 cat config3.txt >> config.txt
 rm config3.txt
 echo \[pi4\] >> config.txt
 cat config4.txt >> config.txt
+echo \[pi400\] >> config.txt
+cat config4.txt >> config.txt
+echo \[cm4\] >> config.txt
+cat config4.txt >> config.txt
+echo \[cm4s\] >> config.txt
+cat config4.txt >> config.txt
 rm config4.txt
+echo \[pi5\] >> config.txt
+cat config5.txt >> config.txt
+rm config5.txt
 echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
 sed -i "/dtoverlay=miniuart-bt/d" config.txt
 unix2dos config.txt
+cd /
 ;;
 x86_64)
 while true;do
