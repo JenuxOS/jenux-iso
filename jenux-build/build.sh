@@ -714,7 +714,7 @@ sed -i "s|RPI_EFI.fd|RPI5_EFI.fd|g" config5.txt
 rm efi5.zip
 echo \[pi3\] > config.txt
 cat config3.txt >> config.txt
-echo \[pi3+\] > config.txt
+echo \[pi3+\] >> config.txt
 cat config3.txt >> config.txt
 rm config3.txt
 echo \[pi4\] >> config.txt
