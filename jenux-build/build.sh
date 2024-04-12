@@ -726,6 +726,9 @@ cat config4.txt >> config.txt
 echo \[cm4s\] >> config.txt
 cat config4.txt >> config.txt
 rm config4.txt
+echo \[pi5\] >> config.txt
+cat config5.txt >> config.txt
+rm config5.txt
 echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
