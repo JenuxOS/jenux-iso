@@ -77,6 +77,14 @@ systemctl restart wifiinit
 systemctl restart NetworkManager
 touch /run/brcm_fix_run
 fi
+if [ -e /run/.time_sync_run ];then
+sleep .01
+else
+if ping -c 1 google.com > /dev/null 2>/dev/null;then
+systemctl restart systemd-timesyncd
+touch /run/.time_sync_run
+fi
+fi
 echo "\"Welcome to Jenux!\"">/tmp/automenu
 echo -n "\"a\" \"Install the Android OS on this device\" \"c\" \"Run the clonezilla backup tool to backup or restore this device's storage\" \"e\" \"enable remote access to this environment, use with caution! \" \"j\" \"install Jenux on this device\" \"n\" \"Access this device's storage over the network, using the NBD protocol\" \"p\" \"partition a hard disk\" \"r\" \"Flash an image to a Raspberry Pi or Other ARM Device\" \"s\" \"drop to system shell\" \"w\" \"Reset a Windows Password on this device\"">>/tmp/automenu
 createmenu /tmp/automenu

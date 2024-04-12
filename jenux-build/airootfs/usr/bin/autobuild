@@ -23,7 +23,7 @@ export scriptname="winreset"
 ;;
 esac
 if cat /proc/cmdline|grep -iq unattend;then
-source $unattend
+source ~/unattend
 else
 echo Welcome! To set up the installation of $productname, you must have a working internet connection. Will you be using wifi to connect\? If so, type y and press enter, otherwise, type n and press enter.
 read wifianswer
@@ -34,9 +34,6 @@ echo "not using wifi, continuing to next step"
 fi
 if curl -s -o index.html https://nashcentral.duckdns.org;rm index.html; then
 echo "connected to internet, proceding to install phase! "
-echo syncing time/date for ssl
-systemctl restart systemd-timesyncd
-sleep 5
 else
 echo "Sorry, your system cannot be automatically connected to the internet. Connect manually to try the installation again. Please press enter to return to the main menu."
 read var

@@ -140,7 +140,7 @@ fi
 done
 ;;
 esac
-rm -rf /root/customize_airootfs.sh
+rm -rf /root/customize_airootfs.sh /root/jenux.defaults /root/applydef.sh
 rm -rf /etc/pacman.d/gnupg
 rm -rf /root/.zlogout
 rm -rf /var/lib/pacman/sync/*
