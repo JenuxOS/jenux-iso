@@ -643,13 +643,6 @@ truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tr
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
-sgdisk -h 2:EE $loopdev
-fdisk -t dos $loopdev<<EOF
-t
-1
-c
-w
-EOF
 partprobe $loopdev
 mkfs.vfat -n ISOEFI $loopdev"p2"
 mkfs.vfat -n ${iso_label} $loopdev"p3"
