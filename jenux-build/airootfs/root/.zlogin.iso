@@ -37,6 +37,21 @@ fi
 else
 echo -n > ~/.postlogin.$mytty
 fi
+if [ -f /run/brcm_fix_run ];then
+sleep .01
+else
+systemctl restart wifiinit
+systemctl restart NetworkManager
+touch /run/brcm_fix_run
+fi
+if [ -e /run/.time_sync_run ];then
+sleep .01
+else
+if ping -c 1 google.com > /dev/null 2>/dev/null;then
+systemctl restart systemd-timesyncd
+touch /run/.time_sync_run
+fi
+fi
 if [ -e ~/unattend ];then
 if [ -e ~/.unattend.$mytty ];then
 true
