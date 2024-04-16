@@ -15,20 +15,49 @@ export lang="en_US.UTF-8"
 fi
 case "$lang" in
 en_US.UTF-8)
-export sndseltext="Hello and welcome to jenux, an accessible distribution based on Arch Linux! since you have booted the installer with accessibility enabled and this device has multiple sound cards, please press enter within 10 seconds to select card $c. If this is the last device in the list and no device is selected, your platform\'s default audio device will be used, which may not be desireable depending on your setup."
+export cdesc=`cat /proc/asound/cards|grep -w $c|sed "s|$c \[||g;s|\]||g"`
+export sndseltext="Hello and welcome to jenux, an accessible distribution based on Arch Linux! since you have booted the installer with accessibility enabled and this device has multiple sound cards, please press enter within 10 seconds to select card $c, a $cdesc. If this is the last device in the list and no device is selected, your platform\'s default audio device will be used, which may not be desireable depending on your setup."
+echo $sndseltext|RHVoice-test -p bdl -o sndsel.wav
+export durhours=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 1 -d :`
+export durmins=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 2 -d :`
+export dursecs=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 3 -d :`
+export dursleep=$(($durhours*3600+$durmins*60+$dursecs))
+if [ -z $dursleep ];then
+export dursleep=10
+fi
+if echo $dursleep|grep -qw 10;then
+true
+else
+export sndseltext=`echo -en $sndseltext|sed "s|10 seconds|$dursleep seconds|g"`
+fi
 echo $sndseltext|RHVoice-test -p bdl -o sndsel.wav
 echo $sndseltext
 ;;
 pt_BR.UTF-8)
 export esv=`echo $lang|cut -f 1 -d _`
-export sndseltext="Olá e bem-vindo ao jenux, uma distribuição acessível baseada no Arch Linux! como você inicializou o instalador com a acessibilidade habilitada e este dispositivo possui várias placas de som, pressione enter em 10 segundos para selecionar a placa $ c. Se este for o último dispositivo da lista e nenhum dispositivo for selecionado, o dispositivo de áudio padrão de sua plataforma será usado, o que pode não ser desejável dependendo de sua configuração."
+export cdesc=`cat /proc/asound/cards|grep -w $c|sed "s|$c \[||g;s|\]||g"`
+export sndseltext="Olá e bem-vindo ao jenux, uma distribuição acessível baseada no Arch Linux! como você inicializou o instalador com a acessibilidade habilitada e este dispositivo possui várias placas de som, pressione enter em 10 segundos para selecionar a placa $c, a $cdesc. Se este for o último dispositivo da lista e nenhum dispositivo for selecionado, o dispositivo de áudio padrão de sua plataforma será usado, o que pode não ser desejável dependendo de sua configuração."
+echo $sndseltext|espeak -v $esv -w sndsel.wav
+export durhours=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 1 -d :`
+export durmins=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 2 -d :`
+export dursecs=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 3 -d :`
+export dursleep=$(($durhours*3600+$durmins*60+$dursecs))
+if [ -z $dursleep ];then
+export dursleep=10
+fi
+if echo $dursleep|grep -qw 10;then
+true
+else
+export sndseltext=`echo -en $sndseltext|sed "s|10 seconds|$dursleep seconds|g"`
+fi
 echo $sndseltext|espeak -v $esv -w sndsel.wav
 echo $sndseltext
 ;;
 esac
-aplay -D plughw:$c sndsel.wav > /dev/null 2>/dev/null
+aplay -D plughw:$c sndsel.wav > /dev/null 2>/dev/null&
+if read -t $dursleep var;then
+killall -9 aplay
 rm sndsel.wav
-if read -t 10 var;then
 cat > /etc/asound.conf <<EOF
 pcm.!default {
         type plug
@@ -37,7 +66,7 @@ pcm.!default {
                 card $c
         }
 }
-                                                                                                                                                                          
+
 ctl.!default {
         type hw
         card $c
