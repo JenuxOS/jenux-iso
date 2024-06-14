@@ -40,7 +40,13 @@ read var
 exit 1
 fi
 fi
+while true;do
 echo Downloading $productname installation script...
-curl -o $scriptname $baseurl/$dirname/$scriptname
+if curl -o $scriptname $baseurl/$dirname/$scriptname;then
+break
+else
+continue
+fi
+done
 chmod 755 $scriptname
 ./$scriptname $@
