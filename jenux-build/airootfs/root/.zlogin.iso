@@ -37,13 +37,6 @@ fi
 else
 echo -n > ~/.postlogin.$mytty
 fi
-if [ -f /run/brcm_fix_run ];then
-sleep .01
-else
-systemctl restart wifiinit
-systemctl restart NetworkManager
-touch /run/brcm_fix_run
-fi
 if [ -e /run/.time_sync_run ];then
 sleep .01
 else
