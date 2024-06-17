@@ -49,4 +49,5 @@ continue
 fi
 done
 chmod 755 $scriptname
+clear
 ./$scriptname $@
