@@ -9,7 +9,7 @@ continue
 fi
 done
 /etc/postinstall.sh root_only base n
-systemctl disable speech-dispatcherd fenrirscreenreader
+systemctl disable speech-dispatcherd fenrirscreenreader swap
 if [ -e /boot/vmlinuz-linux ];then
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 fi
@@ -127,7 +127,7 @@ echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
 sed -i "/dtoverlay=miniuart-bt/d" config.txt
-unix2dos config.txt
+dos2unix config.txt
 cd /
 ;;
 x86_64)

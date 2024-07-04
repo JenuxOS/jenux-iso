@@ -733,7 +733,7 @@ echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
 sed -i "/dtoverlay=miniuart-bt/d" config.txt
-unix2dos config.txt
+dos2unix config.txt
 cd $OLDPWD
 umount /mnt/EFI /mnt
 losetup -d $loopdev
