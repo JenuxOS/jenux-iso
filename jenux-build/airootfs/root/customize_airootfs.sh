@@ -116,6 +116,15 @@ mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/kernel8.img -g /boot/archiso
 mv /boot/kernel8.img /boot/vmlinuz-linux.rpi
 mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
+while true;do
+if curl -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/pi/aarch64.conf;then
+break
+else
+continue
+fi
+done
+sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/speechctl
+sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/talk-to-me
 cd /boot
 rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
