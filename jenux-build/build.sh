@@ -164,10 +164,10 @@ make_boot() {
 mkdir -p ${work_dir}/iso
 mkdir -p ${work_dir}/iso/${install_dir}/boot/${arch}
 if [ -e ${work_dir}/${arch}/airootfs/boot/archiso.img ];then
-    cp ${work_dir}/${arch}/airootfs/boot/archiso.img ${work_dir}/iso/${install_dir}/boot/${arch}/archiso.img
+    cp ${work_dir}/${arch}/airootfs/boot/archiso* ${work_dir}/iso/${install_dir}/boot/${arch}
     fi
 if [ -e ${work_dir}/${arch}/airootfs/boot/vmlinuz-linux ];then
-cp ${work_dir}/${arch}/airootfs/boot/vmlinuz-linux ${work_dir}/iso/${install_dir}/boot/${arch}/vmlinuz
+cp ${work_dir}/${arch}/airootfs/boot/vmlinuz-linux* ${work_dir}/iso/${install_dir}/boot/${arch}/
 fi
 }
 
