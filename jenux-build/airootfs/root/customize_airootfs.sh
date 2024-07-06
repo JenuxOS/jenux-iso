@@ -85,7 +85,14 @@ rm $f
 fi
 done
 while true;do
-if pacman --noconfirm --needed -Sdd linux-rpi linux-rpi-headers;then
+if pacman --dbonly --noconfirm -Rdd linux-aarch64 linux-aarch64-headers;then
+break
+else
+continue
+fi
+done
+while true;do
+if pacman --noconfirm --overwrite \* --needed -Sdd linux-rpi linux-rpi-headers;then
 break
 else
 continue
