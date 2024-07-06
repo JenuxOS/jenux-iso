@@ -565,12 +565,14 @@ cat >> "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #kernel=/arch/boot/x86_64/vmlinuz
 #kernel=/arch/boot/i686/vmlinuz
 #kernel='(hd0,gpt3)'/boot/vmlinuz-linux
+#kernel=/arch/boot/aarch64/vmlinuz-linux.rpi
 #ramdisk:
 #The path, in any format that grub can interpret, of a custom ramdisk to load, either on this media, where root is set, or on any filesystem that grub can access
 #examples:
 #ramdisk=/arch/boot/x86_64/archiso.img
 #ramdisk=/arch/boot/i686/archiso.img
 #ramdisk='(hd0,gpt3)'/boot/initramfs-linux-fallback.img
+#ramdisk=/arch/boot/aarch64/archiso.rpi.img
 #noamdmicrocode:
 #if set, skips loading of AMD microcode. Note: this will not effect the ability to boot on non-AMD platforms, since mismatching microcode will be ignored by the kernel.
 #example:

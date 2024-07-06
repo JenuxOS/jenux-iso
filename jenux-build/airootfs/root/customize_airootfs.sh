@@ -91,6 +91,7 @@ else
 continue
 fi
 done
+sed -i "s|CheckSpace|#CheckSpace|g" /etc/pacman.conf
 while true;do
 if pacman --noconfirm --overwrite \* --needed -Sdd linux-rpi linux-rpi-headers;then
 break
@@ -98,6 +99,7 @@ else
 continue
 fi
 done
+sed -i "s|#CheckSpace|CheckSpace|g" /etc/pacman.conf
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/kernel8.img -g /boot/archiso.rpi.img
 mv /boot/kernel8.img /boot/vmlinuz-linux.rpi
 mv /boot/Image /boot/vmlinuz-linux
