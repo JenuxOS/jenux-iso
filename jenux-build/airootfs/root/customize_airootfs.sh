@@ -84,6 +84,15 @@ else
 rm $f
 fi
 done
+while true;do
+if pacman --noconfirm --needed -Sdd linux-rpi linux-rpi-headers;then
+break
+else
+continue
+fi
+done
+mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/kernel8.img -g /boot/archiso.rpi.img
+mv /boot/kernel8.img /boot/vmlinuz-linux.rpi
 mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 cd /boot
