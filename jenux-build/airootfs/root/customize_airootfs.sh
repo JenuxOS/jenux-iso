@@ -102,6 +102,7 @@ continue
 fi
 done
 done
+rm *.sig
 while true;do
 if pacman --noconfirm --overwrite \* --needed -Udd *;then
 rm -rf /var/cache/pacman/pkg/*
