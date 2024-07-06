@@ -117,7 +117,7 @@ mv /boot/kernel8.img /boot/vmlinuz-linux.rpi
 mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 while true;do
-if curl -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/pi/aarch64.conf;then
+if curl -s -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.aarch64.conf;then
 break
 else
 continue
