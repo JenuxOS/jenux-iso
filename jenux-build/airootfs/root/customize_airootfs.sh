@@ -92,8 +92,19 @@ continue
 fi
 done
 sed -i "s|CheckSpace|#CheckSpace|g" /etc/pacman.conf
+cd /var/cache/pacman/pkg
+for f in `pacman -Sp linux-rpi linux-rpi-headers`;do
 while true;do
-if pacman --noconfirm --overwrite \* --needed -Sdd linux-rpi linux-rpi-headers;then
+if curl -LO $f;then
+break
+else
+continue
+fi
+done
+done
+while true;do
+if pacman --noconfirm --overwrite \* --needed -Udd *;then
+rm -rf /var/cache/pacman/pkg/*
 break
 else
 continue
