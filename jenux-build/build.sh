@@ -694,7 +694,7 @@ rm $f.unsigned
 fi
 done
 rm $tmpdir/jenux.key
-mv $tmpdir/jenux.crt /mnt/EFI
+mv $tmpdir/jenux-iso.cer /mnt/EFI
 cd /mnt/EFI
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
 unzip -o efi3.zip
