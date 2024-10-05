@@ -702,13 +702,13 @@ rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
 mv RPI_EFI.fd RPI3_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI3_EFI.fd|g" config3.txt
-curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.35/RPi4_UEFI_Firmware_v1.35.zip
+curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.38/RPi4_UEFI_Firmware_v1.38.zip
 unzip -o efi4.zip
 rm efi4.zip Readme.md firmware/Readme.txt
 mv config.txt config4.txt
 mv RPI_EFI.fd RPI4_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
-curl -Lo efi5.zip 'https://github.com/worproject/rpi5-uefi/releases/download/v0.2/RPi5_UEFI_Release_v0.2.zip'
+curl -Lo efi5.zip 'https://github.com/worproject/rpi5-uefi/releases/download/v0.3/RPi5_UEFI_Release_v0.3.zip'
 unzip -o efi5.zip
 mv config.txt config5.txt
 mv RPI_EFI.fd RPI5_EFI.fd
@@ -734,6 +734,7 @@ rm config5.txt
 echo \[all\] >> config.txt
 echo dtparam=audio=on >> config.txt
 echo dtparam=krnbt=on >> config.txt
+echo dtparam=pcie=on >> config.txt
 sed -i "/dtoverlay=miniuart-bt/d" config.txt
 dos2unix config.txt
 cd $OLDPWD
