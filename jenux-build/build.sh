@@ -762,13 +762,13 @@ force_turbo=1
 dtparam=audio=on
 dtparam=krnbt=on
 dtparam=pcie=on
-initramfs initrd.img followkernel
+initramfs archiso.img followkernel
 EOF
 cat > cmdline.rpi.txt<<EOF
 archisolabel=${iso_label} archisobasedir=arch copytoram checksum
 EOF
-cp ${script_path}/${work_dir}/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.img
-cp ${script_path}/${work_dir}/arch/boot/${arch}/archiso.rpi.img initrd.img
+cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.img
+cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/archiso.rpi.img archiso.img
 cd $OLDPWD
 umount /mnt/EFI /mnt
 losetup -d $loopdev
