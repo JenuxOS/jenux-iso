@@ -654,12 +654,7 @@ mount $loopdev"p2" /mnt/EFI
 cp -rf * /mnt
 cp -rf ../x86_64/airootfs/usr/share/shim-signed/EFI /mnt/EFI
 export tmpdir=`mktemp -d`
-export sbgen=2
-export grubver=`grub-mkstandalone --version|sed "s|grub-mkstandalone (GRUB) ||g"`
-cat > $tmpdir/sbat.csv <<EOF
-sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
-grub,$sbgen,Free Software Foundation,grub,$grubver,https://www.gnu.org/software/grub/
-EOF
+cp ../x86_64/airootfs/usr/share/grub/sbat.csv $tmpdir/sbat.csv
 cp -Lrf ${script_path}/${work_dir}/aarch64/airootfs/boot/* /mnt/EFI
 rm -rf /mnt/EFI/Image.gz /mnt/EFI/vmlinuz-linux /mnt/EFI/initramfs-linux* /mnt/EFI/amd-ucode.img /mnt/EFI/archiso.img /mnt/EFI/firmware
 grub-install -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos iso9660 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
