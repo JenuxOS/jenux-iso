@@ -767,8 +767,8 @@ EOF
 cat > cmdline.rpi.txt<<EOF
 archisolabel=${iso_label} archisobasedir=arch copytoram checksum
 EOF
-cp ${work_dir}/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.img
-cp ${work_dir}/arch/boot/${arch}/archiso.rpi.img initrd.img
+cp ${script_path}/${work_dir}/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.img
+cp ${script_path}/${work_dir}/arch/boot/${arch}/archiso.rpi.img initrd.img
 cd $OLDPWD
 umount /mnt/EFI /mnt
 losetup -d $loopdev
