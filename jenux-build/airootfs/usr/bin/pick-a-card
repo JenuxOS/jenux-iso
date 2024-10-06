@@ -32,8 +32,13 @@ export gencmd="RHVoice-test"
 export genargs="-p bdl -o sndsel.wav"
 ;;
 *)
+if cat /bin/speechctl|grep -qw reader=espeakup;then
+export gencmd="espeak"
+export genargs="-w sndsel.wav"
+else
 export gencmd="RHVoice-test"
 export genargs="-p bdl -o sndsel.wav"
+fi
 ;;
 esac
 echo $sndseltext|$gencmd $genargs
