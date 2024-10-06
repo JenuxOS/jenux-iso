@@ -732,6 +732,42 @@ echo dtparam=krnbt=on >> config.txt
 echo dtparam=pcie=on >> config.txt
 sed -i "/dtoverlay=miniuart-bt/d" config.txt
 dos2unix config.txt
+cat > config.rpi.txt<<EOF
+[pi3]
+arm_64bit=1
+[pi3+]
+arm_64bit=1
+[pi4]
+arm_64bit=1
+arm_boost=1
+[pi400]
+arm_64bit=1
+arm_boost=1
+[cm4]
+arm_64bit=1
+arm_boost=1
+[pi400]
+arm_64bit=1
+arm_boost=1
+[cm4]
+arm_64bit=1
+arm_boost=1
+[cm4s]
+arm_64bit=1
+arm_boost=1
+[pi5]
+usb_max_current_enable=1
+force_turbo=1
+[all]
+dtparam=audio=on
+dtparam=krnbt=on
+dtparam=pcie=on
+EOF
+cat > cmdline.rpi.txt<<EOF
+archisolabel=${iso_label} archisobasedir=arch
+EOF
+cp ${work_dir}/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.img
+cp ${work_dir}/arch/boot/${arch}/archiso.rpi.img initrd.img
 cd $OLDPWD
 umount /mnt/EFI /mnt
 losetup -d $loopdev
