@@ -13,22 +13,22 @@ else
 sleep .01
 fi
 fi
-echo export wifianswer=$wifianswer >> ~/unattend
+echo export wifianswer=\'$wifianswer\' >> ~/unattend
 if [ -z $passwd ];then
 echo please enter a root password. This password will not be shown as you type.
 read -r -s passwd
 fi
-echo export passwd=$passwd >> ~/unattend
+echo export passwd=\'$passwd\' >> ~/unattend
 if [ -z $port ];then
 echo please enter the port on which ssh should run, from 1 to 65535.
 read -r port
 fi
-echo export port=$port >> ~/unattend
+echo export port=\'$port\' >> ~/unattend
 if [ -z $extport ];then
 echo please enter the external\(internet facing\) port that the connection should be accepted on.
 read -r extport
 fi
-echo export extport=$extport >> ~/unattend
+echo export extport=\'$extport\' >> ~/unattend
 if [ -z $fwdport ];then
 echo Should attempts be made to forward this port to the outside world using upnp\? y/n
 read -r fwdport
@@ -44,7 +44,7 @@ unset fwdport
 ;;
 esac
 fi
-echo export fwdport=$fwdport >> ~/unattend
+echo export fwdport=\'$fwdport\' >> ~/unattend
 if [ -z $torenable ];then
 echo should a hidden service be set up to allow connections to this machine over the tor network\? y/n
 read -r torenable
@@ -60,7 +60,7 @@ unset torenable
 ;;
 esac
 fi
-echo export torenable=$torenable >> ~/unattend
+echo export torenable=\'$torenable\' >> ~/unattend
 cp /proc/cmdline /
 chmod 600 /cmdline
 if [ -z $fwdport ];then
@@ -81,11 +81,13 @@ else
 echo waiting for tor hostname
 while true;do
 if [ -e /var/lib/tor/hidden_services/ssh/hostname ];then
-echo connect to this host via tor at the following hostname:
-cat /var/lib/tor/hidden_services/ssh/hostname
-echo press enter to exit, remote access is enabled until reboot
-read var
 systemctl restart sshd
+echo connect to this host via tor at the following hostname:
+export svcurl=`cat /var/lib/tor/hidden_services/ssh/hostname`
+echo $svcurl
+echo export svcurl=\'$svcurl\' >> ~/unattend
+echo press enter to exit, remote access is enabled until reboot.
+read var
 exit
 else
 sleep 1
