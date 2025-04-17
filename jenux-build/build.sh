@@ -481,6 +481,15 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #if set, turns off accessibility in the installer, also tells the installed android and jenux/arm systems not to activate accessibility features during first time configuration, can be reversed by the user during setup
 #example:
 #nospeech=1
+#soundcard:
+#if set to the name of a device, or a substring that may be in the device id, i.e. hdmi, PCH, HDA, etc, the value of this variable will be used to attempt to auto select the sound card for speech output during the live environment
+#example:
+#soundcard=pch
+#soundcard=es1370
+#soundcardindex:
+#if set to the index of a device, the value of this variable will be used to select the sound card for speech output during the live environment
+#example:
+#soundcardindex=0
 #script:
 #used to give the location of a script which will be executed after the package manager initialization, but before execution of the main menu. Both the format and restrictions relating to this parameter match with the below unattend directive. 
 #examples:
