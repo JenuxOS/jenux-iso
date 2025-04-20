@@ -1,4 +1,7 @@
 #!/bin/zsh
+if cat /proc/cmdline|grep -qw soundcard||cat /proc/cmdline|grep -qw soundcardindex;then
+exit 4
+fi
 export IFS=$(echo -en \\n\\b)
 for c in `ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"`;do
 for d in `amixer scontrols -c $c|sed 's|Simple mixer control ||g'|tr -d \'`;do

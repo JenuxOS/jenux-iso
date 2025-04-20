@@ -278,7 +278,7 @@ else
 export IFS=$(echo -en \\n\\b)
 for c in `ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"`;do
 export cdesc=`cat /proc/asound/cards|grep -w $c|sed "s|$c \[||g;s|\]||g"`
-if echo $cdesc|grep -qw $soundcard;then
+if echo $cdesc|grep -iqw $soundcard;then
 export soundcardindex=$c
 break
 fi
