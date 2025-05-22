@@ -684,21 +684,22 @@ sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
 rm $f.unsigned
 done
 for f in `find /mnt -type f|grep core.efi`;do
-if file $f|grep -qw EFI\ application;then
+if file $f|grep -iw EFI|grep -iqw application;then
 mv $f $f.unsigned
 sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
 rm $f.unsigned
 fi
 done
 for f in `find /mnt -type f|sed "/shim/d;/mm/d;/fb/d;/EFI\/boot/d"|grep .efi|sed /mod/d`;do
-if file $f|grep -qw EFI\ application;then
+if file $f|grep -iw EFI|grep -iqw application;then
 mv $f $f.unsigned
 sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
 rm $f.unsigned
 fi
 done
-rm $tmpdir/jenux.key
 mv $tmpdir/jenux-iso.cer /mnt/EFI
+mv $tmpdir/jenux.crt /mnt/EFI/jenux.sbverify.crt
+rm $tmpdir/jenux.key
 cd /mnt/EFI
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
 unzip -o efi3.zip
