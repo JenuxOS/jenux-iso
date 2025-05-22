@@ -699,7 +699,7 @@ fi
 done
 mv $tmpdir/jenux-iso.cer /mnt/EFI
 mv $tmpdir/jenux.crt /mnt/EFI/jenux.sbverify.crt
-cp -rf /mnt/EFI/boot/*.efi /mnt
+cp -rf /mnt/EFI/EFI/boot/*.efi /mnt
 cp /mnt/boot/grub/arm64-efi/core.efi /mnt/grubaa64.efi
 cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
 cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
