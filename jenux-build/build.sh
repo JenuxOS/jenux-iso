@@ -670,9 +670,9 @@ grub-install -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-e
 grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
 grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
 grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos iso9660 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos iso9660 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
 grub-mknetdir --net-directory=/mnt -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc
 mv /mnt/EFI/EFI/boot/bootaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi.shim
 mv /mnt/EFI/EFI/arch/grubaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi
@@ -699,6 +699,10 @@ fi
 done
 mv $tmpdir/jenux-iso.cer /mnt/EFI
 mv $tmpdir/jenux.crt /mnt/EFI/jenux.sbverify.crt
+cp -rf /mnt/EFI/boot/*.efi /mnt
+cp /mnt/boot/grub/arm64-efi/core.efi /mnt/grubaa64.efi
+cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
+cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
 rm $tmpdir/jenux.key
 cd /mnt/EFI
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
