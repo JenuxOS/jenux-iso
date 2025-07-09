@@ -14,10 +14,10 @@ continue
 fi
 done
 /etc/postinstall.sh root_only $preset n
-if [ -z $livebuild ];then
-sleep .01
-else
+if echo $livebuild|grep -iqw livebuild;then
 mv /root/.zlogin /root/.zlogin.firstboot
+else
+cp -aT /etc/skel/ /root/
 fi
 systemctl disable speech-dispatcherd fenrirscreenreader swap
 if [ -e /boot/vmlinuz-linux ];then
@@ -27,7 +27,6 @@ sed -i 's/#\(en_US\.UTF-8\)/\1/' /etc/locale.gen
 locale-gen
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 usermod -s /usr/bin/zsh root
-cp -aT /etc/skel/ /root/
 mv /root/.zlogin.iso /root/.zlogin
 rm -rf /etc/systemd/system/getty@tty1.service.d/firstboot.conf
 mv /lib/systemd/system/getty@.service.sys /lib/systemd/system/getty@.service
