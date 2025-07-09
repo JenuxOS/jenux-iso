@@ -153,8 +153,7 @@ i686)
 curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist|sed "s|#Server|Server|g" > "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 ;;
 esac
-
-arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch}
+arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
 rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 rm -rf ${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg
 }
