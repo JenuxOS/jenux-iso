@@ -12,6 +12,9 @@ echo cannot load nbd module
 exit 48
 fi
 fi
+if echo $0|grep -iqw livebuild;then
+export livebuild=1
+fi
 iso_name=Jenux
 iso_label="JENUX_$(date +%Y)"
 iso_version=$(date +%Y.%m.%d)
@@ -97,7 +100,7 @@ curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirro
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
-export preset="base"
+export preset="mate"
 curl -s https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
 if [ $arch = "aarch64" ];then
 sed -i "/qemu-system-arm/d;/qemu-system-x86/d" packages.${arch}
@@ -153,7 +156,7 @@ i686)
 curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist|sed "s|#Server|Server|g" > "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 ;;
 esac
-arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
+arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset} ${livebuild}
 rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 rm -rf ${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg
 }

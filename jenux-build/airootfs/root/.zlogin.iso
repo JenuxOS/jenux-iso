@@ -92,5 +92,10 @@ fi
 for t in "2" "3" "4" "5" "6" "S0" "S1" "S2" "S3";do
 systemctl start getty@tty$t
 done
+if [ -e ~/.zlogin.firstboot ];then
+mv ~/.zlogin.firstboot ~/.zlogin
+source .zlogin
+else
 automenu
 logout
+fi

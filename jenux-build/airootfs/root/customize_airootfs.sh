@@ -4,6 +4,7 @@ export preset=$2
 if [ -z $preset ];then
 export preset=base
 fi
+export livebuild=$3
 cd /
 while true;do
 if curl https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz|tar -xz;then
@@ -13,6 +14,11 @@ continue
 fi
 done
 /etc/postinstall.sh root_only $preset n
+if [ -z $livebuild ];then
+sleep .01
+else
+mv /root/.zlogin /root/.zlogin.firstboot
+fi
 systemctl disable speech-dispatcherd fenrirscreenreader swap
 if [ -e /boot/vmlinuz-linux ];then
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
