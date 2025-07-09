@@ -103,7 +103,7 @@ mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
 export preset="mate"
 curl -s https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
 if [ $arch = "aarch64" ];then
-sed -i "/qemu-system-arm/d;/qemu-system-x86/d" packages.${arch}
+sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d" packages.${arch}
 fi
 if [ $arch = "i686" ];then
 sed -i "/qemu-img/d;s|qemu-base|qemu-headless|g" packages.${arch}
@@ -826,7 +826,7 @@ mkdir -p ${work_dir}
 
 
 # Do all stuff for each airootfs
-for arch in "i686" "x86_64" "aarch64"; do
+for arch in "x86_64" "i686" "aarch64"; do
 run_once make_pacman_conf
 run_once make_packages
 run_once make_setup_mkinitcpio
