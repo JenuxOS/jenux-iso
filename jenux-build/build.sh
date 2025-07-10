@@ -4,13 +4,10 @@ set -u
 if echo $0|grep -iqw livebuild;then
 export livebuild=livebuild
 export preset="mate"
+iso_name=Jenux-live-$preset
 else
 export preset=base
-fi
-if [ -z $livebuild ];then
 iso_name=Jenux
-else
-iso_name=Jenux-live-$preset
 fi
 iso_label="JENUX_$(date +%Y)"
 iso_version=$(date +%Y.%m.%d)
