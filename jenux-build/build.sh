@@ -1,9 +1,10 @@
 #!/bin/bash
 umask 022
 set -u
-export preset=$1
-if [ -z $preset ];then
+if [ -z $1 ];then
 export preset=base
+else
+export preset=$1
 fi
 if echo $0|grep -iqw livebuild;then
 export livebuild=livebuild
