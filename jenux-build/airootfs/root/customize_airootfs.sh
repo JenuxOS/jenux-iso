@@ -5,6 +5,9 @@ if [ -z $preset ];then
 export preset=base
 fi
 export livebuild=$3
+if [ -z $livebuild ];then
+export livebuild
+fi
 cd /
 while true;do
 if curl https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz|tar -xz;then

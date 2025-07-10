@@ -7,6 +7,7 @@ export preset="mate"
 iso_name=Jenux-live-$preset
 else
 export preset=base
+export livebuild
 iso_name=Jenux
 fi
 iso_label="JENUX_$(date +%Y)"
