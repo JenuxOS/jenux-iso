@@ -1,5 +1,4 @@
 #!/bin/bash
-set -u
 export preset=$2
 if [ -z $preset ];then
 export preset=base

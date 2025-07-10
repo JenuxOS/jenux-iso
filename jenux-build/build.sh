@@ -1,6 +1,5 @@
 #!/bin/bash
 umask 022
-set -u
 if [ -z $1 ];then
 export preset=base
 else
