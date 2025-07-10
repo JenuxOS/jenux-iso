@@ -1,13 +1,15 @@
 #!/bin/bash
 umask 022
 set -u
+export preset=$1
+if [ -z $preset ];then
+export preset=base
+fi
 if echo $0|grep -iqw livebuild;then
 export livebuild=livebuild
-export preset="mate"
 iso_name=Jenux-live-$preset
 else
-export preset=base
-export livebuild
+export livebuild=nolive
 iso_name=Jenux
 fi
 iso_label="JENUX_$(date +%Y)"

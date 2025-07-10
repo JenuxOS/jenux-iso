@@ -6,7 +6,7 @@ export preset=base
 fi
 export livebuild=$3
 if [ -z $livebuild ];then
-export livebuild
+export livebuild=nolive
 fi
 cd /
 while true;do
