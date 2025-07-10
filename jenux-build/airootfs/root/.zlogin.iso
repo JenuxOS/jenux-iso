@@ -99,6 +99,7 @@ sleep .01
 else
 speechctl enable
 speechctl start
+sleep .25
 fi
 source .zlogin
 else
