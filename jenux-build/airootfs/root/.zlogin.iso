@@ -94,6 +94,12 @@ systemctl start getty@tty$t
 done
 if [ -e ~/.zlogin.firstboot ];then
 mv ~/.zlogin.firstboot ~/.zlogin
+if cat /proc/cmdline|grep -iqw nospeech;then
+sleep .01
+else
+speechctl enable
+speechctl start
+fi
 source .zlogin
 else
 automenu
