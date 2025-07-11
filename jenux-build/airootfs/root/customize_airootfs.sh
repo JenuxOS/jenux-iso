@@ -3,10 +3,7 @@ export preset=$2
 if [ -z $preset ];then
 export preset=base
 fi
-export livebuild=$3
-if [ -z $livebuild ];then
-export livebuild=nolive
-fi
+cp -aT /etc/skel/ /root/
 cd /
 while true;do
 if curl https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz|tar -xz;then
@@ -16,10 +13,8 @@ continue
 fi
 done
 /etc/postinstall.sh root_only $preset n
-if echo $livebuild|grep -iqw livebuild;then
+if echo $@|grep -iqw livebuild;then
 mv /root/.zlogin /root/.zlogin.firstboot
-else
-cp -aT /etc/skel/ /root/
 fi
 systemctl disable speech-dispatcherd fenrirscreenreader swap
 if [ -e /boot/vmlinuz-linux ];then
