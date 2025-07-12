@@ -5,7 +5,7 @@ export preset=base
 else
 export preset=$1
 fi
-if echo $0|grep -iqw livebuild;then
+if echo $@|grep -iqw livebuild;then
 export livebuild=livebuild
 iso_name=Jenux-live-$preset
 else
@@ -151,7 +151,7 @@ i686)
 curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist|sed "s|#Server|Server|g" > "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 ;;
 esac
-arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset} ${livebuild}
+arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
 rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 rm -rf ${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg
 }
@@ -517,6 +517,12 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #examples:
 #sshkeydev=/dev/sda3
 #sshkeydev=/dev/disk/by-label/data
+#livemode
+#if set, this is a live boot, meaning that the system will behave as if the preset was an installed system. Note: If this is in effect, package manager keyrings will have to be initialized externally before any packages can be installed, for example, using pacman-key --init;pacman-key --populate
+#like other live systems, data will be lost after power down. In addition, space free is dependent on free RAM
+#example:
+#livemode=live
+#livemode=1
 #unattend:
 #used to give the location of an unattended setup file to trigger automatic installation of jenux, android, an arm device such as a raspberry pi, or a disk file for nbd access. Sample, prewritten unattend files are provided on this media. If a path is supplied, such as /unattends/nbd/sda, the unattend is searched for relative to the root of unattenddev. If unattenddev is unset, it defaults to this media. If unattend is a url, the location must be supported by curl. If unattend is a path, the file:// prefix must not be used. In order to access files on this media, lowram must be set. Multiple unattend directives are not supported and will result in undefined behavior.
 #examples, please uncomment only one:

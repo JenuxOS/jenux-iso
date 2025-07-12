@@ -20,6 +20,15 @@ cat /proc/cmdline|tr \  \\n|grep -w sshkeydev|sed "s|sshkeydev=||g"|tr -d \\n|he
 cat /proc/cmdline|tr \  \\n|grep -w torenable|sed "s|torenable=||g"|tr -d \\n|head -n 1|read -r -s torenable
 cat /proc/cmdline|tr \  \\n|grep -w soundcard|sed "s|soundcard=||g"|tr -d \\n|head -n 1|read -r -s soundcard
 cat /proc/cmdline|tr \  \\n|grep -w soundcardindex|sed "s|soundcardindex=||g"|tr -d \\n|head -n 1|read -r -s soundcardindex
+cat /proc/cmdline|tr \  \\n|grep -w livemode|sed "s|livemode=||g"|tr -d \\n|head -n 1|read -r -s livemode
+if [ -z $livemode ];then
+mv /root/.zlogin.iso /root/.zlogin
+else
+if [ -z $nospeech ];then
+speechctl enable
+speechctl start
+fi
+fi
 if [ -z $lang ];then
 sleep .01
 else

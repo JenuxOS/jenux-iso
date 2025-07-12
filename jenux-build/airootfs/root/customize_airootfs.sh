@@ -13,9 +13,6 @@ continue
 fi
 done
 /etc/postinstall.sh root_only $preset n
-if echo $@|grep -iqw livebuild;then
-mv /root/.zlogin /root/.zlogin.firstboot
-fi
 systemctl disable speech-dispatcherd fenrirscreenreader swap
 if [ -e /boot/vmlinuz-linux ];then
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
@@ -24,7 +21,6 @@ sed -i 's/#\(en_US\.UTF-8\)/\1/' /etc/locale.gen
 locale-gen
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 usermod -s /usr/bin/zsh root
-mv /root/.zlogin.iso /root/.zlogin
 rm -rf /etc/systemd/system/getty@tty1.service.d/firstboot.conf
 mv /lib/systemd/system/getty@.service.sys /lib/systemd/system/getty@.service
 chmod -R 700 /root
