@@ -518,7 +518,7 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #sshkeydev=/dev/sda3
 #sshkeydev=/dev/disk/by-label/data
 #livemode
-#if set, this is a live boot, meaning that the system will behave as if the preset was an installed system. Note: If this is in effect, package manager keyrings will have to be initialized externally before any packages can be installed, for example, using pacman-key --init;pacman-key --populate
+#if set, this is a live boot, meaning that the system will behave as if the preset was an installed system.
 #like other live systems, data will be lost after power down. In addition, space free is dependent on free RAM
 #example:
 #livemode=live

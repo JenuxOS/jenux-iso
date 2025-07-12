@@ -22,11 +22,14 @@ cat /proc/cmdline|tr \  \\n|grep -w soundcard|sed "s|soundcard=||g"|tr -d \\n|he
 cat /proc/cmdline|tr \  \\n|grep -w soundcardindex|sed "s|soundcardindex=||g"|tr -d \\n|head -n 1|read -r -s soundcardindex
 cat /proc/cmdline|tr \  \\n|grep -w livemode|sed "s|livemode=||g"|tr -d \\n|head -n 1|read -r -s livemode
 if [ -z $livemode ];then
+if [ -e /root/.zlogin.iso ];then
 mv /root/.zlogin.iso /root/.zlogin
+fi
 else
-if [ -z $nospeech ];then
-speechctl enable
-speechctl start
+if [ -e /root/.zlogin.firstboot ];then
+sleep .01
+else
+mv /root/.zshrc.local /root/.zlogin.firstboot
 fi
 fi
 if [ -z $lang ];then
