@@ -1,4 +1,23 @@
 #!/bin/zsh
+export c=$1
+if [ -z $c ];then
+sleep .01
+else
+cat > /etc/asound.conf <<EOF
+pcm.!default {
+        type plug
+        slave.pcm {
+                type hw
+                card $c
+        }
+}
+
+ctl.!default {
+        type hw
+        card $c
+}
+EOF
+fi
 if cat /proc/cmdline|grep -qw soundcard||cat /proc/cmdline|grep -qw soundcardindex;then
 exit 4
 fi
