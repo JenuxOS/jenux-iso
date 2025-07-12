@@ -5,7 +5,7 @@ export preset=base
 else
 export preset=$1
 fi
-if echo $@|grep -iqw livebuild;then
+if echo $@|grep -iqw live;then
 export livebuild=livebuild
 iso_name=Jenux-live-$preset
 else
@@ -518,7 +518,7 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #sshkeydev=/dev/sda3
 #sshkeydev=/dev/disk/by-label/data
 #livemode
-#if set, this is a live boot, meaning that the system will behave as if the preset was an installed system.
+#if set to any non empty value, this is a live boot, meaning that the system will behave as if the preset was an installed system.
 #like other live systems, data will be lost after power down. In addition, space free is dependent on free RAM
 #example:
 #livemode=live

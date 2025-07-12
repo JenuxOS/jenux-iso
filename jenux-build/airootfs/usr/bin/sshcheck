@@ -24,12 +24,15 @@ cat /proc/cmdline|tr \  \\n|grep -w livemode|sed "s|livemode=||g"|tr -d \\n|head
 if [ -z $livemode ];then
 if [ -e /root/.zlogin.iso ];then
 mv /root/.zlogin.iso /root/.zlogin
+cp /etc/skel/.zshrc.local /root
 fi
 else
 if [ -e /root/.zlogin.firstboot ];then
 sleep .01
 else
+mv /root/.zlogin.iso /root/.zlogin
 mv /root/.zshrc.local /root/.zlogin.firstboot
+cp /etc/skel/.zshrc.local /root
 fi
 fi
 if [ -z $lang ];then
