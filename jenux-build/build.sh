@@ -592,9 +592,6 @@ EOF
 for unattend in `find unattends -type f|sort|uniq`;do
 echo \#unattend=\""/"$unattend\" >> "${script_path}/${work_dir}/iso/rootpasswd.sample"
 done
-if echo $livebuild|grep -iqw livebuild;then
-echo livemode=livemode > "${script_path}/${work_dir}/iso/rootpasswd"
-fi
 base64 -d > pxeboot<<EOF
 IyEvYmluL3NoCmV4cG9ydCBpZj0kMQppZiBbIC16ICRpZiBdO3RoZW4KZWNobyBlbnRlciBpbnRl
 cmZhY2UgbmFtZQpyZWFkIGlmCmZpCmlmIGlwIGFkZHIgbHN8Z3JlcCAxOTIuMTY4LjEyMC4xfGdy

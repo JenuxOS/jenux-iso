@@ -99,6 +99,7 @@ cp /run/archiso/airootfs/root/.zshrc.local /root/.zlogin.firstboot
 cp /run/archiso/airootfs/etc/skel/.zshrc.local /root
 systemctl restart sshcheck
 sleep 2
+rm -rf /.fscrypt
 umount /proc/cmdline
 rm /root/c
 exit
