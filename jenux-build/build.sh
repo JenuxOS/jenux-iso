@@ -523,14 +523,6 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #example:
 #livemode=live
 #livemode=1
-#unattend:
-#used to give the location of an unattended setup file to trigger automatic installation of jenux, android, an arm device such as a raspberry pi, or a disk file for nbd access. Sample, prewritten unattend files are provided on this media. If a path is supplied, such as /unattends/nbd/sda, the unattend is searched for relative to the root of unattenddev. If unattenddev is unset, it defaults to this media. If unattend is a url, the location must be supported by curl. If unattend is a path, the file:// prefix must not be used. In order to access files on this media, lowram must be set. Multiple unattend directives are not supported and will result in undefined behavior.
-#examples, please uncomment only one:
-EOF
-for unattend in `find unattends -type f|sort|uniq`;do
-echo \#unattend=\""/"$unattend\" >> "${script_path}/${work_dir}/iso/rootpasswd.sample"
-done
-cat >> "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #unattenddev:
 #specifies the device to mount containing the unattend file. If not supplied, it defaults to this media.
 #examples:
@@ -593,7 +585,16 @@ cat >> "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #if set, skips loading of Intel microcode. Note: this will not effect the ability to boot on non-Intel platforms, since mismatching microcode will be ignored by the kernel.
 #example:
 #nointelmicrocode=1
+#unattend:
+#used to give the location of an unattended setup file to trigger automatic installation of jenux, android, an arm device such as a raspberry pi, or a disk file for nbd access. Sample, prewritten unattend files are provided on this media. If a path is supplied, such as /unattends/nbd/sda, the unattend is searched for relative to the root of unattenddev. If unattenddev is unset, it defaults to this media. If unattend is a url, the location must be supported by curl. If unattend is a path, the file:// prefix must not be used. In order to access files on this media, lowram must be set. Multiple unattend directives are not supported and will result in undefined behavior.
+#examples, please uncomment only one:
 EOF
+for unattend in `find unattends -type f|sort|uniq`;do
+echo \#unattend=\""/"$unattend\" >> "${script_path}/${work_dir}/iso/rootpasswd.sample"
+done
+if echo $livebuild|grep -iqw livebuild;then
+echo livemode=livemode > "${script_path}/${work_dir}/iso/rootpasswd"
+fi
 base64 -d > pxeboot<<EOF
 IyEvYmluL3NoCmV4cG9ydCBpZj0kMQppZiBbIC16ICRpZiBdO3RoZW4KZWNobyBlbnRlciBpbnRl
 cmZhY2UgbmFtZQpyZWFkIGlmCmZpCmlmIGlwIGFkZHIgbHN8Z3JlcCAxOTIuMTY4LjEyMC4xfGdy
