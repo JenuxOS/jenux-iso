@@ -21,8 +21,6 @@ sed -i 's/#\(en_US\.UTF-8\)/\1/' /etc/locale.gen
 locale-gen
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 usermod -s /usr/bin/zsh root
-rm -rf /etc/systemd/system/getty@tty1.service.d/firstboot.conf
-mv /lib/systemd/system/getty@.service.sys /lib/systemd/system/getty@.service
 chmod -R 700 /root
 sed -i "s/#Server/Server/g" /etc/pacman.d/mirrorlist
 sed -i 's/#\(Storage=\)auto/\1volatile/' /etc/systemd/journald.conf
