@@ -12,6 +12,9 @@ cat /proc/cmdline|tr \  \\n|grep -w fwdport|sed "s|fwdport=||g"|tr -d \\n|head -
 cat /proc/cmdline|tr \  \\n|grep -w extport|sed "s|extport=||g"|tr -d \\n|head -n 1|read -r -s extport
 cat /proc/cmdline|tr \  \\n|grep -w unattenddev|sed "s|unattenddev=||g"|tr -d \\n|head -n 1|read -r -s unattenddev
 cat /proc/cmdline|tr \  \\n|grep -w scriptdev|sed "s|scriptdev=||g"|tr -d \\n|head -n 1|read -r -s scriptdev
+cat /proc/cmdline|tr \  \\n|grep -w overlay|sed "s|overlay=||g"|tr -d \\n|head -n 1|read -r -s overlay
+cat /proc/cmdline|tr \  \\n|grep -w overlaydev|sed "s|overlaydev=||g"|tr -d \\n|head -n 1|read -r -s overlaydev
+cat /proc/cmdline|tr \  \\n|grep -w scriptdev|sed "s|scriptdev=||g"|tr -d \\n|head -n 1|read -r -s scriptdev
 cat /proc/cmdline|tr \  \\n|grep -w script|sed "s|script=||g"|tr -d \\n|head -n 1|read -r -s script
 cat /proc/cmdline|tr \  \\n|grep -w postscriptdev|sed "s|postscriptdev=||g"|tr -d \\n|head -n 1|read -r -s postscriptdev
 cat /proc/cmdline|tr \  \\n|grep -w postscript|sed "s|postscript=||g"|tr -d \\n|head -n 1|read -r -s postscript
@@ -145,6 +148,28 @@ $passwd
 EOF
 sed -i s/#PermitRootLogin\ prohibit-password/PermitRootLogin\ yes/g /etc/ssh/sshd_config
 systemctl restart sshd
+fi
+if [ -z $overlay ];then
+echo no rootfs overlay supplied!
+else
+if [ -z $overlaydev ];then
+export overlaydev=/dev/disk/by-label/$label
+fi
+mount $overlaydev /mnt
+if [ -e /mnt/$overlay ];then
+export overlay=file:///mnt/$script
+fi
+echo downloading and extracting overlay
+while true;do
+if curl $overlay|tar -C / -xz;then
+break
+else
+systemctl restart sshcheck
+fi
+done
+if mountpoint -q /mnt;then
+umount /mnt
+fi
 fi
 if [ -z $unattend ];then
 echo no unattend file supplied!

@@ -487,6 +487,16 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #if set to the index of a device, the value of this variable will be used to select the sound card for speech output during the live environment
 #example:
 #soundcardindex=0
+#overlay:
+#used to give the location of a gzip compressed tarball(.tar.gz) which will be extracted verbatim at / upon running sshcheck. This allows you to add content to the rootfs. Your optional scripts can then make further changes depending on and assuming that that content is present at the location that you specify in the tarball, as they are fetched and ran after successful extraction. Both the format and restrictions relating to this parameter match with the below unattend directive. 
+#examples:
+#overlay=/additional/stupid/wifidriver.tar.gz
+#overlay=https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz
+#overlaydev:
+#specifies the device to mount containing the overlay. If not supplied, it defaults to this media.
+#examples:
+#overlaydev=/dev/sda3
+#overlaydev=/dev/disk/by-label/data
 #script:
 #used to give the location of a script which will be executed after the package manager initialization, but before execution of the main menu. Both the format and restrictions relating to this parameter match with the below unattend directive. 
 #examples:
