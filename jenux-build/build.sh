@@ -602,54 +602,6 @@ EOF
 for unattend in `find unattends -type f|sort|uniq`;do
 echo \#unattend=\""/"$unattend\" >> "${script_path}/${work_dir}/iso/rootpasswd.sample"
 done
-base64 -d > pxeboot<<EOF
-IyEvYmluL3NoCmV4cG9ydCBpZj0kMQppZiBbIC16ICRpZiBdO3RoZW4KZWNobyBlbnRlciBpbnRl
-cmZhY2UgbmFtZQpyZWFkIGlmCmZpCmlmIGlwIGFkZHIgbHN8Z3JlcCAxOTIuMTY4LjEyMC4xfGdy
-ZXAgLXF3ICRpZjt0aGVuCnNsZWVwIC4wMQplbHNlCmlwIGxpbmsgc2V0ICRpZiBkb3duCm5tY2xp
-IGQgc2V0ICRpZiBtYW5hZ2VkIG5vCmlwIGxpbmsgc2V0ICRpZiB1cAppcCBhZGRyIGFkZCAxOTIu
-MTY4LjEyMC4xLzI0IGRldiAkaWYKZmkKZXhwb3J0IG93bmVyPWBscyAtbGF8aGVhZCAtbiAyfHRh
-aWwgLW4gMXxhd2sgJ3twcmludCAkM30nYApjYXQgPiAvdG1wL3B4ZS5jb25mPDxFT0YKbm8tZGFl
-bW9uCnVzZXI9JG93bmVyCnBvcnQ9MAppbnRlcmZhY2U9JGlmCmJpbmQtaW50ZXJmYWNlcwpkaGNw
-LXJhbmdlPTE5Mi4xNjguMTIwLjIsMTkyLjE2OC4xMjAuMjU0LDEyaApkaGNwLW1hdGNoPXNldDpi
-aW9zLG9wdGlvbjpjbGllbnQtYXJjaCwwCmRoY3AtbWF0Y2g9c2V0OmVmaS14ODYsb3B0aW9uOmNs
-aWVudC1hcmNoLDYKZGhjcC1tYXRjaD1zZXQ6ZWZpLXg4Nl82NCxvcHRpb246Y2xpZW50LWFyY2gs
-NwpkaGNwLW1hdGNoPXNldDplZmkteDg2XzY0LG9wdGlvbjpjbGllbnQtYXJjaCw5CmRoY3AtbWF0
-Y2g9c2V0OmVmaS1hcm02NCxvcHRpb246Y2xpZW50LWFyY2gsMTEKZGhjcC1ib290PXRhZzpiaW9z
-LCIuL2Jvb3QvZ3J1Yi9pMzg2LXBjL2NvcmUuMCIKZGhjcC1ib290PXRhZzplZmkteDg2LCIuL0VG
-SS9FRkkvYm9vdC9ib290aWEzMi5lZmkiCmRoY3AtYm9vdD10YWc6ZWZpLXg4Nl82NCwiLi9FRkkv
-RUZJL2Jvb3QvYm9vdHg2NC5lZmkiCmRoY3AtYm9vdD10YWc6ZWZpLWFybTY0LCIuL0VGSS9FRkkv
-Ym9vdC9ib290YWE2NC5lZmkiCmVuYWJsZS10ZnRwCnRmdHAtcm9vdD0kUFdECkVPRgpkYXJraHR0
-cGQgLiAtLWFkZHIgMTkyLjE2OC4xMjAuMSAtLW5vLWxpc3RpbmcgLS11aWQgJG93bmVyJgpleHBv
-cnQgaHR0cHBpZD1gZWNobyAkIWAKZG5zbWFzcSAtQyAvdG1wL3B4ZS5jb25mJgpleHBvcnQgZGhj
-cHBpZD1gcGdyZXAgLWFmIGRuc21hc3F8Z3JlcCAtdyAnZG5zbWFzcSAtQyAvdG1wL3B4ZS5jb25m
-J3xzZWQgL2dyZXAvZHxjdXQgLWYgMSAtZCBcICBgCndoaWxlIHRydWU7ZG8KdHJhcCAiaXAgYWRk
-ciBkZWwgMTkyLjE2OC4xMjAuMS8yNCBkZXYgJGlmO2lwIGxpbmsgc2V0ICRpZiBkb3duO3JtIC90
-bXAvcHhlLmNvbmY7ZXhpdCIgaW50CnNsZWVwIC4yNQpkb25lCg==
-EOF
-chmod 755 pxeboot
-base64 -d > support.png<<EOF
-iVBORw0KGgoAAAANSUhEUgAAAKsAAACrAQMAAAAjJv5aAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS
-TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAK5SURBVEiJ5Zc9susgDIXloaCLN8AM26Bj
-S/EG7HgD8Zbo2AYzbAB3FIz1Ds79aV4j2ptxEX/JgCWOjmTi/37ob+NCtJKZKm2xTdGegSY5Prk9
-PZ/BTKEt1UwRRI6DWWp6+Pz2NAXeIy1DeMPd/YAb52MUL1W9vSFNT595DDOCS0TYoU0BO/wEL8DI
-9xLN7/V7DAKMT6F8hoZVX04dv4IQ4OLaHNUZE2mzkkLQsxyfFZLJl+bLq+KwbpvkuOi2MM3B7tyQ
-8q2qU45PVnvFo3UMEXHF+YsxhzRHmiPCNeQsB3vI8RmRbHpSFyDCPeoIvsis3mwVZw45W2Rrl2Pm
-zGxfZF8Qsuvh8gAOadVtpUSOX54e2kwDuNpLw2mwfC4urf5TUkIc2wr14S6iLhXXvMvx5WAw5kG4
-aHU0Vx7AJyfycBdbyB7B4DvLMerg7dND9zN/uXyENstx0UQ4qLsuH90wzAC+vC06rQSXQp7Uzl8a
-lGEyT1yozoCUwyrsLsfI0Mmw/7YF+9ZYWw3gqzeQfN7uO9XbRAcwqUKKQy63Dc/1K1UijHwvFcWd
-L98If3EfDcowQ3QVVUUPiNHBMtUhx5dOT7L3Y/LbmRnWNYAd/Dtttcu5OFRnW0YwHFcd0SDEi+4G
-K8doaEWjk0CGfR8OZpJj7iNP72kLiinixx/jEODLqR3ygQARou6DwynHBRpkOC6MkwjW+x2lCDM6
-SfeYtLHt4fYvYnz5tFSoJuNJu3xiPgYw8RHV5eFY5gm3oM/EIcO9z0eYBOoSO5henXLcZx/XqwFT
-IapqYrvLcbeEql6EESy/epQfh5BhzIMbYzTG2m113be2AYzxNhLaGqrhjRkKmwzhpcJj0FcxD6KZ
-fIpbjLfa5YOXhqPi2O05gO/3hp3THMyq8a8RfBs2okzIUw8xmkWOZa9YfwH/AzZWQP+EEZJUAAAA
-AElFTkSuQmCC
-EOF
-base64 -d > support.vcf<<EOF
-QkVHSU46VkNBUkQKVkVSU0lPTjoyLjEKTjpEYW5pZWwgTmFzaDs7OwpGTjpOYXNoO0RhbmllbApP
-Ukc6ClRJVExFOlRlY2huaWNhbCBDb25zdWx0YW50CkVNQUlMO0hPTUU6ZG5sLm5hc2hAZ21haWwu
-Y29tClRFTDtDRUxMOisxICg5MTQpIDk3OS0xMzk1ClVSTDpodHRwczovL25hc2hjZW50cmFsLmR1
-Y2tkbnMub3JnCmVuZDp2Y2FyZAo=
-EOF
 cd ${script_path}
 if [ -e ${out_dir} ];then
 sleep .01
@@ -658,7 +610,10 @@ mkdir -p ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
-git log > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
+if [ -e "${script_path}/iso" ];then
+cp -rf "${script_path}/iso"/* .
+fi
+cp "${iso_name}-${iso_version}-tripple.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
 export contsize=$(($rootsize+600))"M"
 truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"

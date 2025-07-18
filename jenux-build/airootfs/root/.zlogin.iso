@@ -6,8 +6,6 @@ nmcli c modify gsm connection.autoconnect yes
 fi
 clear
 talk-to-me
-setopt singlelinezle
-~/.automated_script.sh
 if cat /proc/cmdline|grep -q nokeyrings;then
 sleep .01
 else

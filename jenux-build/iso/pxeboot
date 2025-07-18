@@ -1,0 +1,42 @@
+#!/bin/sh
+export if=$1
+if [ -z $if ];then
+echo enter interface name
+read if
+fi
+if ip addr ls|grep 192.168.120.1|grep -qw $if;then
+sleep .01
+else
+ip link set $if down
+nmcli d set $if managed no
+ip link set $if up
+ip addr add 192.168.120.1/24 dev $if
+fi
+export owner=`ls -la|head -n 2|tail -n 1|awk '{print $3}'`
+cat > /tmp/pxe.conf<<EOF
+no-daemon
+user=$owner
+port=0
+interface=$if
+bind-interfaces
+dhcp-range=192.168.120.2,192.168.120.254,12h
+dhcp-match=set:bios,option:client-arch,0
+dhcp-match=set:efi-x86,option:client-arch,6
+dhcp-match=set:efi-x86_64,option:client-arch,7
+dhcp-match=set:efi-x86_64,option:client-arch,9
+dhcp-match=set:efi-arm64,option:client-arch,11
+dhcp-boot=tag:bios,"./boot/grub/i386-pc/core.0"
+dhcp-boot=tag:efi-x86,"./EFI/EFI/boot/bootia32.efi"
+dhcp-boot=tag:efi-x86_64,"./EFI/EFI/boot/bootx64.efi"
+dhcp-boot=tag:efi-arm64,"./EFI/EFI/boot/bootaa64.efi"
+enable-tftp
+tftp-root=$PWD
+EOF
+darkhttpd . --addr 192.168.120.1 --no-listing --uid $owner&
+export httppid=`echo $!`
+dnsmasq -C /tmp/pxe.conf&
+export dhcppid=`pgrep -af dnsmasq|grep -w 'dnsmasq -C /tmp/pxe.conf'|sed /grep/d|cut -f 1 -d \  `
+while true;do
+trap "ip addr del 192.168.120.1/24 dev $if;ip link set $if down;rm /tmp/pxe.conf;exit" int
+sleep .25
+done
