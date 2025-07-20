@@ -71,7 +71,7 @@ createmenu $tempdir/dynmenu
 rm $tempdir/menutitle > /dev/null 2>/dev/null
 }
 echo "\"Welcome to Jenux!\"">/tmp/automenu
-echo -n "\"a\" \"Install the Android OS on this device\" \"c\" \"Run the clonezilla backup tool to backup or restore this device's storage\" \"e\" \"enable remote access to this environment, use with caution! \" \"j\" \"install Jenux on this device\" \"l\" \"enter live mode to test the software in this environment\" \"n\" \"Access this device's storage over the network, using the NBD protocol\" \"p\" \"partition a hard disk\" \"r\" \"Flash an image to a Raspberry Pi or Other ARM Device\" \"s\" \"drop to system shell\" \"w\" \"Reset a Windows Password on this device\"">>/tmp/automenu
+echo -n "\"a\" \"Install the Android OS on this device\" \"c\" \"Run the clonezilla backup tool to backup or restore this device's storage\" \"e\" \"enable remote access to this environment, use with caution! \" \"i\" \"install the software in this environment to this system\" \"j\" \"install Jenux on this device\" \"l\" \"enter live mode to test the software in this environment\" \"n\" \"Access this device's storage over the network, using the NBD protocol\" \"p\" \"partition a hard disk\" \"r\" \"Flash an image to a Raspberry Pi or Other ARM Device\" \"s\" \"drop to system shell\" \"w\" \"Reset a Windows Password on this device\"">>/tmp/automenu
 createmenu /tmp/automenu
 case "$choice" in
 a)
@@ -85,6 +85,9 @@ sshenable
 ;;
 j)
 autobuild
+;;
+i)
+offline-install
 ;;
 l)
 echo preparing to enter live mode

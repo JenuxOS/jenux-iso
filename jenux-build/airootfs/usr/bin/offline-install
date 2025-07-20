@@ -1,0 +1,520 @@
+#!/bin/zsh
+function createmenu
+{
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo whiptail --menu `cat $1|head -n 1` `echo -n $menudesc` `cat $1|tail -n 1`>/tmp/menu
+cat $1|tail -n 1|sed s/\"\ /\\n/g>/tmp/itemlist
+chmod 755 /tmp/menu
+/tmp/menu 2>/tmp/choice
+export choice=`cat /tmp/choice|cut -f 2 -d \;`
+export linecounter=1
+export numitems=`cat /tmp/itemlist|wc -l`
+for line in `cat /tmp/itemlist`;do if echo $line|grep -q \;;then sleep .01;else echo $line>>/tmp/items;fi;export linecounter=$(($linecounter+1));if echo $linecounter|grep -qw $(($numitems+1));then break;else continue;fi;done
+export itemname=`cat /tmp/items|head -n $choice|tail -n 1|sed s/\?/\ /g`
+rm /tmp/choice /tmp/menu /tmp/itemlist /tmp/items
+clear
+}
+function createdynamicmenu
+{
+$@|sed s/\ /\?/g>/tmp/itemlist
+export title="\"`cat /tmp/itemlist|wc -l` items available\""
+export counter="1"
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo $title > /tmp/dynmenu
+for item in `cat /tmp/itemlist`;do echo -n "\"`echo $item|cut -c 1`;`echo -n $counter`\"" "\"$item\" " >>/tmp/dynmenu;export counter=$(($counter+1));done
+createmenu /tmp/dynmenu
+rm /tmp/dynmenu
+}
+if [ -z $SUDO_USER ];then
+cp /run/archiso/airootfs/root/.zlogin.iso /root/.zlogin
+cp /run/archiso/airootfs/root/.zshrc.local /root/.zlogin.firstboot
+cp /run/archiso/airootfs/etc/skel/.zshrc.local /root
+else
+rm -rf /home/*/.local/share/applications/install.desktop /home/*/Desktop/install.desktop
+fi
+if [ -e ~/unattend ];then
+export unattend=1
+source ~/unattend
+else
+if grep -q \#jenux ~/unattend;then
+sed -i "s|\#jenux|\#jenuxoffline|g" ~/unattend
+true
+else
+echo \#jenuxoffline > ~/unattend
+fi
+fi
+echo "Welcome to the Jenux installer! "
+clear
+if echo $unattend|grep -qw 1;then
+true
+else
+beep -f 750 -l 500
+echo "on the next screen, you will be asked to select a hard disk to install to. Please note: If you have other opperating systems on your computer that you would like to multi boot with, please resize their partitions manually and create enough free space for linux. As a minimum, a command line installation will require at least 2 GB, a graphical desktop at least 8, and an installation of everything will require at least 60 GB excluding data. WARNING!!!!! IMPROPER PARTITIONING WILL LEAD TO LOSS OF DATA!!!!! Whenever making changes to partition tables, please make sure you back up all data on the disk in case of issues. In the Jenux ISO Main Menu, an option to run the Clonezilla backup program is provided for automated backup and restores of hard disks. Please press enter to select your target disk."
+read confirm
+fi
+while true;do
+if [ -z $disk ];then
+sh -c 'echo -n "print devices"|parted|grep /dev|grep \(>/tmp/disk;cat /tmp/disk|tr \  \:>/tmp/disks;rm /tmp/disk'
+echo root_only:\(`df --output=size -h /mnt|tail -n 1|cut -f 2 -d \  `\) >> /tmp/disks
+createdynamicmenu cat /tmp/disks
+export disk=`echo $itemname|cut -f 1 -d \:|cut -f 2 -d \"`
+unset choice
+clear
+else
+break
+fi
+done
+while true;do
+if [ $disk = "root_only" ];then
+export partmethod=s
+export fmtfs=n
+export fmtboot=n
+export encrypt=n
+ln -s /dev/null /dev/disk/by-partlabel/EFI
+ln -s /dev/null /dev/disk/by-partlabel/linux
+break
+fi
+if [ -e $disk ];then
+break
+else
+sh -c 'echo -n "print devices"|parted|grep /dev|grep \(>/tmp/disk;cat /tmp/disk|tr \  \:>/tmp/disks;rm /tmp/disk'
+echo root_only:\(`df --output=size -h /mnt|tail -n 1|cut -f 2 -d \  `\) >> /tmp/disks
+createdynamicmenu cat /tmp/disks
+export disk=`echo $itemname|cut -f 1 -d \:|cut -f 2 -d \"`
+unset choice
+fi
+done
+while true;do
+if [ -z $partmethod ];then
+echo "\"How would you like to partition your disk?\"">/tmp/partmenu
+echo -n "\"e\" \"erase disk and install jenux, will use all space on disk\" \"m\" \"manually, prints instructions and drops to gdisk partitioning console\" \"s\" \"skip partitioning, partition has already been created\"" >> /tmp/partmenu
+createmenu /tmp/partmenu
+case "$choice" in
+e)
+export partmethod=e
+;;
+m)
+export partmethod=m
+;;
+s)
+export partmethod=s
+;;
+esac
+else
+break
+fi
+done
+case "$partmethod" in
+e)
+export fmtboot=y
+export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
+echo sgdisk -g $disklayout $disk >> /tmp/part
+chmod 755 /tmp/part
+export disksize=`lsblk -nro size $disk|head -n 1|tr -d \\\n`
+echo repartitioning $disksize disk $disk", destroying all data, in 5 seconds! Press control c to abort and drop to system shell"
+read -t 5 var
+/tmp/part
+rm /tmp/part
+sleep 1.5
+partprobe $disk
+export maxparts=3
+export partwipecounter=1
+while [ $partwipecounter -le $maxparts ];do
+if [ -e $disk"p"$partwipecounter ];then
+wipefs -a $disk"p"$partwipecounter
+else
+wipefs -a $disk$partwipecounter
+fi
+export partwipecounter=$(($partwipecounter+1))
+done
+;;
+m)
+echo "partitioning instructions:"
+echo "To create new partitions, type n at the command prompt. To change a partition's name after creation, type c."
+echo "create at least 3 partitions. The following layout is suggested:"
+echo "partition 1: from sector 0 to 2M, type code ef02, for BIOS Boot, name BIOS"
+echo "partition 2, from 2M to 502M, for uefi boot, type code ef00, name EFI"
+echo "partition 3, from 502M to however large you want your linux installation to be, default type code 8300, name linux."
+echo "feel free to make changes to this suggested layout, but the type codes and partition names must be as stated in the instructions for a successful installation."
+echo "if you made a mestake and want to start from scratch, type o, y, enter to destroy the in memory copy of the partition table. Don't forget to type w enter y enter to write your new partition table to the disk."
+gdisk $disk 
+;;
+s)
+echo partitioning of $disk has been skipped due to user override
+;;
+esac
+echo waiting for EFI partition
+while true;do
+if [ $disk = root_only ];then
+break
+fi
+if [ -e /dev/disk/by-partlabel/EFI ];then
+break
+else
+sleep 1.5
+partprobe $disk
+continue
+fi
+done
+echo waiting for linux partition
+while true;do
+if [ $disk = root_only ];then
+break
+fi
+if [ -e /dev/disk/by-partlabel/linux ];then
+break
+else
+sleep 1.5
+partprobe $disk
+continue
+fi
+done
+if [ $disk = "root_only" ];then
+sleep .01
+else
+sleep 1.5
+partprobe
+if [ -z $disklayout ];then
+export disklen=`sgdisk -p $disk|wc -l`
+export partliststart=`sgdisk -p $disk|grep -nw Number|cut -f 1 -d :`
+export firstpart=$(($disklen-$partliststart))
+export IFS=$(echo -en \\n\\b)
+export disklayout=`echo -n \  -o\  `
+export partcounter=0
+for part in `sgdisk -p $disk|tail -n $firstpart|tr -s \  `;do
+export num=`echo $part|cut -f 2 -d \  `
+export startsect=`echo $part|cut -f 3 -d \  `
+export endsect=`echo $part|cut -f 4 -d \  `
+export type=`echo $part|cut -f 7 -d \  `
+export name=`echo $part|cut -f 8 -d \  `
+if [ $(($partcounter+1+$partliststart)) = $disklen ];then
+export disklayout=$disklayout`echo -n - -N $num -t $num:$type -c $num:$name \  `
+else
+export disklayout=$disklayout`echo -n - -n $num:$startsect:$endsect:$type -t $num:$type -c $num:$name \  `
+fi
+export partcounter=$(($partcounter+1))
+done
+fi
+fi
+if grep -q disk= ~/unattend;then
+true
+else
+echo export disk=\'$disk\' >> ~/unattend
+fi
+if grep -q partmethod= ~/unattend;then
+true
+else
+echo export partmethod=\'$partmethod\' >> ~/unattend
+fi
+if grep -q disklayout= ~/unattend;then
+true
+else
+echo export disklayout=\'$disklayout\' >> ~/unattend
+fi
+if [ $disk = "root_only" ];then
+sleep .01
+else
+if [ -z $boot ];then
+if [ -e /dev/disk/by-partlabel/EFI ];then
+export boot="/dev/disk/by-partlabel/EFI"
+else
+clear
+echo "Your EFI System Partition which will hold the kernel and bootloader cannot automatically be detected. Please select it from the following list."
+read var
+export entries=`lsblk -nro name,size $disk|wc -l`
+lsblk -nro name,size $disk|head -n $entries|tail -n $(($entries-1)) > /tmp/vols
+createdynamicmenu cat /tmp/vols
+export bootdev=`echo $itemname|cut -f 2 -d \"|cut -f 1 -d \  `
+export boot=/dev/$bootdev
+sgdisk $disk -c=$choice:EFI
+fi
+fi
+if [ -z $root ];then
+if [ -e /dev/disk/by-partlabel/linux ];then
+export root="/dev/disk/by-partlabel/linux"
+else
+clear
+echo "Your root device cannot automatically be detected. Please select it from the following list."
+read var
+export entries=`lsblk -nro name,size $disk|wc -l`
+lsblk -nro name,size $disk|head -n $entries|tail -n $(($entries-1)) > /tmp/vols
+createdynamicmenu cat /tmp/vols
+export rootdev=`echo $itemname|cut -f 2 -d \"|cut -f 1 -d \  `
+export root=/dev/$rootdev
+sgdisk $disk -c=$choice:linux
+fi
+fi
+fi
+clear
+if grep -qw boot= ~/unattend;then
+true
+else
+echo export boot=\'$boot\' >> ~/unattend
+fi
+if grep -qw root= ~/unattend;then
+true
+else
+echo export root=\'$root\' >> ~/unattend
+fi
+while true;do
+if [ -z $fmtboot ];then
+echo would you like to format your EFI System partition\?
+read fmtboot
+case "$fmtboot" in
+y)
+break
+;;
+n)
+break
+;;
+*)
+continue
+;;
+esac
+else
+break
+fi
+done
+case "$fmtboot" in
+y)
+while true;do
+if mkfs.vfat -n EFI $boot;then
+break
+else
+continue
+fi
+done
+;;
+n)
+if [ -z $boot ];then
+sleep .01
+else
+echo backing up ESP
+mount $boot /boot
+cd /boot
+tar -czf ~/esp.tar.gz .
+cd $OLDPWD
+rm -rf /boot/*
+umount /boot
+fi
+;;
+esac
+if grep -q fmtboot ~/unattend;then
+true
+else
+echo export fmtboot=\'$fmtboot\' >> ~/unattend
+fi
+if [ -z $encrypt ];then
+echo "Would you like to encrypt your system with LUKS? This will protect your data, even in cases where your device is stolen, as well as providing assurence that your system cannot easily be compromised by a third party. For encryption, enter y, otherwise, enter n."
+read encrypt
+fi
+if echo $encrypt|grep -q y;then
+if [ -z $cryptkey ];then
+echo please enter a password to decrypt your system. This password will not be echoed as you type it. If using special characters such as backslash, you will need to escape those characters using a backslash before the character.
+read -r -s cryptkey
+fi
+else
+true
+fi
+if echo $encrypt|grep -q y;then
+echo formatting LUKS cryptographic layer
+echo -n $cryptkey|cryptsetup -q luksFormat $root
+echo -n $cryptkey|cryptsetup luksConvertKey --pbkdf pbkdf2 $root
+echo "opening encrypted volume..."
+echo -n $cryptkey|cryptsetup luksOpen $root root
+echo formatting filesystem
+while true;do
+if mkfs.ext4 -O encrypt -q -L root /dev/mapper/root;then
+break
+else
+continue
+fi
+done
+mount /dev/mapper/root /mnt
+else
+while true;do
+if blkid $root|grep -qw ext4;then
+if [ -z $fmtfs ];then
+echo ext4 partition detected. Format anyway\?
+read fmtfs
+fi
+else
+echo root partition does not contain an ext4 filesystem, formatting
+export fmtfs="y"
+fi
+case "$fmtfs" in
+y)
+echo formatting filesystem
+while true;do
+if echo y|mkfs.ext4 -O encrypt -q -L root $root;then
+break
+else
+continue
+fi
+done
+break
+;;
+n)
+break
+;;
+*)
+continue
+;;
+esac
+done
+while true;do
+if mount $root /mnt;then
+break
+else
+if [ $fmtfs = "y" ];then
+echo y|mkfs.ext4 -O encrypt -q -L root $root
+continue
+else
+echo error: cannot mount $root on /mnt, rerun installer
+exit 69
+fi
+fi
+done
+fi
+if grep -q fmtfs= ~/unattend;then
+true
+else
+echo export fmtfs=\'$fmtfs\' >> ~/unattend
+fi
+if grep -q encrypt= ~/unattend;then
+true
+else
+echo export encrypt=\'$encrypt\' >> ~/unattend
+fi
+if grep -q cryptkey= ~/unattend;then
+true
+else
+echo export cryptkey=\'$cryptkey\' >> ~/unattend
+fi
+mkdir -p /mnt/boot/EFI
+mount $boot /mnt/boot/EFI
+if [ -f ~/esp.tar.gz ];then
+mv ~/esp.tar.gz /mnt/boot.old.tar.gz
+echo restoring old ESP contents to /boot.old
+mkdir -p /mnt/boot.old
+cd /mnt/boot.old
+tar -xf /mnt/boot.old.tar.gz
+cd $OLDPWD
+fi
+echo "generating file system table"
+genfstab -p -U /mnt > /tmp/fstab
+clear
+export presetname=`cat /usr/share/jenux/preset`
+export kerntype=`cat /usr/share/jenux/kerntype`
+sed -i /presetname=/d ~/unattend
+echo export presetname=\'$presetname\' >> ~/unattend
+sed -i /kerntype=/d ~/unattend
+echo export kerntype=\'$kerntype\' >> ~/unattend
+/usr/share/jenux/offline-options
+cp -rf /mnt/usr/share/shim-signed/EFI /mnt/boot/EFI
+mv /tmp/fstab /mnt/etc
+if cat /proc/cmdline|grep -qw nospeech;then
+sleep .01
+else
+arch-chroot /mnt speechctl enable
+fi
+if echo $encrypt|grep -qw y;then
+echo setting up automatic unlock after load of kernel and ramdisk
+dd if=/dev/random of=/mnt/crypto_keyfile.bin bs=1M count=8
+chmod 600 /mnt/crypto_keyfile.bin 
+echo -n $cryptkey|cryptsetup luksAddKey $root /mnt/crypto_keyfile.bin
+echo -n $cryptkey|cryptsetup luksConvertKey --pbkdf pbkdf2 $root
+cp /etc/mkinitcpio.conf.encrypted /mnt/etc/mkinitcpio.conf
+mv /mnt/etc/default/grub.encrypted /mnt/etc/default/grub
+fi
+arch-chroot /mnt /bin/mkinitcpio -P
+arch-chroot /mnt /bin/sh -c "bootcrypt"
+arch-chroot /mnt /bin/sh -c "grub-mkconfig -o /boot/grub/grub.cfg"
+arch-chroot /mnt /bin/sh -c 'for t in "1" "2" "3" "4" "5" "6";do systemctl enable getty@tty$t;done'
+echo ensuring that grub will load on next boot
+for f in `efibootmgr|grep Boot|grep \*|cut -f 1 -d \  |sed "s|Boot||g;s|\*||g"`;do
+efibootmgr -b $f -B
+done
+export efipartnum=`readlink /dev/disk/by-partlabel/EFI|sed "s|..\/..\/|\/dev\/|g;s|$disk||g;s|p||g"`
+efibootmgr -T
+efibootmgr --create --disk $disk --part $efipartnum --loader "efi\boot\bootx64.efi" --label "Windows Boot Manager"
+while true;do
+if [ -z $completeaction ];then
+echo "\"installation complete! Please select an option.\"">/tmp/actmenu
+echo -n "\"p\" \"power off system\" \"r\" \"reboot system\" \"s\" \"Drop To System Shell\"">>/tmp/actmenu
+createmenu /tmp/actmenu
+case "$choice" in
+p)
+export completeaction="poweroff"
+;;
+r)
+export completeaction="reboot"
+;;
+s)
+export completeaction="shell"
+;;
+esac
+break
+else
+break
+fi
+done
+if grep -q completeaction= ~/unattend;then
+true
+else
+echo export completeaction=\'$completeaction\' >> ~/unattend
+fi
+cd
+if [ -e /mnt/unattend ];then
+echo using unattend on local disk
+else
+echo copying unattend settings to installed system
+cp ~/unattend /mnt
+chown root:root /mnt/unattend
+chmod 600 /mnt/unattend
+fi
+if [ -e /root/.ssh/authorized_keys ];then
+if [ -d /mnt/root/.ssh ];then
+sleep .01
+else
+mkdir -p /mnt/root/.ssh
+fi
+echo copying ssh key used in live environment to system...
+cp /root/.ssh/authorized_keys /mnt/root/.ssh/authorized_keys
+chown -R root:root /mnt/root/.ssh
+chmod -R 700 /mnt/root/.ssh
+echo disabling password authentication on system...
+sed -i "s|#PasswordAuthentication yes|PasswordAuthentication no|g" /mnt/etc/ssh/sshd_config
+fi
+if [ -e /root/postinstall ];then
+echo copying postinstall script to system root
+cp /root/postinstall /mnt
+chmod 755 /mnt/postinstall
+while true;do
+echo attempting to run postinstall script in system root
+if chroot /mnt /postinstall;then
+echo script successful, deleting
+rm /mnt/postinstall
+break
+else
+continue
+fi
+done
+fi
+case "$completeaction" in
+poweroff)
+echo "Installation complete! powering off"
+sync
+poweroff -f
+;;
+reboot)
+echo "Installation complete! rebooting"
+sync
+reboot -f
+;;
+shell)
+echo installation complete! $root is mounted on /mnt, $boot is mounted on /mnt/boot/EFI, Launching shell
+cd
+zsh
+;;
+esac

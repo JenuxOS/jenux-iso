@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Install This System
+Comment=Install this system, including current state to either a local storage device or create a rootfs tree in /mnt
+Exec=sudo offline-install
+Type=Application
+Terminal=true
+Categories=System

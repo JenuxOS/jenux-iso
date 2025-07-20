@@ -1,4 +1,5 @@
 #!/bin/zsh
+cat /proc/cmdline|tr \  \\n|grep -w BOOT_IMAGE|sed "s|BOOT_IMAGE=||g"|tr -d \\n|head -n 1|read -r -s bootimage
 cat /proc/cmdline|tr \  \\n|grep -w archisolabel|sed "s|archisolabel=||g"|tr -d \\n|head -n 1|read -r -s label
 cat /proc/cmdline|tr \  \\n|grep -w passwd|sed "s|passwd=||g"|tr -d \\n|head -n 1|read -r -s passwd
 cat /proc/cmdline|tr \  \\n|grep -w port|sed "s|port=||g"|tr -d \\n|head -n 1|read -r -s port
@@ -24,6 +25,24 @@ cat /proc/cmdline|tr \  \\n|grep -w torenable|sed "s|torenable=||g"|tr -d \\n|he
 cat /proc/cmdline|tr \  \\n|grep -w soundcard|sed "s|soundcard=||g"|tr -d \\n|head -n 1|read -r -s soundcard
 cat /proc/cmdline|tr \  \\n|grep -w soundcardindex|sed "s|soundcardindex=||g"|tr -d \\n|head -n 1|read -r -s soundcardindex
 cat /proc/cmdline|tr \  \\n|grep -w livemode|sed "s|livemode=||g"|tr -d \\n|head -n 1|read -r -s livemode
+if [ -e /usr/share/jenux ];then
+sleep .01
+else
+mkdir -p /usr/share/jenux
+fi
+export kernelfile=`basename $bootimage`
+if echo $kernelfile|grep -qw vmlinuz-linux;then
+export kerntype=linux
+elif echo $kernelfile|grep -qw vmlinuz-linux-zen;then
+export kerntype=linux-zen
+elif echo $kernelfile|grep -qw vmlinuz-linux-hardened;then
+export kerntype=linux-hardened
+elif echo $kernelfile|grep -qw vmlinuz-linux-linux-lts;then
+export kerntype=linux-lts
+else
+export kerntype=linux
+fi
+echo $kerntype >> /usr/share/jenux/kerntype
 if [ -z $livemode ];then
 if [ -e /root/.zlogin.iso ];then
 mv /root/.zlogin.iso /root/.zlogin

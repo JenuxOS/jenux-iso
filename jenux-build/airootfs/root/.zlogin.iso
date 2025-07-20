@@ -57,6 +57,10 @@ jenux)
 echo -n > ~/.unattend.$mytty
 autobuild
 ;;
+jenuxoffline)
+echo -n > ~/.unattend.$mytty
+offline-install
+;;
 nbd)
 echo -n > ~/.unattend.$mytty
 export IFS=$(echo -en \\n\\b)
