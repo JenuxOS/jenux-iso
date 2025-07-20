@@ -229,6 +229,56 @@ cd ${script_path}
 # Build ISO
 make_iso() {
 cd ${script_path}/${work_dir}/iso
+mkdir -p unattends/jenuxoffline
+for crypttype in "encrypted" "unencrypted";do
+for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
+export disk=$disk
+export partmethod=e
+export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
+export boot="/dev/disk/by-partlabel/EFI"
+export root="/dev/disk/by-partlabel/linux"
+if echo $crypttype|grep -qw encrypted;then
+export encrypt=y
+else
+export encrypt=n
+fi
+export cryptkey=
+export fmtboot=y
+export fmtfs=y
+export presetname=$preset
+export kerntype=linux
+export completeaction=poweroff
+export accessibility="1"
+export host="myhostname"
+export name="My_Name"
+export user=myname
+export pass=mysupersecretandsecurepassword12345
+export encrypthome=1
+echo \#jenuxoffline > unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+if echo $disk|grep -qw root_only;then
+echo export disk=\'$disk\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+else
+echo export disk=\'/dev/$disk\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+fi
+echo export partmethod=\'$partmethod\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export disklayout=\'$disklayout\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export boot=\'$boot\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export root=\'$root\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export fmtboot=\'$fmtboot\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export fmtfs=\'$fmtfs\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export encrypt=\'$encrypt\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export cryptkey=\'$cryptkey\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export presetname=\'$presetname\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export kerntype=\'$kerntype\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export completeaction=\'$completeaction\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export accessibility=\'$accessibility\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export host=\'$host\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export name=\'$name\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export user=\'$user\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export pass=\'$pass\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export encrypthome=\'$encrypthome\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+done
+done
 mkdir -p unattends/android
 for presetname in "current" "legacy" "custom";do
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
@@ -323,56 +373,6 @@ echo \#export user=\'$user\' >> unattends/jenux/$presetname-$disk-$crypttype-era
 echo \#export pass=\'$pass\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
 echo \#export encrypthome=\'$encrypthome\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
 done
-done
-done
-mkdir -p unattends/jenuxoffline
-for crypttype in "encrypted" "unencrypted";do
-for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
-export disk=$disk
-export partmethod=e
-export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
-export boot="/dev/disk/by-partlabel/EFI"
-export root="/dev/disk/by-partlabel/linux"
-if echo $crypttype|grep -qw encrypted;then
-export encrypt=y
-else
-export encrypt=n
-fi
-export cryptkey=
-export fmtboot=y
-export fmtfs=y
-export presetname=$presetname
-export kerntype=linux
-export completeaction=poweroff
-export accessibility="1"
-export host="myhostname"
-export name="My_Name"
-export user=myname
-export pass=mysupersecretandsecurepassword12345
-export encrypthome=1
-echo \#jenuxoffline > unattends/jenux/$presetname-$disk-$crypttype-erase
-if echo $disk|grep -qw root_only;then
-echo export disk=\'$disk\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-else
-echo export disk=\'/dev/$disk\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-fi
-echo export partmethod=\'$partmethod\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export disklayout=\'$disklayout\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export boot=\'$boot\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export root=\'$root\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export fmtboot=\'$fmtboot\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export fmtfs=\'$fmtfs\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export encrypt=\'$encrypt\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export cryptkey=\'$cryptkey\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export presetname=\'$presetname\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export kerntype=\'$kerntype\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo export completeaction=\'$completeaction\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo \#export accessibility=\'$accessibility\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo \#export host=\'$host\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo \#export name=\'$name\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo \#export user=\'$user\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo \#export pass=\'$pass\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
-echo \#export encrypthome=\'$encrypthome\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
 done
 done
 mkdir -p unattends/nbd
