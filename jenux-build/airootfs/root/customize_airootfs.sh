@@ -127,6 +127,8 @@ sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/speechctl
 sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/talk-to-me
 cd /boot
 rm fixup4.dat start4.elf bootcode.bin fixup.dat start.elf
+mkdir -p /boot/EFI
+cd /boot/EFI
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
 unzip -o efi3.zip
 rm efi3.zip Readme.md firmware/Readme.txt

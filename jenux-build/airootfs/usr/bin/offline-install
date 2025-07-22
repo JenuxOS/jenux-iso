@@ -411,6 +411,9 @@ echo export presetname=\'$presetname\' >> ~/unattend
 sed -i /kerntype=/d ~/unattend
 echo export kerntype=\'$kerntype\' >> ~/unattend
 /usr/share/jenux/offline-options
+if [ -e /boot/EFI ];then
+cp -rf /boot/EFI /mnt/boot
+fi
 cp -rf /mnt/usr/share/shim-signed/EFI /mnt/boot/EFI
 mv /tmp/fstab /mnt/etc
 if cat /proc/cmdline|grep -qw nospeech;then
