@@ -17,7 +17,7 @@ echo loading nbd module
 modprobe nbd
 fi
 echo connecting $src to /dev/nbd0
-qemu-nbd -s -c /dev/nbd0 $src
+qemu-nbd -r -c /dev/nbd0 $src
 echo loading partition table for /dev/nbd0
 partprobe /dev/nbd0
 if echo $type|grep -qw w;then
@@ -119,8 +119,20 @@ else
 export dstpart=$disk$counter
 fi
 if [ -e /dev/nbd0p$counter ];then
+while true;do
 echo writing $desc partition to $dstpart
-qemu-img convert -p /dev/nbd0p$counter $dstpart
+if qemu-img convert -p /dev/nbd0p$counter $dstpart;then
+break
+else
+echo disconnecting due to write error
+qemu-nbd -d /dev/nbd0
+echo reconnecting $src to /dev/nbd0
+qemu-nbd -r -c /dev/nbd0 $src
+echo loading partition table for /dev/nbd0
+partprobe /dev/nbd0
+continue
+fi
+done
 if blkid $dstpart|grep -iqw ntfs;then
 echo resizing ntfs partition $dstpart
 echo y|ntfsresize -f $dstpart > /dev/null 2>/dev/null
@@ -148,8 +160,20 @@ else
 export dstpart=$disk$counter
 fi
 if [ -e /dev/nbd0p$counter ];then
+while true;do
 echo writing $desc partition to $dstpart
-qemu-img convert -p /dev/nbd0p$counter $dstpart
+if qemu-img convert -p /dev/nbd0p$counter $dstpart;then
+break
+else
+echo disconnecting due to write error
+qemu-nbd -d /dev/nbd0
+echo reconnecting $src to /dev/nbd0
+qemu-nbd -r -c /dev/nbd0 $src
+echo loading partition table for /dev/nbd0
+partprobe /dev/nbd0
+continue
+fi
+done
 fi
 export counter=$(($counter+1))
 done

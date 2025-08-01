@@ -31,12 +31,18 @@ rm ~/postlogin
 clear
 curl -LO http://192.168.120.1/imglist
 export supver=1
-
+cat /proc/cmdline|tr \  \\n|grep -w img|sed "s|img=||g"|tr -d \\n|head -n 1 | read -r -s img
+if cat imglist|grep -qw $img;then
+export img=`cat imglist|grep -w $img|cut -f 1|head -n 1`
+else
+unset img
+fi
 if cat imglist|head -n 1 | grep `echo -e v$supver`;then
 if cat imglist|wc -l|grep -qw 2;then
 export img=`cat imglist|tail -n 1 | cut -f 1`
 export type=`cat imglist|tail -n 1 | cut -f 2`
 else
+if [ -z $img ];then
 echo "select image to apply" > /tmp/menutitle
 cp imglist /tmp/i
 sed -i /\#img/d /tmp/i
@@ -44,6 +50,9 @@ cat /tmp/i|cut -f 1 | cut -f 1 -d . > /tmp/images
 createdynamicmenu cat /tmp/images
 export img=`cat imglist|grep \`echo -e $itemname|tr -d \"\`|head -n 1|cut -f 1|tr -d \"`
 export type=`cat imglist|grep \`echo -e $itemname|tr -d \"\`|head -n 1|cut -f 2|tr -d \"`
+else
+export type=`cat imglist|grep \`echo -e $img|tr -d \"\`|head -n 1|cut -f 2|tr -d \"`
+fi
 fi
 else
 echo unsupported image list version
