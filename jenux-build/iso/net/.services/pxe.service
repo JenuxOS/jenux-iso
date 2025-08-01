@@ -1,0 +1,9 @@
+[Unit]
+Description=Image PXE
+After=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "cd /net;./pxeboot `nmcli -t d|grep -i ethernet|cut --f 1 -d :`"
+[Install]
+WantedBy=default.target

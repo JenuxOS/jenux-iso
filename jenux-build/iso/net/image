@@ -1,0 +1,106 @@
+#!/bin/zsh
+function createmenu
+{
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo whiptail --menu `cat $1|head -n 1` `echo -n $menudesc` `cat $1|tail -n 1`>/tmp/menu
+cat $1|tail -n 1|sed s/\"\ /\\n/g>/tmp/itemlist
+chmod 755 /tmp/menu
+/tmp/menu 2>/tmp/choice
+export choice=`cat /tmp/choice|cut -f 2 -d \;`
+export linecounter=1
+export numitems=`cat /tmp/itemlist|wc -l`
+for line in `cat /tmp/itemlist`;do if echo $line|grep -q \;;then sleep .01;else echo $line>>/tmp/items;fi;export linecounter=$(($linecounter+1));if echo $linecounter|grep -qw $(($numitems+1));then break;else continue;fi;done
+export itemname=`cat /tmp/items|head -n $choice|tail -n 1|sed s/\?/\ /g`
+rm /tmp/choice /tmp/menu /tmp/itemlist /tmp/items
+clear
+}
+function createdynamicmenu
+{
+$@|sed s/\ /\?/g>/tmp/itemlist
+export title="\"`cat /tmp/itemlist|wc -l` items available\""
+export counter="1"
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo $title > /tmp/dynmenu
+for item in `cat /tmp/itemlist`;do echo -n "\"`echo $item|cut -c 1`;`echo -n $counter`\"" "\"$item\" " >>/tmp/dynmenu;export counter=$(($counter+1));done
+createmenu /tmp/dynmenu
+rm /tmp/dynmenu
+}
+cd
+export disk=`echo -n /dev/disk/by-id/;ls /dev/disk/by-id|sed "/usb/d;/wwn/d;/part/d;/DVD/d"|head -n 1`
+rm ~/postlogin
+clear
+curl -LO http://192.168.120.1/imglist
+export supver=1
+
+if cat imglist|head -n 1 | grep `echo -e v$supver`;then
+if cat imglist|wc -l|grep -qw 2;then
+export img=`cat imglist|tail -n 1 | cut -f 1`
+export type=`cat imglist|tail -n 1 | cut -f 2`
+else
+echo "select image to apply" > /tmp/menutitle
+cp imglist /tmp/i
+sed -i /\#img/d /tmp/i
+cat /tmp/i|cut -f 1 | cut -f 1 -d . > /tmp/images
+createdynamicmenu cat /tmp/images
+export img=`cat imglist|grep \`echo -e $itemname|tr -d \"\`|head -n 1|cut -f 1|tr -d \"`
+export type=`cat imglist|grep \`echo -e $itemname|tr -d \"\`|head -n 1|cut -f 2|tr -d \"`
+fi
+else
+echo unsupported image list version
+exit 48
+fi
+if echo $type|grep -qw w;then
+echo press b enter within 10 seconds to skip image and run bootloader repair
+read -t 10 nowrite
+if echo $nowrite|grep -qw b;then
+qemu-nbd -t -f raw -x disk $disk &
+while true;do
+if pgrep -af qemu-nbd;then
+break
+else
+continue
+fi
+done
+curl -s http://192.168.120.1/bootloader > /dev/null
+sleep 2
+while true;do
+if curl -s http://192.168.120.1/bootloaderstatus|grep -qw _done_;then
+killall -9 qemu-nbd
+break
+else
+sleep 2
+continue
+fi
+done
+for f in `efibootmgr|grep -i boot|grep \*|cut -f 1 -d \*|sed "s|Boot||g"`;do
+efibootmgr -b $f -B
+done
+efibootmgr -T
+sync
+reboot -f
+else
+echo -n image started on\  
+date
+while true;do
+if curl -LO http://192.168.120.1/v2p;then
+chmod 755 v2p
+break
+else
+continue
+fi
+done
+./v2p http://192.168.120.1/$img $disk $type
+fi
+else
+echo -n image started on\  
+date
+while true;do
+if curl -LO http://192.168.120.1/v2p;then
+chmod 755 v2p
+break
+else
+continue
+fi
+done
+./v2p http://192.168.120.1/$img $disk $type
+fi

@@ -1,0 +1,9 @@
+[Unit]
+Description=nbd processor for bootloader repair
+After=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "cd /net/.img/.scripts;./nbd"
+[Install]
+WantedBy=default.target

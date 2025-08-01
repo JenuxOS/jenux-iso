@@ -32,7 +32,7 @@ dhcp-boot=tag:efi-arm64,"./EFI/EFI/boot/bootaa64.efi"
 enable-tftp
 tftp-root=$PWD
 EOF
-darkhttpd . --addr 192.168.120.1 --no-listing --uid $owner&
+darkhttpd . --timeout 0 --addr 192.168.120.1 --no-listing --uid $owner&
 export httppid=`echo $!`
 dnsmasq -C /tmp/pxe.conf&
 export dhcppid=`pgrep -af dnsmasq|grep -w 'dnsmasq -C /tmp/pxe.conf'|sed /grep/d|cut -f 1 -d \  `

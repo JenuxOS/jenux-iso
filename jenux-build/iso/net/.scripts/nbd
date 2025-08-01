@@ -1,0 +1,57 @@
+#!/bin/zsh
+while true;do
+if lsmod|grep -qw nbd;then
+sleep .01
+else
+modprobe nbd
+fi
+if [ -e /net/imglist ];then
+export imglist=`cat /net/imglist`
+else
+echo -e \#img\\tv1 > /net/imglist
+export imglist=""
+fi
+for f in `ls /net/*.qcow2`;do
+if cat /net/imglist|grep -iqw `basename $f`;then
+continue
+fi
+if cat /net/imglist|grep -qw `basename $f`;then
+sleep .01
+else
+qemu-nbd -c /dev/nbd15 -r $f
+partprobe /dev/nbd15
+for g in `ls /dev/nbd15p*`;do
+if blkid $g|grep -iqw ntfs;then
+echo -e `basename $f`\\tw >> /net/imglist
+break
+else
+sleep .01
+fi
+done
+qemu-nbd -d /dev/nbd15
+fi
+if cat /net/imglist|grep -iw `basename $f`|cut -f 2 |grep -iqw w;then
+continue
+else
+echo -e `basename $f`\\tn >> /net/imglist
+fi
+done
+export clientip=`journalctl -u pxe -o cat --lines 100|grep -w /bootloader|head -n 1|cut -f 1 -d \  |cut -f 1 -d \  `
+export iplen=`echo -en $clientip|wc -c`
+if [ $iplen -ge 1 ];then
+if nmap -p 10809 $clientip|grep -qw open;then
+qemu-nbd -c /dev/nbd15 -f raw --discard=unmap --detect-zeroes=unmap nbd://$clientip/disk
+./bcdbooter /dev/nbd15
+qemu-nbd -d /dev/nbd15
+echo _done_ > /net/bootloaderstatus
+chmod 755 /net/bootloaderstatus
+sleep 2
+unset clientip
+rm /net/bootloaderstatus
+else
+unset clientip
+fi
+else
+sleep 1
+fi
+done
