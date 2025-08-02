@@ -1,2 +1,11 @@
 jenux-build/out
 jenux-build/work
+jenux-build/packages.i686
+jenux-build/pacman.i686.conf
+jenux-build/installtest.i686
+jenux-build/packages.aarch64
+jenux-build/pacman.aarch64.conf
+jenux-build/installtest.aarch64
+jenux-build/packages.x86_64
+jenux-build/pacman.x86_64.conf
+jenux-build/installtest.x86_64
