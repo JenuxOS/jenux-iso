@@ -681,14 +681,14 @@ cp -rf "${script_path}/iso"/* .
 fi
 cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
-export contsize=$(($rootsize+600))"M"
+export contsize=$(($rootsize+856))"M"
 truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1234943:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
 partprobe $loopdev
 mkfs.vfat -n ISOEFI $loopdev"p2"
-mkfs.vfat -n ${iso_label} $loopdev"p3"
+mkfs.ext4 -n ${iso_label} $loopdev"p3"
 tune2fs -O encrypt -m 0 $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
