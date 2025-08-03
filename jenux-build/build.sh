@@ -682,7 +682,7 @@ cp -rf "${script_path}/iso"/* .
 fi
 cp "${iso_name}-${iso_version}-tripple.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
-export contsize=$(($rootsize+815))"M"
+export contsize=$(($rootsize+855))"M"
 truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
