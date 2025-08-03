@@ -17,7 +17,6 @@ iso_version=$(date +%Y.%m.%d)
 install_dir=arch
 work_dir=work
 out_dir=out
-arch=$(uname -m)
 verbose="-v"
 script_path=$(readlink -f ${0%/*})
 _usage ()
@@ -381,8 +380,8 @@ echo \#nbd > unattends/nbd/$disk
 echo /dev/$disk >> unattends/nbd/$disk
 done
 mkdir -p unattends/pi
-for arch in "armv7h" "aarch64";do
-case "$arch" in
+for unattendarch in "armv7h" "aarch64";do
+case "$unattendarch" in
 armv7h)
 echo raspberry pi 2\|rpi_2 >> /tmp/devlist
 echo raspberry pi 2 with vendor firmware\|rpi-vfw_2 >> /tmp/devlist
@@ -422,10 +421,10 @@ rpi-vfw_2)
 export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi fbdetect"
 ;;
 rpi_3)
-if echo $arch|grep -qw armv7h;then
+if echo $unattendarch|grep -qw armv7h;then
 export devpkgs="linux-armv7 linux-armv7-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 fi
-if echo $arch|grep -qw aarch64;then
+if echo $unattendarch|grep -qw aarch64;then
 export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
 fi
 ;;
@@ -459,28 +458,28 @@ export pass=mysupersecretandsecurepassword12345
 export encrypthome=1
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 for preset in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch" "all";do
-echo \#pi > unattends/pi/$preset-$disk-$arch-$devid
+echo \#pi > unattends/pi/$preset-$disk-$unattendarch-$devid
 if echo $disk|grep -qw root_only;then
-echo export disk=\'$disk\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export disk=\'$disk\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
 else
-echo export disk=\'/dev/$disk\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export disk=\'/dev/$disk\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
 fi
-echo export arch=\'$arch\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export transtype=\'$transtype\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export device=\'$device\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export devid=\'$devid\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export devpkgs=\'$devpkgs\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export devtype=\'$devtype\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export preset=\'$preset\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export blueans=\'$blueans\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export macaddr=\'$macaddr\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo export completeaction=\'$completeaction\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo \#export accessibility=\'$accessibility\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo \#export host=\'$host\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo \#export name=\'$name\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo \#export user=\'$user\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo \#export pass=\'$pass\' >> unattends/pi/$preset-$disk-$arch-$devid
-echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$preset-$disk-$arch-$devid
+echo export arch=\'$unattendarch\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export transtype=\'$transtype\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export device=\'$device\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export devid=\'$devid\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export devpkgs=\'$devpkgs\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export devtype=\'$devtype\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export preset=\'$preset\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export blueans=\'$blueans\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export macaddr=\'$macaddr\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export completeaction=\'$completeaction\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export accessibility=\'$accessibility\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export host=\'$host\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export name=\'$name\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export user=\'$user\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export pass=\'$pass\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
 done
 done
 done
@@ -676,39 +675,58 @@ else
 mkdir -p ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
-git log > "${iso_name}-${iso_version}-tripple.iso.changelog"
+git log > "${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 if [ -e "${script_path}/iso" ];then
 cp -rf "${script_path}/iso"/* .
 fi
-cp "${iso_name}-${iso_version}-tripple.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso.changelog"
+cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
-export contsize=$(($rootsize+600))"M"
-truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
-losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"
-export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-tripple.iso"|cut -f 1 -d \  `
-sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
+export contsize=$(($rootsize+827))"M"
+truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"
+losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"
+export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"|cut -f 1 -d \  `
+sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1234943:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
 partprobe $loopdev
 mkfs.vfat -n ISOEFI $loopdev"p2"
-mkfs.vfat -n ${iso_label} $loopdev"p3"
+mkfs.ext4 -L ${iso_label} $loopdev"p3"
+tune2fs -O encrypt -m 0 $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
 cp -rf * /mnt
-cp -rf ../x86_64/airootfs/usr/share/shim-signed/EFI /mnt/EFI
+if [ -e ../${arch}/airootfs/usr/share/shim-signed/EFI ];then
+cp -rf ../${arch}/airootfs/usr/share/shim-signed/EFI /mnt/EFI
+else
+cp -rf /usr/share/shim-signed/EFI /mnt/EFI
+fi
 export tmpdir=`mktemp -d`
-cp ../x86_64/airootfs/usr/share/grub/sbat.csv $tmpdir/sbat.csv
-cp -Lrf ${script_path}/${work_dir}/aarch64/airootfs/boot/* /mnt/EFI
-rm -rf /mnt/EFI/Image.gz /mnt/EFI/vmlinuz-linux /mnt/EFI/initramfs-linux* /mnt/EFI/amd-ucode.img /mnt/EFI/archiso.img /mnt/EFI/firmware
-grub-install -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
-grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
-grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
-grub-install -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/aarch64/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
-grub-mknetdir --net-directory=/mnt -d ${script_path}/${work_dir}/x86_64/airootfs/usr/lib/grub/i386-pc
+cp ../${arch}/airootfs/usr/share/grub/sbat.csv $tmpdir/sbat.csv
+if echo $prepbuilds|grep -iqw x86_64;then
+grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
+fi
+if echo $prepbuilds|grep -iqw x86_64||echo $prepbuilds|grep -iqw i686;then
+grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
+grub-mknetdir --net-directory=/mnt -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-pc
+cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
+if [ -e /mnt/boot/grub/x86_64-efi/core.efi ];then
+cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
+fi
+fi
+if echo $prepbuilds|grep -iqw aarch64;then
+cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI
+grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
 mv /mnt/EFI/EFI/boot/bootaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi.shim
 mv /mnt/EFI/EFI/arch/grubaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi
+cp /mnt/boot/grub/arm64-efi/core.efi /mnt/grubaa64.efi
+fi
+if [ -e /mnt/EFI/EFI/boot/*.efi ];then
+cp -rf /mnt/EFI/EFI/boot/*.efi /mnt
+fi
 openssl req -new -x509 -newkey rsa:4096 -days 365000 -keyout $tmpdir/jenux.key -out $tmpdir/jenux.crt -nodes -subj "/CN=Jenux ISO Secure Boot/"
 openssl x509 -in $tmpdir/jenux.crt -out $tmpdir/jenux-iso.cer -outform DER
 for f in `find /mnt -type f|grep vmlinuz`;do
@@ -732,11 +750,8 @@ fi
 done
 mv $tmpdir/jenux-iso.cer /mnt/EFI
 mv $tmpdir/jenux.crt /mnt/EFI/jenux.sbverify.crt
-cp -rf /mnt/EFI/EFI/boot/*.efi /mnt
-cp /mnt/boot/grub/arm64-efi/core.efi /mnt/grubaa64.efi
-cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
-cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
 rm $tmpdir/jenux.key
+if echo $prepbuilds|grep -iqw aarch64;then
 cd /mnt/EFI
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
 unzip -o efi3.zip
@@ -817,13 +832,14 @@ EOF
 cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.img
 cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/archiso.rpi.img archiso.img
 cd $OLDPWD
+fi
 umount /mnt/EFI /mnt
 losetup -d $loopdev
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
-sha512sum "${iso_name}-${iso_version}-tripple.iso" > "${iso_name}-${iso_version}-tripple.iso.sha512"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
 cd ${script_path}
-ls -sh "${out_dir}/${iso_name}-${iso_version}-tripple.iso"
+ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
 }
 
 if [[ ${EUID} -ne 0 ]]; then
@@ -831,10 +847,6 @@ if [[ ${EUID} -ne 0 ]]; then
     _usage 1
 fi
 
-if [[ ${arch} != x86_64 ]]; then
-    echo "This script needs to be run on x86_64"
-    _usage 1
-fi
 
 while getopts 'N:V:L:D:w:o:vh' arg; do
     case "${arg}" in
@@ -856,8 +868,14 @@ done
 mkdir -p ${work_dir}
 
 
-# Do all stuff for each airootfs
-for arch in "x86_64" "i686" "aarch64"; do
+if [ -z $arch ];then
+export buildtype=tripple
+export prepbuilds=`echo -en x86_64 i686 aarch64`
+else
+export buildtype=$arch
+export prepbuilds=`echo -en $arch`
+fi
+for arch in `echo -en $prepbuilds`; do
 run_once make_pacman_conf
 run_once make_packages
 run_once make_setup_mkinitcpio
@@ -871,7 +889,6 @@ run_once make_efi
 ;;
 esac
 done
-
 
 
 # Do all stuff for "iso"
