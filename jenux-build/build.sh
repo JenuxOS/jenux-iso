@@ -710,6 +710,8 @@ cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
 export arch=$oldarch
 fi
 if echo $prepbuilds|grep -iqw x86_64||echo $prepbuilds|grep -iqw i686;then
+export oldarch=$arch
+export arch=x86_64
 grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
 grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
 grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
@@ -718,6 +720,7 @@ cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
 if [ -e /mnt/boot/grub/x86_64-efi/core.efi ];then
 cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
 fi
+export arch=$oldarch
 fi
 if echo $prepbuilds|grep -iqw aarch64;then
 cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI
