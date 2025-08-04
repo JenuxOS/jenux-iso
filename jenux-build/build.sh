@@ -694,33 +694,23 @@ mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
 cp -rf * /mnt
-if [ -e ../${arch}/airootfs/usr/share/shim-signed/EFI ];then
-cp -rf ../${arch}/airootfs/usr/share/shim-signed/EFI /mnt/EFI
-else
 cp -rf /usr/share/shim-signed/EFI /mnt/EFI
-fi
 export tmpdir=`mktemp -d`
-cp ../${arch}/airootfs/usr/share/grub/sbat.csv $tmpdir/sbat.csv
+cp /usr/share/grub/sbat.csv $tmpdir/sbat.csv
 if echo $prepbuilds|grep -iqw x86_64;then
-export oldarch=$arch
-export arch=x86_64
-grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+grub-install -d /usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
 cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
-export arch=$oldarch
 fi
 if echo $prepbuilds|grep -iqw x86_64||echo $prepbuilds|grep -iqw i686;then
-export oldarch=$arch
-export arch=x86_64
-grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
-grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
-grub-mknetdir --net-directory=/mnt -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/i386-pc
+grub-install -d /usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
+grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+grub-install -d /usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
+grub-mknetdir --net-directory=/mnt -d /usr/lib/grub/i386-pc
 cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
 if [ -e /mnt/boot/grub/x86_64-efi/core.efi ];then
 cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
 fi
-export arch=$oldarch
 fi
 if echo $prepbuilds|grep -iqw aarch64;then
 cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI
