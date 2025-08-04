@@ -680,8 +680,10 @@ if [ -e "${script_path}/iso" ];then
 cp -rf "${script_path}/iso"/* .
 fi
 cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
+export bufsize=600
+while true;do
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
-export contsize=$(($rootsize+856))"M"
+export contsize=$(($rootsize+$bufsize))"M"
 truncate -s $contsize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"
 losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"|cut -f 1 -d \  `
@@ -693,32 +695,115 @@ tune2fs -O encrypt -m 0 $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
-cp -rf * /mnt
-cp -rf /usr/share/shim-signed/EFI /mnt/EFI
+if install_bootloader;then
+umount /mnt/EFI /mnt
+losetup -d $loopdev
+break
+else
+umount /mnt/EFI /mnt
+losetup -d $loopdev
+export bufsize=$(($bufsize+100))
+continue
+fi
+done
+rm -rf $tmpdir
+cd "${script_path}/${out_dir}"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
+cd ${script_path}
+ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
+}
+function install_bootloader
+{
+if cp -rf * /mnt;then
+sleep .01
+else
+return 1
+fi
+if cp -rf /usr/share/shim-signed/EFI /mnt/EFI;then
+sleep .01
+else
+return 2
+fi
 export tmpdir=`mktemp -d`
-cp /usr/share/grub/sbat.csv $tmpdir/sbat.csv
+if cp /usr/share/grub/sbat.csv $tmpdir/sbat.csv;then
+sleep .01
+else
+return 3
+fi
 if echo $prepbuilds|grep -iqw x86_64;then
-grub-install -d /usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
-cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
+if grub-install -d /usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI;then
+sleep .01
+else
+return 4
+fi
+if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp";then
+sleep .01
+else
+return 5
+fi
+if cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi;then
+sleep .01
+else
+return 6
+fi
 fi
 if echo $prepbuilds|grep -iqw x86_64||echo $prepbuilds|grep -iqw i686;then
-grub-install -d /usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
-grub-install -d /usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev
-grub-mknetdir --net-directory=/mnt -d /usr/lib/grub/i386-pc
-cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi
+if grub-install -d /usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI;then
+sleep .01
+else
+return 7
+fi
+if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp";then
+sleep .01
+else
+return 8
+fi
+if grub-install -d /usr/lib/grub/i386-pc --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --target i386-pc $loopdev;then
+sleep .01
+else
+return 9
+fi
+if grub-mknetdir --net-directory=/mnt -d /usr/lib/grub/i386-pc;then
+sleep .01
+else
+return 10
+fi
+if cp /mnt/boot/grub/i386-efi/core.efi /mnt/grubia32.efi;then
+sleep .01
+else
+return 11
+fi
 if [ -e /mnt/boot/grub/x86_64-efi/core.efi ];then
-cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi
+if cp /mnt/boot/grub/x86_64-efi/core.efi /mnt/grubx64.efi;then
+sleep .01
+else
+return 12
+fi
 fi
 fi
 if echo $prepbuilds|grep -iqw aarch64;then
-cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI
-grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI
-grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp"
+if cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI;then
+sleep .01
+else
+return 13
+fi
+if grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI;then
+sleep .01
+else
+return 14
+fi
+if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp";then
+sleep .01
+else
+return 15
+fi
 mv /mnt/EFI/EFI/boot/bootaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi.shim
 mv /mnt/EFI/EFI/arch/grubaa64.efi /mnt/EFI/EFI/boot/bootaa64.efi
-cp /mnt/boot/grub/arm64-efi/core.efi /mnt/grubaa64.efi
+if cp /mnt/boot/grub/arm64-efi/core.efi /mnt/grubaa64.efi;then
+sleep .01
+else
+return 17
+fi
 fi
 if [ -e /mnt/EFI/EFI/boot/*.efi ];then
 cp -rf /mnt/EFI/EFI/boot/*.efi /mnt
@@ -829,15 +914,8 @@ cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.im
 cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/archiso.rpi.img archiso.img
 cd $OLDPWD
 fi
-umount /mnt/EFI /mnt
-losetup -d $loopdev
-rm -rf $tmpdir
-cd "${script_path}/${out_dir}"
-sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
-cd ${script_path}
-ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
+return 0
 }
-
 if [[ ${EUID} -ne 0 ]]; then
     echo "This script must be run as root."
     _usage 1
