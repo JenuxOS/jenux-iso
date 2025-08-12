@@ -957,11 +957,7 @@ run_once make_customize_airootfs
 run_once make_boot
 run_once make_boot_extra
 run_once make_prepare
-case "$arch" in
-x86_64)
 run_once make_efi
-;;
-esac
 done
 
 

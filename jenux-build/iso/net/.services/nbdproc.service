@@ -4,6 +4,6 @@ After=NetworkManager.service
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c "cd /net/.img/.scripts;./nbd"
+ExecStart=/bin/sh -c "cd /net/.scripts;./nbd"
 [Install]
 WantedBy=default.target

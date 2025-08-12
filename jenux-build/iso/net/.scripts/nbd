@@ -11,7 +11,14 @@ else
 echo -e \#img\\tv1 > /net/imglist
 export imglist=""
 fi
-for f in `ls /net/*.qcow2`;do
+for img in `cat /net/imglist|cut -f 1`;do
+if [ -e /net/$img ];then
+sleep .01
+else
+sed -i /$img/d /net/imglist
+fi
+done
+for f in `ls /net/*.qcow2|sort -V|uniq;ls /net/*.vmdk|sort -V|uniq`;do
 if cat /net/imglist|grep -iqw `basename $f`;then
 continue
 fi

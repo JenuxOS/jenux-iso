@@ -176,7 +176,7 @@ export overlaydev=/dev/disk/by-label/$label
 fi
 mount $overlaydev /mnt
 if [ -e /mnt/$overlay ];then
-export overlay=file:///mnt/$script
+export overlay=file:///mnt/$overlay
 fi
 echo downloading and extracting overlay
 while true;do
