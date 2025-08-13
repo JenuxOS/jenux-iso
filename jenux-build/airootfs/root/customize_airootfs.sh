@@ -13,7 +13,7 @@ continue
 fi
 done
 /etc/postinstall.sh root_only $preset n
-systemctl disable speech-dispatcherd fenrirscreenreader swap
+systemctl disable speech-dispatcherd fenrirscreenreader swap avahi-daemon
 if [ -e /boot/vmlinuz-linux ];then
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 fi

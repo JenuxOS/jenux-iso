@@ -25,7 +25,12 @@ cat /proc/cmdline|tr \  \\n|grep -w torenable|sed "s|torenable=||g"|tr -d \\n|he
 cat /proc/cmdline|tr \  \\n|grep -w soundcard|sed "s|soundcard=||g"|tr -d \\n|head -n 1|read -r -s soundcard
 cat /proc/cmdline|tr \  \\n|grep -w soundcardindex|sed "s|soundcardindex=||g"|tr -d \\n|head -n 1|read -r -s soundcardindex
 cat /proc/cmdline|tr \  \\n|grep -w livemode|sed "s|livemode=||g"|tr -d \\n|head -n 1|read -r -s livemode
-systemctl stop avahi-daemon
+cat /proc/cmdline|tr \  \\n|grep -w btconnaddr|sed "s|btconnaddr=||g"|tr -d \\n|head -n 1|read -r -s btconnaddr
+export IFS=,
+for btdev in `echo $btconnaddr`;do
+systemctl --no-block start btconnect@$btdev
+done
+unset IFS
 if [ -e /usr/share/jenux ];then
 sleep .01
 else

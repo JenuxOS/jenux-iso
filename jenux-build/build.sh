@@ -599,6 +599,11 @@ cat > "${script_path}/${work_dir}/iso/rootpasswd.sample" <<EOF
 #example:
 #livemode=live
 #livemode=1
+#btconnaddr
+#sets the mac addresses of bluetooth devices to keep a persistant connection open to, seperated by commas. This can be used, for example, to automatically connect to bluetooth headphones or a keyboard with no user interaction required
+#examples:
+#btconnaddr=00:01:02:03:04:05
+#btconnaddr=0a:1b:2c:3d:4e:5f,aa:bb:cc:dd:ee:ff
 #unattenddev:
 #specifies the device to mount containing the unattend file. If not supplied, it defaults to this media.
 #examples:
