@@ -4,7 +4,7 @@ After=NetworkManager.service graphical.target
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/sshcheck
-TimeoutSec=300
+Restart=on-failure
 
 [Install]
 WantedBy=getty.target
