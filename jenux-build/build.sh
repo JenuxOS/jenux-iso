@@ -159,8 +159,8 @@ else
 mkdir -p "${work_dir}/${arch}/airootfs/usr/share/jenux"
 fi
 echo $preset > "${work_dir}/${arch}/airootfs/usr/share/jenux/preset"
-echo -en rsync -aAXHPv \   > "${work_dir}/${arch}/airootfs/usr/share/jenux/offline-options"
-for f in `echo --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found/' '/usr/share/jenux/offline-options';find airootfs -type l -o -type f |sed "s|airootfs\/|\/|g"`;do
+echo -en rsync -aAXHPv --info=progress2 \   > "${work_dir}/${arch}/airootfs/usr/share/jenux/offline-options"
+for f in `echo --exclude='/boot/vmlinuz-linux.rpi' --exclude='/boot/archiso*' --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found/' '/usr/share/jenux/offline-options';find airootfs -type l -o -type f |sed "s|airootfs\/|\/|g"`;do
 if echo $f|grep -qw - --exclude=;then
 echo $f|sed "s|--exclude=|--exclude=\'|g"|tr -d \\n
 echo -en \'\  
