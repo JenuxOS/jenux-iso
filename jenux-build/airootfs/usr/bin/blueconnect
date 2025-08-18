@@ -1,0 +1,51 @@
+#!/bin/sh
+function createmenu
+{
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo whiptail --menu `cat $1|head -n 1` `echo -n $menudesc` `cat $1|tail -n 1`>/tmp/menu
+cat $1|tail -n 1|sed s/\"\ /\\n/g>/tmp/itemlist
+chmod 755 /tmp/menu
+/tmp/menu 2>/tmp/choice
+export choice=`cat /tmp/choice|cut -f 2 -d \;`
+export linecounter=1
+export numitems=`cat /tmp/itemlist|wc -l`
+for line in `cat /tmp/itemlist`;do if echo $line|grep -q \;;then sleep .01;else echo $line>>/tmp/items;fi;export linecounter=$(($linecounter+1));if echo $linecounter|grep -qw $(($numitems+1));then break;else continue;fi;done
+export itemname=`cat /tmp/items|head -n $choice|tail -n 1|sed s/\?/\ /g`
+rm /tmp/choice /tmp/menu /tmp/itemlist /tmp/items
+clear
+}
+function createdynamicmenu
+{
+$@|sed s/\ /\?/g>/tmp/itemlist
+export title="\"`cat /tmp/itemlist|wc -l` items available\""
+export counter="1"
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo $title > /tmp/dynmenu
+for item in `cat /tmp/itemlist`;do echo -n "\"`echo $item|cut -c 1`;`echo -n $counter`\"" "\"$item\" " >>/tmp/dynmenu;export counter=$(($counter+1));done
+createmenu /tmp/dynmenu
+rm /tmp/dynmenu
+}
+while true;do
+echo powering on bluetooth radio
+bluetoothctl power on
+echo scanning for bluetooth devices
+bluetoothctl --timeout 10 scan on|grep Device|cut -f 2 -d \]|cut -f 3,4,5 -d \ >/tmp/devlist
+if wc -l /tmp/devlist|grep -qw 0;then
+echo no devices found. Either this device\'s bluetooth radio is not opperating propperly, or no devices could be detected. Please enter the mac address and press enter. Alternatively, please enter r to rescan
+read macaddr
+if [ $macaddr == "r" ];then
+unset macaddr
+continue
+else
+if [ -z $macaddr ];then
+echo rescan >> /tmp/devlist
+createdynamicmenu cat /tmp/devlist
+export macaddr=`echo $itemname|cut -f 2 -d \"|cut -f 1-6 -d :|cut -f 1 -d \  `
+fi
+fi
+break
+else
+continue
+fi
+done
+systemctl enable --now btconnect@$macaddr
