@@ -11,7 +11,7 @@ else
 echo -e \#img\\tv1 > /net/imglist
 export imglist=""
 fi
-for img in `cat /net/imglist|cut -f 1`;do
+for img in `cat /net/imglist|cut -f 1|sed /\#/d`;do
 if [ -e /net/$img ];then
 sleep .01
 else
