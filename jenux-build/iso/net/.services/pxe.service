@@ -4,6 +4,6 @@ After=NetworkManager.service
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c "cd /net;./pxeboot `nmcli -t d|grep -i ethernet|cut -f 1 -d :`"
+ExecStart=/bin/sh -c "cd /net;export dev=`nmcli -t d|grep -i ethernet|cut -f 1 -d :`;if [ -z $dev ];then export dev=lo;fi;./pxeboot $dev"
 [Install]
 WantedBy=default.target
