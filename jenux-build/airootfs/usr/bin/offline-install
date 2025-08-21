@@ -433,6 +433,7 @@ fi
 arch-chroot /mnt /bin/mkinitcpio -P
 arch-chroot /mnt /bin/sh -c "bootcrypt"
 arch-chroot /mnt /bin/sh -c "grub-mkconfig -o /boot/grub/grub.cfg"
+arch-chroot /mnt /bin/sh -c "grub-mkconfig -o /boot/grub/grub.cfg"
 arch-chroot /mnt /bin/sh -c 'for t in "1" "2" "3" "4" "5" "6";do systemctl enable getty@tty$t;done'
 echo ensuring that grub will load on next boot
 for f in `efibootmgr|grep Boot|grep \*|cut -f 1 -d \  |sed "s|Boot||g;s|\*||g"`;do
