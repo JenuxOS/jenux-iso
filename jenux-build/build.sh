@@ -685,7 +685,7 @@ if [ -e "${script_path}/iso" ];then
 cp -rf "${script_path}/iso"/* .
 fi
 cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
-export bufsize=600
+export bufsize=800
 while true;do
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
 export contsize=$(($rootsize+$bufsize))"M"
@@ -816,9 +816,9 @@ fi
 openssl req -new -x509 -newkey rsa:4096 -days 365000 -keyout $tmpdir/jenux.key -out $tmpdir/jenux.crt -nodes -subj "/CN=Jenux ISO Secure Boot/"
 openssl x509 -in $tmpdir/jenux.crt -out $tmpdir/jenux-iso.cer -outform DER
 for f in `find /mnt -type f|grep vmlinuz`;do
-mv $f $f.unsigned
-sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
-rm $f.unsigned
+mv $f $tmpdir/$f.unsigned
+sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $tmpdir/$f.unsigned
+rm $tmpdir/$f.unsigned
 done
 for f in `find /mnt -type f|grep core.efi`;do
 if file $f|grep -iw EFI|grep -iqw application;then
