@@ -840,19 +840,31 @@ rm $tmpdir/jenux.key
 if echo $prepbuilds|grep -iqw aarch64;then
 cd /mnt/EFI
 curl -Lo efi3.zip https://github.com/pftf/RPi3/releases/download/v1.39/RPi3_UEFI_Firmware_v1.39.zip
-unzip -o efi3.zip
+if yes|unzip -o efi3.zip;then
+sleep .01
+else
+return 18
+fi
 rm efi3.zip Readme.md firmware/Readme.txt
 mv config.txt config3.txt
 mv RPI_EFI.fd RPI3_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI3_EFI.fd|g" config3.txt
 curl -Lo efi4.zip https://github.com/pftf/RPi4/releases/download/v1.38/RPi4_UEFI_Firmware_v1.38.zip
-unzip -o efi4.zip
+if yes|unzip -o efi4.zip;then
+sleep .01
+else
+return 19
+fi
 rm efi4.zip Readme.md firmware/Readme.txt
 mv config.txt config4.txt
 mv RPI_EFI.fd RPI4_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI4_EFI.fd|g" config4.txt
 curl -Lo efi5.zip 'https://github.com/worproject/rpi5-uefi/releases/download/v0.3/RPi5_UEFI_Release_v0.3.zip'
-unzip -o efi5.zip
+if yes|unzip -o efi5.zip;then
+sleep .01
+else
+return 20
+fi
 mv config.txt config5.txt
 mv RPI_EFI.fd RPI5_EFI.fd
 sed -i "s|RPI_EFI.fd|RPI5_EFI.fd|g" config5.txt
