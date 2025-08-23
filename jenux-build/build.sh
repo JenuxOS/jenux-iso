@@ -707,7 +707,7 @@ break
 else
 umount /mnt/EFI /mnt
 losetup -d $loopdev
-export bufsize=$(($bufsize+100))
+export bufsize=$(($bufsize+200))
 continue
 fi
 done
