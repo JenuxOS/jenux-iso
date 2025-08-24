@@ -818,7 +818,7 @@ openssl x509 -in $tmpdir/jenux.crt -out $tmpdir/jenux-iso.cer -outform DER
 for f in `find /mnt -type f|grep vmlinuz`;do
 mv $f $tmpdir/`basename $f`".unsigned"
 sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $tmpdir/`basename $f`".unsigned"
-rm $tmpdir/$f.unsigned
+rm $tmpdir/`basename $f`".unsigned"
 done
 for f in `find /mnt -type f|grep core.efi`;do
 if file $f|grep -iw EFI|grep -iqw application;then
