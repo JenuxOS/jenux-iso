@@ -705,6 +705,13 @@ umount /mnt/EFI /mnt
 losetup -d $loopdev
 break
 else
+cd ${script_path}/${work_dir}/iso
+export mypid=`readlink /proc/self`"c"
+export pids=`fuser -m /mnt|tr c \  |tr -s \  |sed "s|$mypid||g"`
+export pids=$pids" "`fuser -m /mnt/EFI|tr c \  |tr -s \  |sed "s|$mypid||g"`
+for f in `echo $pids`;do
+kill -9 $f
+done
 umount /mnt/EFI /mnt
 losetup -d $loopdev
 export bufsize=$(($bufsize+200))
@@ -714,6 +721,8 @@ done
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
+qemu-img convert -p -f raw -O vmdk "${iso_name}-${iso_version}-${buildtype}.iso" "${iso_name}-${iso_version}-${buildtype}.vmdk"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.vmdk" > "${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 cd ${script_path}
 ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
 }
