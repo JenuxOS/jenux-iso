@@ -6,8 +6,8 @@ lsblk
 read disk
 fi
 if [ -e winpe.iso ];then
-qemu-system-x86_64 -m 2048 -cdrom winpe.iso -drive file=$disk,format=raw,id=internal,if=none -device ide-hd,drive=internal -boot d --enable-kvm -action reboot=shutdown -monitor none
+qemu-system-x86_64 -m 2048 -cdrom winpe.iso -drive file=$disk,format=raw,id=internal,if=none -device ide-hd,drive=internal -boot d --enable-kvm -action reboot=shutdown -monitor none -display none
 else
 curl -LO https://nashcentral.duckdns.org/projects/bcdbooter/winpe.iso
-qemu-system-x86_64 -m 2048 -cdrom winpe.iso -drive file=$disk,format=raw,id=internal,if=none -device ide-hd,drive=internal -boot d --enable-kvm -action reboot=shutdown -monitor none
+qemu-system-x86_64 -m 2048 -cdrom winpe.iso -drive file=$disk,format=raw,id=internal,if=none -device ide-hd,drive=internal -boot d --enable-kvm -action reboot=shutdown -monitor none -display none
 fi
