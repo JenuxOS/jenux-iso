@@ -1,11 +1,15 @@
 #!/bin/bash
 umask 022
-if [ -z $1 ];then
-export preset=base
-else
-export preset=$1
+if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
+echo environment error, see .venv.example, all vars must be set.
+exit 1
 fi
-if echo $@|grep -iqw live;then
+export preset=$jenux_iso_preset
+export arch=$jenux_iso_arch
+if echo $jenux_iso_arch|grep -iqw all;then
+unset arch
+fi
+if echo $jenux_iso_livemode|grep -iqw 1;then
 export livebuild=livebuild
 iso_name=Jenux-live-$preset
 else

@@ -8,7 +8,8 @@ RUN pacman-key --populate
 RUN pacman --needed -Syu archlinux-keyring --noconfirm
 RUN pacman --noconfirm -Rdd iptables
 RUN /pkg.base
-COPY ./ build/
-WORKDIR /build/jenux-build/
-VOLUME "[/build/jenux-build/out]"
-RUN ./build.sh
+RUN rm /pkg.base
+COPY . /build
+WORKDIR /build/jenux-build
+VOLUME ["/build/jenux-build/out"]
+CMD ["./build.sh"]
