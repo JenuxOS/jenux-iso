@@ -698,6 +698,19 @@ losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtyp
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:+750M:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
 partprobe $loopdev
+export oldifs=$IFS
+export IFS=$(echo -en \\n\\b)
+for f in `cat /proc/partitions|tr -s \  |grep loop\*p\*`;do
+export dev=`echo -en $f|cut -f 5 -d \  `
+if [ -e /dev/$dev ];then
+continue
+else
+export maj=`echo $f|cut -f 2 -d \  `
+export min=`echo -en $f|cut -f 3 -d \  `
+mknod /dev/$dev b $maj $min
+fi
+done
+export IFS=$oldifs
 mkfs.vfat -n ISOEFI $loopdev"p2"
 echo y|mkfs.ext4 -L ${iso_label} $loopdev"p3"
 tune2fs -O encrypt -m 0 $loopdev"p3"

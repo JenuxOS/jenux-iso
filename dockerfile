@@ -11,5 +11,6 @@ RUN /pkg.base
 RUN rm /pkg.base
 COPY . /build
 WORKDIR /build/jenux-build
-VOLUME ["/build/jenux-build/out"]
+VOLUME ["./jenux-build/out" "/build/jenux-build/out"]
+VOLUME ["/dev" "/dev"]
 CMD ["./build.sh"]
