@@ -1,7 +1,9 @@
 #!/bin/bash
 umask 022
 if [ -e /.dockerenv ];then
-source /.dockerenv
+if [ -e /build/.env ];then
+source /build/.env
+fi
 mount -t devtmpfs /dev /dev
 fi
 if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
