@@ -12,7 +12,5 @@ RUN rm /pkg.base
 COPY . /build
 WORKDIR /build/jenux-build
 COPY .env /build/jenux-build/
-ENV docker_phase=rootfs
-RUN ./build.sh
-ENV docker_phase=iso
-CMD ["./build.sh"]
+RUN export docker_phase=rootfs;./build.sh
+CMD unset docker_phase;./build.sh
