@@ -1018,6 +1018,7 @@ if [ -z $docker_phase ];then
 true
 else
 if echo $docker_phase|grep -qw rootfs;then
+rm ${work_dir}/build.make_packages_${arch}
 exit 0
 fi
 fi
