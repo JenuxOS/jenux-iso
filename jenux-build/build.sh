@@ -1,10 +1,7 @@
 #!/bin/bash
 umask 022
-if [ -e /.dockerenv ];then
 if [ -e /build/.env ];then
 source /build/.env
-fi
-mount -t devtmpfs /dev /dev
 fi
 if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
 if [ -z $jenux_iso_arch ];then
@@ -44,6 +41,9 @@ work_dir=work
 out_dir=out
 verbose="-v"
 script_path=$(readlink -f ${0%/*})
+if [ -e /.dockerenv ];then
+mount -t devtmpfs /dev /dev
+fi
 _usage ()
 {
     echo "usage ${0} [options]"

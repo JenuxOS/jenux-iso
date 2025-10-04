@@ -9,3 +9,5 @@ jenux-build/installtest.aarch64
 jenux-build/packages.x86_64
 jenux-build/pacman.x86_64.conf
 jenux-build/installtest.x86_64
+.env
+jenux-build/.env
