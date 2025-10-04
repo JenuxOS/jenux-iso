@@ -756,8 +756,6 @@ done
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
-qemu-img convert -p -f raw -O vmdk "${iso_name}-${iso_version}-${buildtype}.iso" "${iso_name}-${iso_version}-${buildtype}.vmdk"
-sha512sum "${iso_name}-${iso_version}-${buildtype}.vmdk" > "${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 cd ${script_path}
 ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
 }
