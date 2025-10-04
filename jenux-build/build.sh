@@ -1014,13 +1014,11 @@ fi
 for arch in `echo -en $prepbuilds`; do
 run_once make_pacman_conf
 run_once make_packages
-if [ -e /.dockerenv ];then
 if [ -z $docker_phase ];then
 true
 else
-if echo $docker_phase|grep -qw rootfs ];then
+if echo $docker_phase|grep -qw rootfs;then
 exit 0
-fi
 fi
 fi
 run_once make_setup_mkinitcpio

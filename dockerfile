@@ -14,6 +14,5 @@ WORKDIR /build/jenux-build
 COPY .env /build/jenux-build/
 ENV docker_phase=rootfs
 RUN ./build.sh
-RUN rm /build/jenux-build/.env
 ENV docker_phase=iso
 CMD ["./build.sh"]
