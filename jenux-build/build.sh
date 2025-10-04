@@ -1,7 +1,7 @@
 #!/bin/bash
 umask 022
-if [ -e /build/.env ];then
-source /build/.env
+if [ -e .env ];then
+source .env
 fi
 if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
 if [ -z $jenux_iso_arch ];then
