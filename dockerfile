@@ -11,6 +11,7 @@ RUN /pkg.base
 RUN rm /pkg.base
 COPY . /build
 WORKDIR /build/jenux-build
-VOLUME ["./jenux-build/out" "/build/jenux-build/out"]
-VOLUME ["/dev" "/dev"]
-CMD ["./build.sh"]
+ENV docker_phase rootfs
+RUN ./build.sh
+ENV docker_phase iso
+cmd ["./build.sh"]
