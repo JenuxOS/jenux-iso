@@ -129,6 +129,11 @@ fi
 if [ $arch = "i686" ];then
 sed -i "/qemu-img/d;s|qemu-base|qemu-headless|g" packages.${arch}
 fi
+if echo $preset|grep -qw base ];then
+true
+else
+pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Rdd virtualbox-guest-utils-nox --noconfirm
+fi
 echo -n pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syyp\   > installtest.${arch}
 cat packages.${arch}|tr \\n \  >> installtest.${arch}
 chmod 700 installtest.${arch}
