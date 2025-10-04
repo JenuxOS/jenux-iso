@@ -1,6 +1,21 @@
 #!/bin/bash
 umask 022
 if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
+if [ -z $jenux_iso_arch ];then
+echo jenux_iso_arch is not set
+else
+echo jenux_iso_arch: $jenux_iso_arch
+fi
+if [ -z $jenux_iso_livemode ];then
+echo jenux_iso_livemode is not set
+else
+echo jenux_iso_livemode: $jenux_iso_livemode
+fi
+if [ -z $jenux_iso_preset ];then
+echo jenux_iso_preset is not set
+else
+echo jenux_iso_preset: $jenux_iso_preset
+fi
 echo environment error, see .venv.example, all vars must be set.
 exit 1
 fi
