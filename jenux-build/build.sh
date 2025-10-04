@@ -120,6 +120,8 @@ curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirro
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
+}
+make_packages() {
 curl -s https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
 if [ $arch = "aarch64" ];then
 sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d" packages.${arch}
@@ -138,8 +140,6 @@ rm installtest.${arch}
 cat ${script_path}/packages.${arch}|tr \\n \  |sed "s| linux | linux-aarch64 linux-aarch64-headers raspberrypi-bootloader firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect |g;s| linux-headers | |g"|tr \  \\n |sort|uniq > pkg.$arch
 mv pkg.$arch ${script_path}/packages.${arch}
 fi
-}
-make_packages() {
 while true;do
 if pacstrap -C "${work_dir}/pacman.${arch}.conf" -M -G "${work_dir}/${arch}/airootfs" --needed --overwrite \* `cat ${script_path}/packages.$arch|tr \\\\n \  `;then
 break
