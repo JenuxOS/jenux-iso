@@ -132,7 +132,9 @@ fi
 if echo $preset|grep -qw base ];then
 true
 else
+if pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Q 2>/dev/stdout|grep -iqw virtualbox-guest-utils-nox;then
 pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Rdd virtualbox-guest-utils-nox --noconfirm
+fi
 fi
 echo -n pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syyp\   > installtest.${arch}
 cat packages.${arch}|tr \\n \  >> installtest.${arch}
