@@ -1,5 +1,9 @@
 #!/bin/bash
 umask 022
+if [ -e /.dockerenv ];then
+source /.dockerenv
+mount -t devtmpfs /dev /dev
+fi
 if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
 if [ -z $jenux_iso_arch ];then
 echo jenux_iso_arch is not set
@@ -18,9 +22,6 @@ echo jenux_iso_preset: $jenux_iso_preset
 fi
 echo environment error, see .venv.example, all vars must be set.
 exit 1
-fi
-if [ -e /.dockerenv ];then
-mount -t devtmpfs /dev /dev
 fi
 export preset=$jenux_iso_preset
 export arch=$jenux_iso_arch
