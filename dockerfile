@@ -1,4 +1,5 @@
 FROM archlinux:base
+COPY . /build
 RUN curl -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.conf
 RUN curl -LO https://nashcentral.duckdns.org/autobuildres/linux/pkg.base
 RUN sed -i "s|pacstrap \/mnt|pacman -Syu --noconfirm|g" /pkg.base
@@ -9,8 +10,5 @@ RUN pacman --needed -Syu archlinux-keyring --noconfirm
 RUN pacman --noconfirm -Rdd iptables
 RUN /pkg.base
 RUN rm /pkg.base
-COPY . /build
 WORKDIR /build/jenux-build
-COPY .env /build/jenux-build/
-RUN export docker_phase=rootfs;./build.sh
-CMD unset docker_phase;./build.sh
+CMD ["./build.sh"]
