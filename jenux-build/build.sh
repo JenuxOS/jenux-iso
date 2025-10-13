@@ -110,7 +110,11 @@ cd $prepkgdir
 else
 curl -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.${arch}.conf
 fi
+if [ -e /.dockerenv ];then
+cp ${script_path}/pacman.$arch.conf ${work_dir}/pacman.${arch}.conf
+else
 sed -r "s|^#?\\s*CacheDir.+|CacheDir = $(echo -n ${_cache_dirs[@]})|g" ${script_path}/pacman.$arch.conf > ${work_dir}/pacman.${arch}.conf
+fi
 if [ $arch = "aarch64" ];then
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
 fi
@@ -1023,14 +1027,6 @@ fi
 for arch in `echo -en $prepbuilds`; do
 run_once make_pacman_conf
 run_once make_packages
-if [ -z $docker_phase ];then
-true
-else
-if echo $docker_phase|grep -qw rootfs;then
-rm ${work_dir}/build.make_packages_${arch}
-exit 0
-fi
-fi
 run_once make_setup_mkinitcpio
 run_once make_customize_airootfs
 run_once make_boot
