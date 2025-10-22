@@ -7,9 +7,6 @@ if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];
 if [ -z $jenux_iso_arch ];then
 echo jenux_iso_arch is not set
 else
-if echo $jenux_iso_arch|grep -qw _detect_;then
-export jenux_iso_arch=`uname -m`
-fi
 echo jenux_iso_arch: $jenux_iso_arch
 fi
 if [ -z $jenux_iso_livemode ];then
@@ -24,6 +21,9 @@ echo jenux_iso_preset: $jenux_iso_preset
 fi
 echo environment error, see .venv.example, all vars must be set.
 exit 1
+fi
+if echo $jenux_iso_arch|grep -qw _detect_;then
+export jenux_iso_arch=`uname -m`
 fi
 export preset=$jenux_iso_preset
 export arch=$jenux_iso_arch
