@@ -85,7 +85,13 @@ done
 local _cache_dirs
     _cache_dirs=($(pacman -v 2>&1 | grep '^Cache Dirs:' | sed 's/Cache Dirs:\s*//g'))
     if [ $arch = "aarch64" ];then
-    curl -s -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.$arch.conf
+    while true;do
+if curl -s -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.$arch.conf;then
+break
+else
+continue
+fi
+done
 mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
 export prepkgdir=$PWD
 cd "${work_dir}/${arch}/airootfs"
@@ -111,7 +117,13 @@ sed -i "s|\# Server|Server|g" etc/pacman.d/mirrorlist
 rm *.pkg* mirrors.tar
 cd $prepkgdir
 else
-curl -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.${arch}.conf
+while true;do
+if curl -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.${arch}.conf;then
+break
+else
+continue
+fi
+done
 fi
 if [ -e /.dockerenv ];then
 cp ${script_path}/pacman.$arch.conf ${work_dir}/pacman.${arch}.conf
@@ -123,7 +135,14 @@ sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/
 fi
 if [ $arch = "i686" ];then
 mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
-curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist|sed "s|#Server|Server|g;/mirror.datacenter.by/d;/archlinux32.agoctrl.org/d;/de.mirror.archlinux32.org/d;/\/mirror.archlinux32.org\//d;/mirror.archlinux32.oss/d" > "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
+while true;do
+if curl -Lo "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist" https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist;then
+break
+else
+continue
+fi
+done
+sed -i "s|#Server|Server|g;/mirror.datacenter.by/d;/archlinux32.agoctrl.org/d;/de.mirror.archlinux32.org/d;/\/mirror.archlinux32.org\//d;/mirror.archlinux32.oss/d" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
