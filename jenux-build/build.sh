@@ -156,6 +156,29 @@ done
 pacman --needed --noconfirm -U *.pkg*
 rm *.pkg*
 fi
+if [ $arch = "x86_64" ];then
+mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
+while true;do
+if curl -L https://archlinux.org/packages/core/any/pacman-mirrorlist/download/|tar --zstd -C ${work_dir}/${arch}/airootfs -x etc/pacman.d/mirrorlist;then
+break
+else
+continue
+fi
+done
+sed -i "s|#Server|Server|g" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
+sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
+export mirrorurl=`cat ${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist|grep -i server|head -n 1|sed "s|\\$arch|$arch|g;s|\\$repo|core|g;s|Server = ||g"`
+export keyringurl=`lynx --dump -listonly -nonumbers $mirrorurl|grep archlinux-keyring|grep .tar|sed "/transition/d;/.sig/d"|tail -n 1|cut -f 4 -d \  `
+while true;do
+if curl -LO $keyringurl;then
+break
+else
+continue
+fi
+done
+pacman --needed --noconfirm -U *.pkg*
+rm *.pkg*
+fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
 }
 make_packages() {
