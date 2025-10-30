@@ -51,6 +51,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jenux-${{ matrix.arch == 'all' && 'tripple' || ${{ matrix.arch }}}}
+          name: jenux-${{ matrix.arch == 'all' && 'tripple' || $matrix.arch }}
           path: ./art/*
           retention-days: 1
