@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches:
+      dnl-nash/experimental-new-build-workflow
+
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, i686, aarch64, all]
+    
+    name: installer-${{ matrix.arch}}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Create environment file
+        run: |
+          cat > .env << EOF
+          jenux_iso_arch=${{ matrix.arch }}
+          jenux_iso_livemode=0
+          jenux_iso_preset=base
+          EOF
+          
+      - name: Create output directory
+        run: mkdir -p ./art
+      
+      - name: Build Docker image
+        run: docker build -t jenux -f dockerfile $PWD
+      
+      - name: Run Docker container
+        run: |
+          docker run --privileged --env-file .env \
+            -v $PWD/art:/build/jenux-build/out \
+            -t jenux
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch == 'all' && 'tripple' || ${{ matrix.arch }}}}
+          path: ./art/*
+          retention-days: 1
