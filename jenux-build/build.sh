@@ -317,6 +317,9 @@ mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
     cd "${script_path}/${work_dir}/iso/arch/${arch}"
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
+if [ -e ${work_dir}/${arch}/airootfs ];then
+rm -rf ${work_dir}/${arch}/airootfs
+fi
 }
 
 # Build ISO
