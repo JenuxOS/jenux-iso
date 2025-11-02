@@ -318,10 +318,13 @@ mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
 if [ -e ${work_dir}/${arch}/airootfs ];then
-mv ${work_dir}/${arch}/airootfs/boot ${work_dir}/${arch}
+cd ${work_dir}/${arch}/airootfs
+tar -czf ../bootfiles.tar.gz boot usr/lib/grub
+cd ${script_path}
 rm -rf ${work_dir}/${arch}/airootfs
 mkdir -p ${work_dir}/${arch}/airootfs
-cp -rf ${work_dir}/${arch}/boot ${work_dir}/${arch}/airootfs
+cd ${work_dir}/${arch}/airootfs
+tar -xf ../bootfiles.tar.gz
 fi
 }
 
