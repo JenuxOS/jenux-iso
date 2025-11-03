@@ -7,8 +7,6 @@ on:
 
 jobs:
   installer:
-    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    timeout-minutes: 120
     
     strategy:
       fail-fast: false
@@ -16,6 +14,8 @@ jobs:
         arch: [x86_64, i686, aarch64, all]
     
     name: installer-${{ matrix.arch}}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    timeout-minutes: 120
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
