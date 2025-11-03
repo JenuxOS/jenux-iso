@@ -313,7 +313,7 @@ mkdir -p "${work_dir}/iso/arch/${arch}"
 fi
 arch-chroot ${script_path}/${work_dir}/${arch}/airootfs /bin/pacman -Q > "${work_dir}/iso/arch/pkglist.${arch}.txt"
 cd ${work_dir}/${arch}/airootfs
-mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
+mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384 -one-file-system
     cd "${script_path}/${work_dir}/iso/arch/${arch}"
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
@@ -321,7 +321,7 @@ if [ -e ${work_dir}/${arch}/airootfs ];then
 cd ${work_dir}/${arch}/airootfs
 tar -czf ../bootfiles.tar.gz boot usr/lib/grub
 cd ${script_path}
-rm -rf ${work_dir}/${arch}/airootfs
+rm --one-file-system -rf ${work_dir}/${arch}/airootfs
 mkdir -p ${work_dir}/${arch}/airootfs
 cd ${work_dir}/${arch}/airootfs
 tar -xf ../bootfiles.tar.gz
