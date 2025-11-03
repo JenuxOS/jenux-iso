@@ -49,4 +49,4 @@ jobs:
         with:
           name: jenux-${{ matrix.arch }}
           path: ./art/*
-          retention-days: 366
+          retention-days: 90
