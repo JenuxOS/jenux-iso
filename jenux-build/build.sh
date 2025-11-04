@@ -317,15 +317,7 @@ mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
     cd "${script_path}/${work_dir}/iso/arch/${arch}"
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
-if [ -e ${work_dir}/${arch}/airootfs ];then
-cd ${work_dir}/${arch}/airootfs
-tar -czf ../bootfiles.tar.gz boot usr/lib/grub
-cd ${script_path}
 rm --one-file-system -rf ${work_dir}/${arch}/airootfs
-mkdir -p ${work_dir}/${arch}/airootfs
-cd ${work_dir}/${arch}/airootfs
-tar -xf ../bootfiles.tar.gz
-fi
 }
 
 # Build ISO
@@ -816,8 +808,17 @@ tune2fs -O encrypt -m 0 $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
+if [ -e "${script_path}/${work_dir}/${arch}/airootfs" ];then
+sleep .01
+else
+mkdir -p "${script_path}/${work_dir}/${arch}/airootfs"
+fi
+if mountpoint "${script_path}/${work_dir}/${arch}/airootfs/proc" > /dev/null 2>/dev/null;then
+umount "${script_path}/${work_dir}/${arch}/airootfs/proc"
+fi
+mount "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" "${script_path}/${work_dir}/${arch}/airootfs"
 if install_bootloader;then
-umount /mnt/EFI /mnt
+umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
 break
 else
@@ -828,7 +829,7 @@ export pids=$pids" "`fuser -m /mnt/EFI|tr c \  |tr -s \  |sed "s|$mypid||g"`
 for f in `echo $pids`;do
 kill -9 $f
 done
-umount /mnt/EFI /mnt
+umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
 export bufsize=$(($bufsize+200))
 continue
