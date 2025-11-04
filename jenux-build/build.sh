@@ -911,10 +911,12 @@ fi
 fi
 fi
 if echo $prepbuilds|grep -iqw aarch64;then
+if [ -e ${script_path}/${work_dir}/${arch}/airootfs/boot/* ];then
 if cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI;then
 sleep .01
 else
 return 13
+fi
 fi
 if grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI;then
 sleep .01
