@@ -1,0 +1,55 @@
+name: tripple-installer
+
+on:
+  push:
+    branches:
+      dnl-nash/experimental-new-build-workflow
+
+jobs:
+  installer:
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [all]
+    
+    name: installer-${{ matrix.arch}}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Set up Qemu for aarch64
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Create environment file
+        run: |
+          cat > .env << EOF
+          jenux_iso_arch=${{ matrix.arch }}
+          jenux_iso_livemode=0
+          jenux_iso_preset=base
+          EOF
+          
+      - name: Create output directory
+        run: mkdir -p ./art
+      
+      - name: Build Docker image
+        run: docker build -t jenux -f dockerfile $PWD
+      
+      - name: Run Docker container
+        run: |
+          docker run --privileged --env-file .env \
+            -v $PWD/art:/build/jenux-build/out \
+            -t jenux
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}
+          path: ./art/*
+          retention-days: 90

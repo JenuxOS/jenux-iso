@@ -1,4 +1,4 @@
-name: installer-arm
+name: arm-installer
 
 on:
   push:
@@ -7,8 +7,6 @@ on:
 
 jobs:
   installer:
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 120
     
     strategy:
       fail-fast: false
@@ -16,6 +14,8 @@ jobs:
         arch: [aarch64]
     
     name: installer-${{ matrix.arch}}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
     steps:
       - name: Checkout code
         uses: actions/checkout@v5

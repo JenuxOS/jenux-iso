@@ -182,7 +182,14 @@ fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
 }
 make_packages() {
-curl -s https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
+while true;do
+curl https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
+if cat packages.${arch}|grep -iqw base;then
+break
+else
+continue
+fi
+done
 if [ $arch = "aarch64" ];then
 sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d" packages.${arch}
 fi
