@@ -1064,6 +1064,7 @@ cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.im
 cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/archiso.rpi.img archiso.img
 cd $OLDPWD
 fi
+qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk"
 return 0
 }
 if [[ ${EUID} -ne 0 ]]; then
