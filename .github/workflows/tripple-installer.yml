@@ -49,11 +49,11 @@ jobs:
       - name: Upload iso
         uses: actions/upload-artifact@v4
         if: always()
-          path: ./art/*.iso
-          retention-days: 90
+        path: ./art/*.iso
+        retention-days: 90
       
       - name: Upload vmdk
         uses: actions/upload-artifact@v4
         if: always()
-          path: ./art/*.vmdk
-          retention-days: 90
+        path: ./art/*.vmdk
+        retention-days: 90
