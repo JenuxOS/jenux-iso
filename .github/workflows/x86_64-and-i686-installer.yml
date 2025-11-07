@@ -43,10 +43,17 @@ jobs:
             -v $PWD/art:/build/jenux-build/out \
             -t jenux
       
-      - name: Upload artifacts
+      - name: Upload iso
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: jenux-${{ matrix.arch }}
-          path: ./art/*
+          path: ./art/*.iso
+          retention-days: 90
+      - name: Upload vmdk
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}
+          path: ./art/*.vmdk
           retention-days: 90

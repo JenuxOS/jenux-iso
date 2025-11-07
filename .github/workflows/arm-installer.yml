@@ -14,7 +14,7 @@ jobs:
         arch: [aarch64]
     
     name: installer-${{ matrix.arch}}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     timeout-minutes: 120
     steps:
       - name: Checkout code
@@ -43,10 +43,17 @@ jobs:
             -v $PWD/art:/build/jenux-build/out \
             -t jenux
       
-      - name: Upload artifacts
+      - name: Upload iso
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: jenux-${{ matrix.arch }}
-          path: ./art/*
+          path: ./art/*.iso
+          retention-days: 90
+      - name: Upload vmdk
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}
+          path: ./art/*.vmdk
           retention-days: 90
