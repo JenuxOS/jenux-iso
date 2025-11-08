@@ -320,8 +320,8 @@ mkdir -p "${work_dir}/iso/arch/${arch}"
 fi
 arch-chroot ${script_path}/${work_dir}/${arch}/airootfs /bin/pacman -Q > "${work_dir}/iso/arch/pkglist.${arch}.txt"
 cd ${work_dir}/${arch}/airootfs
-mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -one-file-system
-    cd "${script_path}/${work_dir}/iso/arch/${arch}"
+mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
+cd "${script_path}/${work_dir}/iso/arch/${arch}"
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
 rm --one-file-system -rf ${work_dir}/${arch}/airootfs
