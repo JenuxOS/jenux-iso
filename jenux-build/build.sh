@@ -823,7 +823,7 @@ fi
 if mountpoint "${script_path}/${work_dir}/${arch}/airootfs/proc" > /dev/null 2>/dev/null;then
 umount "${script_path}/${work_dir}/${arch}/airootfs/proc"
 fi
-mount "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" "${script_path}/${work_dir}/${arch}/airootfs"
+squashfuse "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" "${script_path}/${work_dir}/${arch}/airootfs"
 if install_bootloader;then
 umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
