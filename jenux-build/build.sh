@@ -331,7 +331,13 @@ else
 break
 fi
 done
-mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
+while true;do
+if mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384;then
+break
+else
+continue
+fi
+done
 cd "${script_path}/${work_dir}/iso/arch/${arch}"
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
