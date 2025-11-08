@@ -49,6 +49,8 @@ jobs:
         with:
           name: jenux-${{ matrix.arch }}.iso
           path: ./art/*.iso
+          compression-level: 9
+          if-no-files-found: error
           retention-days: 90
       
       - name: Upload vmdk
@@ -57,4 +59,6 @@ jobs:
         with:
           name: jenux-${{ matrix.arch }}.vmdk
           path: ./art/*.vmdk
+          compression-level: 9
+          if-no-files-found: error
           retention-days: 90
