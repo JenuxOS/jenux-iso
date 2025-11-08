@@ -327,6 +327,8 @@ break
 else
 continue
 fi
+else
+break
 fi
 done
 mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
