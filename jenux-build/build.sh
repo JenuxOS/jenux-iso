@@ -224,6 +224,7 @@ continue
 fi
 done
 rm ${script_path}/packages.${arch} ${script_path}/pacman.${arch}.conf 
+rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 }
 
 make_setup_mkinitcpio() {
@@ -252,7 +253,6 @@ curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirro
 ;;
 esac
 arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
-rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 rm -rf ${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg
 if [ -e "${work_dir}/${arch}/airootfs/usr/share/jenux" ];then
 sleep .01
