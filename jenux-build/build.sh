@@ -180,6 +180,24 @@ pacman --needed --noconfirm -U *.pkg*
 rm *.pkg*
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
+cat ${work_dir}/pacman.${arch}.conf|grep -F \[|grep -F \]|sed "/#/d;/\[options\]/d"|tr \\n \  |read -r -s repodata
+export repos=`echo $repodata|tr \\  \\\n|tr -d \\[|tr -d \\]`
+export oldifs=$IFS
+export IFS=$(echo -en \\n\\b)
+for f in `echo -en $repos`;do
+if [ -e ${work_dir}/${arch}/airootfs/var/lib/pacman/sync/$f.db ];then
+continue
+else
+while true;do
+if pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syy;then
+break
+else
+continue
+fi
+done
+fi
+done
+export IFS=$oldifs
 }
 make_packages() {
 while true;do
