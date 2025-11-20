@@ -821,6 +821,9 @@ git log > "${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 if [ -e "${script_path}/iso" ];then
 cp -rf "${script_path}/iso"/* .
 fi
+if echo $livebuild|grep -iqw livebuild;then
+echo livemode=1 > ./rootpasswd
+fi
 cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 export bufsize=800
 while true;do
