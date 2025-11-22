@@ -75,6 +75,14 @@ run_once() {
     fi
 }
 make_pacman_conf() {
+export mygpgdir=$PWD
+if [ -e $mygpgdir/gpg.tar ];then
+sleep .01
+else
+cd /
+tar -cf $mygpgdir/gpg.tar etc/pacman.d/gnupg
+cd $mygpgdir
+fi
 for d in "${work_dir}/${arch}" "${work_dir}/${arch}/airootfs" "${work_dir}/iso/${install_dir}";do
 if [ -d $d ];then
 sleep .01
@@ -114,6 +122,10 @@ done
 pacman --needed --noconfirm -U *.pkg*
 tar -xf mirrors.tar etc/pacman.d/mirrorlist
 sed -i "s|\# Server|Server|g" etc/pacman.d/mirrorlist
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init
+echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
+pacman-key --populate
 rm *.pkg* mirrors.tar
 cd $prepkgdir
 else
@@ -154,6 +166,10 @@ continue
 fi
 done
 pacman --needed --noconfirm -U *.pkg*
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init
+echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
+pacman-key --populate
 rm *.pkg*
 fi
 if [ $arch = "x86_64" ];then
@@ -177,6 +193,10 @@ continue
 fi
 done
 pacman --needed --noconfirm -U *.pkg*
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init
+echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
+pacman-key --populate
 rm *.pkg*
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
@@ -236,6 +256,9 @@ fi
 done
 while true;do
 if pacstrap -C "${work_dir}/pacman.${arch}.conf" -M -G "${work_dir}/${arch}/airootfs" --needed --overwrite \* `cat ${script_path}/packages.$arch|tr \\\\n \  `;then
+cd /
+rm -rf etc/pacman.d/gnupg
+tar -xf $mygpgdir/gpg.tar etc/pacman.d/gnupg
 break
 else
 continue
