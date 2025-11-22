@@ -126,6 +126,13 @@ rm -rf /etc/pacman.d/gnupg
 pacman-key --init
 echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
 pacman-key --populate
+for k in `cat /usr/share/pacman/keyrings/*.gpg|gpg --list-options show-std-notations --show-keys 2>/dev/null|sed "/pub/d;/uid/d;/sub/d;/by/d;/Revocable/d"|tr -s \\n`;do
+if pacman-key -l|grep -qw $k;then
+export keylist=$keylist" "$k
+fi
+done
+pacman-key -r $keylist
+pacman-key --lsign $keylist
 rm *.pkg* mirrors.tar
 cd $prepkgdir
 else
@@ -170,6 +177,13 @@ rm -rf /etc/pacman.d/gnupg
 pacman-key --init
 echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
 pacman-key --populate
+for k in `cat /usr/share/pacman/keyrings/*.gpg|gpg --list-options show-std-notations --show-keys 2>/dev/null|sed "/pub/d;/uid/d;/sub/d;/by/d;/Revocable/d"|tr -s \\n`;do
+if pacman-key -l|grep -qw $k;then
+export keylist=$keylist" "$k
+fi
+done
+pacman-key -r $keylist
+pacman-key --lsign $keylist
 rm *.pkg*
 fi
 if [ $arch = "x86_64" ];then
@@ -197,6 +211,13 @@ rm -rf /etc/pacman.d/gnupg
 pacman-key --init
 echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
 pacman-key --populate
+for k in `cat /usr/share/pacman/keyrings/*.gpg|gpg --list-options show-std-notations --show-keys 2>/dev/null|sed "/pub/d;/uid/d;/sub/d;/by/d;/Revocable/d"|tr -s \\n`;do
+if pacman-key -l|grep -qw $k;then
+export keylist=$keylist" "$k
+fi
+done
+pacman-key -r $keylist
+pacman-key --lsign $keylist
 rm *.pkg*
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
