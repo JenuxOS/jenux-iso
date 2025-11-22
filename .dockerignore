@@ -14,3 +14,4 @@ jenux-build/.env
 work
 out
 .github
+jenux-build/gpg.tar
