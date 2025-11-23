@@ -280,6 +280,7 @@ if pacstrap -C "${work_dir}/pacman.${arch}.conf" -M -G "${work_dir}/${arch}/airo
 cd /
 rm -rf etc/pacman.d/gnupg
 tar -xf $mygpgdir/gpg.tar etc/pacman.d/gnupg
+cd $OLDPWD
 break
 else
 continue
