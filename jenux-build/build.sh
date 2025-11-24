@@ -283,6 +283,7 @@ tar -xf $mygpgdir/gpg.tar etc/pacman.d/gnupg
 cd $OLDPWD
 break
 else
+make_packages
 continue
 fi
 done
