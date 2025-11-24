@@ -1,4 +1,4 @@
-name: x86_64-and-i686-installer
+name: i686-installer
 
 on:
   push:

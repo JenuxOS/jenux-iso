@@ -1,4 +1,4 @@
-name: x86_64-and-i686-live-plasma
+name: x86_64-live-plasma
 
 on:
   push:
