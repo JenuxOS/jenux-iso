@@ -13,4 +13,5 @@ jenux-build/.env
 .env
 work
 out
+art
 jenux-build/gpg.tar
