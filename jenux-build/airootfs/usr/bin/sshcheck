@@ -26,6 +26,23 @@ cat /proc/cmdline|tr \  \\n|grep -w soundcard|sed "s|soundcard=||g"|tr -d \\n|he
 cat /proc/cmdline|tr \  \\n|grep -w soundcardindex|sed "s|soundcardindex=||g"|tr -d \\n|head -n 1|read -r -s soundcardindex
 cat /proc/cmdline|tr \  \\n|grep -w livemode|sed "s|livemode=||g"|tr -d \\n|head -n 1|read -r -s livemode
 cat /proc/cmdline|tr \  \\n|grep -w btconnaddr|sed "s|btconnaddr=||g"|tr -d \\n|head -n 1|read -r -s btconnaddr
+if [ -z $nospeech ];then
+export accessibility=1
+else
+export accessibility=0
+fi
+cat /proc/cmdline|tr \  \\n|grep -w host|sed "s|host=||g"|tr -d \\n|read -r -s host
+cat /proc/cmdline|tr \  \\n|grep -w name|sed "s|name=||g"|tr -d \\n|tr _ \  |read -r -s name
+cat /proc/cmdline|tr \  \\n|grep -w user|sed "s|user=||g"|tr -d \\n|read -r -s user
+cat /proc/cmdline|tr \  \\n|grep -w pass|sed "s|pass=||g"|tr -d \\n|read -r -s pass
+cat /proc/cmdline|tr \  \\n|grep -w encrypthome|sed "s|encrypthome=||g"|tr -d \\n|read -r -s encrypthome
+if [ -z $encrypthome ];then
+if [ -z $livemode ];then
+export encrypthome=1
+else
+export encrypthome=0
+fi
+fi
 export IFS=,
 for btdev in `echo $btconnaddr`;do
 systemctl --no-block start btconnect@$btdev
@@ -210,29 +227,6 @@ echo downloading unattend file
 while true;do
 if curl -Lo /root/unattend $unattend;then
 source /root/unattend
-if [ -z $nospeech ];then
-export accessibility=1
-else
-export accessibility=0
-fi
-cat /proc/cmdline|tr \  \\n|grep -w host|sed "s|host=||g"|tr -d \\n|read -r -s host
-cat /proc/cmdline|tr \  \\n|grep -w name|sed "s|name=||g"|tr -d \\n|tr _ \  |read -r -s name
-cat /proc/cmdline|tr \  \\n|grep -w user|sed "s|user=||g"|tr -d \\n|read -r -s user
-cat /proc/cmdline|tr \  \\n|grep -w pass|sed "s|pass=||g"|tr -d \\n|read -r -s pass
-cat /proc/cmdline|tr \  \\n|grep -w encrypthome|sed "s|encrypthome=||g"|tr -d \\n|read -r -s encrypthome
-if [ -z $encrypthome ];then
-export encrypthome=1
-fi
-if [ -z $accessibility ]||[ -z $host ]||[ -z $name ]||[ -z $user ]||[ -z $pass ]||[ -z $encrypthome ];then
-echo some parameters needed to complete first time setup are missing. The unattend file has been left unmodified.
-else
-echo export accessibility=\'$accessibility\' >> /root/unattend
-echo export host=\'$host\' >> /root/unattend
-echo export name=\'$name\' >> /root/unattend
-echo export user=\'$user\' >> /root/unattend
-echo export pass=\'$pass\' >> /root/unattend
-echo export encrypthome=\'$encrypthome\' >> /root/unattend
-fi
 break
 else
 continue
@@ -241,6 +235,18 @@ done
 if mountpoint -q /mnt;then
 umount /mnt
 fi
+fi
+if [ -z $accessibility ]||[ -z $host ]||[ -z $name ]||[ -z $user ]||[ -z $pass ]||[ -z $encrypthome ];then
+if [ -e /root/unattend ];then
+echo some parameters needed to complete first time setup are missing. The unattend file has been left unmodified.
+fi
+else
+echo export accessibility=\'$accessibility\' >> /root/unattend
+echo export host=\'$host\' >> /root/unattend
+echo export name=\'$name\' >> /root/unattend
+echo export user=\'$user\' >> /root/unattend
+echo export pass=\'$pass\' >> /root/unattend
+echo export encrypthome=\'$encrypthome\' >> /root/unattend
 fi
 if [ -z $sshkey ];then
 echo no ssh key supplied!
