@@ -239,6 +239,8 @@ fi
 if [ -z $accessibility ]||[ -z $host ]||[ -z $name ]||[ -z $user ]||[ -z $pass ]||[ -z $encrypthome ];then
 if [ -e /root/unattend ];then
 echo some parameters needed to complete first time setup are missing. The unattend file has been left unmodified.
+else
+echo \#user >> /root/unattend
 fi
 else
 echo export accessibility=\'$accessibility\' >> /root/unattend
