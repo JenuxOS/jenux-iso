@@ -369,7 +369,7 @@ fi
 }
 make_efi() {
 cd ${script_path}
-echo -n iso version: $iso_version > ${work_dir}/iso/jenux_livecd
+echo -n iso version: $iso_version > ${work_dir}/iso/jenux_version
 mkdir -p ${work_dir}/iso/boot/grub
 cp ${script_path}/efiboot/*.cfg ${work_dir}/iso/boot/grub
 sed -i "s|%INSTALL_DIR%|${install_dir}|g" ${work_dir}/iso/boot/grub/grub.cfg
@@ -868,7 +868,7 @@ if [ -e "${script_path}/iso" ];then
 cp -rf "${script_path}/iso"/* .
 fi
 if echo $livebuild|grep -iqw livebuild;then
-echo livemode=1 > ./rootpasswd
+echo livemode=1 > ./jenux_live
 fi
 cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 export bufsize=800
