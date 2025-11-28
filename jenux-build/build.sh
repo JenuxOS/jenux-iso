@@ -865,7 +865,7 @@ fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 if [ -e "${script_path}/iso" ];then
-cp -rf "${script_path}/iso"/* .
+cp -rf "${script_path}/iso" ..
 fi
 if echo $livebuild|grep -iqw livebuild;then
 echo livemode=1 > ./jenux_live
