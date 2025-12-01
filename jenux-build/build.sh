@@ -299,7 +299,6 @@ make_setup_mkinitcpio() {
         cp /usr/lib/initcpio/hooks/${_hook} ${work_dir}/${arch}/airootfs/etc/initcpio/hooks
         cp /usr/lib/initcpio/install/${_hook} ${work_dir}/${arch}/airootfs/etc/initcpio/install
     done
-    sed -i 's|cow_spacesize="256M"|cow_spacesize=\`cat /proc/meminfo\|grep -i available\|cut -f 2 -d :\|sed "s\| \|\|g;s\|kB\|K\|g"\`|g' ${work_dir}/${arch}/airootfs/etc/initcpio/hooks/archiso
     cp /usr/lib/initcpio/install/archiso_kms ${work_dir}/${arch}/airootfs/etc/initcpio/install
     cp ${script_path}/mkinitcpio.conf ${work_dir}/${arch}/airootfs/etc/mkinitcpio-archiso.conf
 }
