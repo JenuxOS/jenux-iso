@@ -4,6 +4,7 @@ on:
   push:
     branches:
       dnl-nash/experimental-new-build-workflow
+  workflow_dispatch:
 
 jobs:
   live-gnome:
