@@ -1,0 +1,43 @@
+#!/bin/zsh
+while true;do
+systemctl restart pxe
+sleep 2
+if systemctl is-active pxe > /dev/null 2>/dev/null;then
+break
+else
+mount -o remount,rw /run/archiso/bootmnt
+rm /run/archiso/bootmnt/pxe_writeable_test
+continue
+fi
+done
+while true;do
+if systemctl is-active nbdproc >/dev/null 2>/dev/null;then
+break
+else
+systemctl restart nbdproc
+continue
+fi
+done
+while true;do
+for f in "image" "imglist";do
+curl -s -LO http://192.168.120.1/$f > /dev/null 2>/dev/null
+done
+export len=`cat /net/imglist|sed /\#/d|wc -l`
+export numqcows=`ls /net/*.qcow2|wc -l`
+export numvmdks=`ls /net/*.vmdk|wc -l`
+export numimgs=$(($numqcows+$numvmdks))
+if [ $len -eq $numimgs ];then
+break
+else
+continue
+fi
+done
+while true;do
+if curl -s -LO http://192.168.120.1/image > /dev/null 2>/dev/null;then
+break
+else
+continue
+fi
+done
+chmod 755 image
+./image

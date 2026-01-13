@@ -1,0 +1,10 @@
+[Unit]
+Description=Image PXE
+After=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c 'if [ -e /net ];then sleep .01;else mkdir /net;fi;if [ -e /dev/disk/by-partlabel/linuxiso ]||[ -e /dev/disk/by-partlabel/ISOEFI ];then if mountpoint /net;then sleep .01;fi;if mountpoint /run/archiso/bootmnt;then sleep .01;else if [ -e /run/archiso/bootmnt ];then sleep .01;else mkdir -p /run/archiso/bootmnt;fi;if mount /dev/disk/by-partlabel/linuxiso /run/archiso/bootmnt;then sleep .01;else echo error: Please reboot with lowram enabled to run pxe imaging. Alternatively, connect or download and attach a Jenux iso as a loop device. ;systemctl stop nbdproc;exit 2;fi;fi;echo > /run/archiso/bootmnt/pxe_writeable_test;if [ -e /run/archiso/bootmnt/pxe_writeable_test ];then sleep .01;else mount -o remount,rw /run/archiso/bootmnt;rm /run/archiso/bootmnt/pxe_writeable_test;fi;if mountpoint /run/archiso/bootmnt/EFI;then sleep .01;else mount /dev/disk/by-partlabel/ISOEFI /run/archiso/bootmnt/EFI;fi;if mount -t overlay -o lowerdir=/run/archiso/bootmnt,upperdir=/run/archiso/bootmnt/pxe,workdir=/run/archiso/bootmnt/netdata /net /net;then mount -o bind,nodev,noexec,nosuid /run/archiso/bootmnt/EFI /net/EFI;fi;chmod -R 755 /net;fi;cd /net;export dev=`nmcli -t d|grep -i ethernet|cut -f 1 -d :`;if [ -z $dev ];then export dev=lo;fi;systemctl start nbdproc;./pxeboot $dev'
+ExecStop=/bin/sh -c 'systemctl stop nbdproc;kill -s INT -p `pidof -x pxeboot`;umount /net/EFI /run/archiso/bootmnt/EFI;qemu-nbd -d /dev/nbd0;qemu-nbd -d /dev/nbd15;fuser -m /net -k;umount /net'
+[Install]
+WantedBy=default.target
