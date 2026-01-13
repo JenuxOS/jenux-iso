@@ -67,6 +67,11 @@ else
 echo unsupported image list version
 exit 48
 fi
+if [ -e /net/$img ];then
+export img=/net/$img
+else
+export img=http://192.168.120.1/$img
+fi
 if echo $type|grep -qw w;then
 echo press b enter within 10 seconds to skip image and run bootloader repair
 read -t 10 nowrite
@@ -107,7 +112,7 @@ else
 continue
 fi
 done
-./v2p http://192.168.120.1/$img $disk $type
+./v2p $img $disk $type
 fi
 else
 echo -n image started on\  
@@ -120,5 +125,5 @@ else
 continue
 fi
 done
-./v2p http://192.168.120.1/$img $disk $type
+./v2p $img $disk $type
 fi

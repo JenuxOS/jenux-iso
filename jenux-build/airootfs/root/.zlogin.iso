@@ -80,13 +80,16 @@ pibuild
 remote)
 echo -n > ~/.unattend.$mytty
 ;;
+user)
+echo -n > ~/.unattend.$mytty
+;;
 *)
 echo -n > ~/.unattend.$mytty
 echo unsupported unattend for $product. Please press enter to load main menu
 read -t 5 var
 ;;
 esac
-rm ~/unattend
+mv ~/unattend /unattend
 fi
 else
 echo -n > ~/.unattend.$mytty

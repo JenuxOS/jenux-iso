@@ -1,0 +1,1 @@
+qemu-system-x86_64 --enable-kvm -m 4096 -drive file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd,format=raw,id=uefi,if=pflash,readonly=on $1 -snapshot

@@ -78,7 +78,7 @@ t
 n
 
 
-239615
+239616
 t
 2
 10
@@ -127,7 +127,7 @@ else
 echo disconnecting due to write error
 qemu-nbd -d /dev/nbd0
 echo reconnecting $src to /dev/nbd0
-qemu-nbd -r -c /dev/nbd0 $src
+qemu-nbd -s -c /dev/nbd0 $src
 echo loading partition table for /dev/nbd0
 partprobe /dev/nbd0
 continue

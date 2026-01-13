@@ -1,0 +1,4 @@
+#!/bin/zsh
+for f in `efibootmgr|grep Boot|grep \*|cut -f 1 -d \*|sed "s|Boot||g"`;do
+efibootmgr -b $f -B
+done

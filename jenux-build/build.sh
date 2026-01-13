@@ -1,11 +1,36 @@
 #!/bin/bash
 umask 022
-if [ -z $1 ];then
-export preset=base
-else
-export preset=$1
+if [ -e .env ];then
+source .env
 fi
-if echo $@|grep -iqw live;then
+if [ -z $jenux_iso_arch ]||[ -z $jenux_iso_livemode ]||[ -z $jenux_iso_preset ];then
+if [ -z $jenux_iso_arch ];then
+echo jenux_iso_arch is not set
+else
+echo jenux_iso_arch: $jenux_iso_arch
+fi
+if [ -z $jenux_iso_livemode ];then
+echo jenux_iso_livemode is not set
+else
+echo jenux_iso_livemode: $jenux_iso_livemode
+fi
+if [ -z $jenux_iso_preset ];then
+echo jenux_iso_preset is not set
+else
+echo jenux_iso_preset: $jenux_iso_preset
+fi
+echo environment error, see .venv.example, all vars must be set.
+exit 1
+fi
+if echo $jenux_iso_arch|grep -qw _detect_;then
+export jenux_iso_arch=`uname -m`
+fi
+export preset=$jenux_iso_preset
+export arch=$jenux_iso_arch
+if echo $jenux_iso_arch|grep -iqw all;then
+unset arch
+fi
+if echo $jenux_iso_livemode|grep -iqw 1;then
 export livebuild=livebuild
 iso_name=Jenux-live-$preset
 else
@@ -19,6 +44,9 @@ work_dir=work
 out_dir=out
 verbose="-v"
 script_path=$(readlink -f ${0%/*})
+if [ -e /.dockerenv ];then
+mount -t devtmpfs /dev /dev
+fi
 _usage ()
 {
     echo "usage ${0} [options]"
@@ -47,6 +75,14 @@ run_once() {
     fi
 }
 make_pacman_conf() {
+export mygpgdir=$PWD
+if [ -e $mygpgdir/gpg.tar ];then
+sleep .01
+else
+cd /
+tar -cf $mygpgdir/gpg.tar etc/pacman.d/gnupg
+cd $mygpgdir
+fi
 for d in "${work_dir}/${arch}" "${work_dir}/${arch}/airootfs" "${work_dir}/iso/${install_dir}";do
 if [ -d $d ];then
 sleep .01
@@ -57,7 +93,13 @@ done
 local _cache_dirs
     _cache_dirs=($(pacman -v 2>&1 | grep '^Cache Dirs:' | sed 's/Cache Dirs:\s*//g'))
     if [ $arch = "aarch64" ];then
-    curl -s -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.$arch.conf
+    while true;do
+if curl -s -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.$arch.conf;then
+break
+else
+continue
+fi
+done
 mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
 export prepkgdir=$PWD
 cd "${work_dir}/${arch}/airootfs"
@@ -80,27 +122,142 @@ done
 pacman --needed --noconfirm -U *.pkg*
 tar -xf mirrors.tar etc/pacman.d/mirrorlist
 sed -i "s|\# Server|Server|g" etc/pacman.d/mirrorlist
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init
+echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
+pacman-key --populate
+for k in `cat /usr/share/pacman/keyrings/*.gpg|gpg --list-options show-std-notations --show-keys 2>/dev/null|sed "/pub/d;/uid/d;/sub/d;/by/d;/Revocable/d"|tr -s \\n`;do
+if pacman-key -l|grep -qw $k;then
+export keylist=$keylist" "$k
+fi
+done
+pacman-key -r $keylist
+pacman-key --lsign $keylist
 rm *.pkg* mirrors.tar
 cd $prepkgdir
 else
-curl -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.${arch}.conf
+while true;do
+if curl -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.${arch}.conf;then
+break
+else
+continue
 fi
+done
+fi
+if [ -e /.dockerenv ];then
+cp ${script_path}/pacman.$arch.conf ${work_dir}/pacman.${arch}.conf
+else
 sed -r "s|^#?\\s*CacheDir.+|CacheDir = $(echo -n ${_cache_dirs[@]})|g" ${script_path}/pacman.$arch.conf > ${work_dir}/pacman.${arch}.conf
+fi
 if [ $arch = "aarch64" ];then
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
 fi
 if [ $arch = "i686" ];then
 mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
-curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist|sed "s|#Server|Server|g;/mirror.datacenter.by/d;/archlinux32.agoctrl.org/d;/de.mirror.archlinux32.org/d;/\/mirror.archlinux32.org\//d;/mirror.archlinux32.oss/d" > "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
+while true;do
+if curl -Lo "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist" https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist;then
+break
+else
+continue
+fi
+done
+sed -i "s|#Server|Server|g;/mirror.datacenter.by/d;/archlinux32.agoctrl.org/d;/de.mirror.archlinux32.org/d;/\/mirror.archlinux32.org\//d;/mirror.archlinux32.oss/d" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
+export mirrorurl=`cat ${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist|grep -i server|head -n 1|sed "s|\\$arch|$arch|g;s|\\$repo|core|g;s|Server = ||g"`
+export keyringurl=`lynx --dump -listonly -nonumbers $mirrorurl|grep archlinux32-keyring|grep .tar|sed "/transition/d;/.sig/d"|tail -n 1|cut -f 4 -d \  `
+while true;do
+if curl -LO $keyringurl;then
+break
+else
+continue
+fi
+done
+pacman --needed --noconfirm -U *.pkg*
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init
+echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
+pacman-key --populate
+for k in `cat /usr/share/pacman/keyrings/*.gpg|gpg --list-options show-std-notations --show-keys 2>/dev/null|sed "/pub/d;/uid/d;/sub/d;/by/d;/Revocable/d"|tr -s \\n`;do
+if pacman-key -l|grep -qw $k;then
+export keylist=$keylist" "$k
+fi
+done
+pacman-key -r $keylist
+pacman-key --lsign $keylist
+rm *.pkg*
+fi
+if [ $arch = "x86_64" ];then
+mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
+while true;do
+if curl -L https://archlinux.org/packages/core/any/pacman-mirrorlist/download/|tar --zstd -C ${work_dir}/${arch}/airootfs -x etc/pacman.d/mirrorlist;then
+break
+else
+continue
+fi
+done
+sed -i "s|#Server|Server|g" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
+sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
+export mirrorurl=`cat ${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist|grep -i server|head -n 1|sed "s|\\$arch|$arch|g;s|\\$repo|core|g;s|Server = ||g"`
+export keyringurl=`lynx --dump -listonly -nonumbers $mirrorurl|grep archlinux-keyring|grep .tar|sed "/transition/d;/.sig/d"|tail -n 1|cut -f 4 -d \  `
+while true;do
+if curl -LO $keyringurl;then
+break
+else
+continue
+fi
+done
+pacman --needed --noconfirm -U *.pkg*
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init
+echo allow-weak-key-signatures >> /etc/pacman.d/gnupg/gpg.conf
+pacman-key --populate
+for k in `cat /usr/share/pacman/keyrings/*.gpg|gpg --list-options show-std-notations --show-keys 2>/dev/null|sed "/pub/d;/uid/d;/sub/d;/by/d;/Revocable/d"|tr -s \\n`;do
+if pacman-key -l|grep -qw $k;then
+export keylist=$keylist" "$k
+fi
+done
+pacman-key -r $keylist
+pacman-key --lsign $keylist
+rm *.pkg*
 fi
 mkdir -p ${work_dir}/${arch}/airootfs/var/lib/pacman/
-curl -s https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
+cat ${work_dir}/pacman.${arch}.conf|grep -F \[|grep -F \]|sed "/#/d;/\[options\]/d"|tr \\n \  |read -r -s repodata
+export repos=`echo $repodata|tr \\  \\\n|tr -d \\[|tr -d \\]`
+export oldifs=$IFS
+export IFS=$(echo -en \\n\\b)
+for f in `echo -en $repos`;do
+if [ -e ${work_dir}/${arch}/airootfs/var/lib/pacman/sync/$f.db ];then
+continue
+else
+while true;do
+if pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syy;then
+break
+else
+continue
+fi
+done
+fi
+done
+export IFS=$oldifs
+}
+make_packages() {
+while true;do
+curl https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
+if cat packages.${arch}|grep -iqw base;then
 if [ $arch = "aarch64" ];then
 sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d" packages.${arch}
 fi
 if [ $arch = "i686" ];then
 sed -i "/qemu-img/d;s|qemu-base|qemu-headless|g" packages.${arch}
+fi
+if echo $preset|grep -qw base ;then
+true
+else
+for reppkg in "jack2" "virtualbox-guest-utils-nox";do
+if pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Q 2>/dev/stdout|grep -iqw $reppkg;then
+pacman --noconfirm --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Rdd $reppkg
+fi
+done
 fi
 echo -n pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syyp\   > installtest.${arch}
 cat packages.${arch}|tr \\n \  >> installtest.${arch}
@@ -113,16 +270,25 @@ rm installtest.${arch}
 cat ${script_path}/packages.${arch}|tr \\n \  |sed "s| linux | linux-aarch64 linux-aarch64-headers raspberrypi-bootloader firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect |g;s| linux-headers | |g"|tr \  \\n |sort|uniq > pkg.$arch
 mv pkg.$arch ${script_path}/packages.${arch}
 fi
-}
-make_packages() {
-while true;do
-if pacstrap -C "${work_dir}/pacman.${arch}.conf" -M -G "${work_dir}/${arch}/airootfs" --needed --overwrite \* `cat ${script_path}/packages.$arch|tr \\\\n \  `;then
 break
 else
 continue
 fi
 done
+while true;do
+if pacstrap -C "${work_dir}/pacman.${arch}.conf" -M -G "${work_dir}/${arch}/airootfs" --needed --overwrite \* `cat ${script_path}/packages.$arch|tr \\\\n \  `;then
+cd /
+rm -rf etc/pacman.d/gnupg
+tar -xf $mygpgdir/gpg.tar etc/pacman.d/gnupg
+cd $OLDPWD
+break
+else
+make_packages
+continue
+fi
+done
 rm ${script_path}/packages.${arch} ${script_path}/pacman.${arch}.conf 
+rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 }
 
 make_setup_mkinitcpio() {
@@ -133,7 +299,6 @@ make_setup_mkinitcpio() {
         cp /usr/lib/initcpio/hooks/${_hook} ${work_dir}/${arch}/airootfs/etc/initcpio/hooks
         cp /usr/lib/initcpio/install/${_hook} ${work_dir}/${arch}/airootfs/etc/initcpio/install
     done
-    sed -i 's|cow_spacesize="256M"|cow_spacesize=\`cat /proc/meminfo\|grep -i available\|cut -f 2 -d :\|sed "s\| \|\|g;s\|kB\|K\|g"\`|g' ${work_dir}/${arch}/airootfs/etc/initcpio/hooks/archiso
     cp /usr/lib/initcpio/install/archiso_kms ${work_dir}/${arch}/airootfs/etc/initcpio/install
     cp ${script_path}/mkinitcpio.conf ${work_dir}/${arch}/airootfs/etc/mkinitcpio-archiso.conf
 }
@@ -151,7 +316,6 @@ curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirro
 ;;
 esac
 arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
-rm -rf ${work_dir}/${arch}/airootfs/var/cache/pacman/pkg/*
 rm -rf ${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg
 if [ -e "${work_dir}/${arch}/airootfs/usr/share/jenux" ];then
 sleep .01
@@ -204,7 +368,7 @@ fi
 }
 make_efi() {
 cd ${script_path}
-echo -n iso version: $iso_version > ${work_dir}/iso/jenux_livecd
+echo -n iso version: $iso_version > ${work_dir}/iso/jenux_version
 mkdir -p ${work_dir}/iso/boot/grub
 cp ${script_path}/efiboot/*.cfg ${work_dir}/iso/boot/grub
 sed -i "s|%INSTALL_DIR%|${install_dir}|g" ${work_dir}/iso/boot/grub/grub.cfg
@@ -219,10 +383,28 @@ mkdir -p "${work_dir}/iso/arch/${arch}"
 fi
 arch-chroot ${script_path}/${work_dir}/${arch}/airootfs /bin/pacman -Q > "${work_dir}/iso/arch/pkglist.${arch}.txt"
 cd ${work_dir}/${arch}/airootfs
-mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384
-    cd "${script_path}/${work_dir}/iso/arch/${arch}"
+while true;do
+if mountpoint -q ${work_dir}/${arch}/airootfs/proc;then
+if umount ${work_dir}/${arch}/airootfs/proc;then
+break
+else
+continue
+fi
+else
+break
+fi
+done
+while true;do
+if mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384;then
+break
+else
+continue
+fi
+done
+cd "${script_path}/${work_dir}/iso/arch/${arch}"
 sha512sum airootfs.sfs > airootfs.sha512
 cd ${script_path}
+rm --one-file-system -rf ${work_dir}/${arch}/airootfs
 }
 
 # Build ISO
@@ -682,7 +864,10 @@ fi
 cd ${script_path}/${work_dir}/iso
 git log > "${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 if [ -e "${script_path}/iso" ];then
-cp -rf "${script_path}/iso"/* .
+cp -rf "${script_path}/iso" ..
+fi
+if echo $livebuild|grep -iqw livebuild;then
+echo livemode=1 > ./jenux_live
 fi
 cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
 export bufsize=800
@@ -694,14 +879,36 @@ losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtyp
 export loopdev=`losetup|grep -w "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso"|cut -f 1 -d \  `
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:+750M:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $loopdev
 partprobe $loopdev
+export oldifs=$IFS
+export IFS=$(echo -en \\n\\b)
+for f in `cat /proc/partitions|tr -s \  |grep loop\*p\*`;do
+export dev=`echo -en $f|cut -f 5 -d \  `
+if [ -e /dev/$dev ];then
+continue
+else
+export maj=`echo $f|cut -f 2 -d \  `
+export min=`echo -en $f|cut -f 3 -d \  `
+mknod /dev/$dev b $maj $min
+fi
+done
+export IFS=$oldifs
 mkfs.vfat -n ISOEFI $loopdev"p2"
 echo y|mkfs.ext4 -L ${iso_label} $loopdev"p3"
 tune2fs -O encrypt -m 0 $loopdev"p3"
 mount $loopdev"p3" /mnt
 mkdir -p /mnt/EFI
 mount $loopdev"p2" /mnt/EFI
+if [ -e "${script_path}/${work_dir}/${arch}/airootfs" ];then
+sleep .01
+else
+mkdir -p "${script_path}/${work_dir}/${arch}/airootfs"
+fi
+if mountpoint "${script_path}/${work_dir}/${arch}/airootfs/proc" > /dev/null 2>/dev/null;then
+umount "${script_path}/${work_dir}/${arch}/airootfs/proc"
+fi
+mount "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" "${script_path}/${work_dir}/${arch}/airootfs"
 if install_bootloader;then
-umount /mnt/EFI /mnt
+umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
 break
 else
@@ -712,7 +919,7 @@ export pids=$pids" "`fuser -m /mnt/EFI|tr c \  |tr -s \  |sed "s|$mypid||g"`
 for f in `echo $pids`;do
 kill -9 $f
 done
-umount /mnt/EFI /mnt
+umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
 export bufsize=$(($bufsize+200))
 continue
@@ -721,8 +928,6 @@ done
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
-qemu-img convert -p -f raw -O vmdk "${iso_name}-${iso_version}-${buildtype}.iso" "${iso_name}-${iso_version}-${buildtype}.vmdk"
-sha512sum "${iso_name}-${iso_version}-${buildtype}.vmdk" > "${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 cd ${script_path}
 ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
 }
@@ -796,10 +1001,12 @@ fi
 fi
 fi
 if echo $prepbuilds|grep -iqw aarch64;then
+if [ -e ${script_path}/${work_dir}/${arch}/airootfs/boot/* ];then
 if cp -Lrf ${script_path}/${work_dir}/${arch}/airootfs/boot/* /mnt/EFI;then
 sleep .01
 else
 return 13
+fi
 fi
 if grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI;then
 sleep .01
@@ -940,6 +1147,8 @@ cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.im
 cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/archiso.rpi.img archiso.img
 cd $OLDPWD
 fi
+qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk"
+sha512sum "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 return 0
 }
 if [[ ${EUID} -ne 0 ]]; then
