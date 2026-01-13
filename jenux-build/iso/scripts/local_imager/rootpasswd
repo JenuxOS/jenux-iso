@@ -1,0 +1,3 @@
+lowram=1
+nochecksum=1
+script=/scripts/local_imager/image_local
