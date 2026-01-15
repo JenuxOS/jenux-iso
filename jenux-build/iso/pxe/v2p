@@ -182,6 +182,10 @@ fi
 echo disconnecting source
 qemu-nbd -d /dev/nbd0
 if echo $type|grep -qw w;then
+if [ -e /net/.scripts/bcdbooter ];then
+cd /net/.scripts
+./bcdbooter $disk
+else
 qemu-nbd -t -f raw -x disk $disk &
 while true;do
 if pgrep -af qemu-nbd;then
@@ -201,6 +205,7 @@ sleep 2
 continue
 fi
 done
+fi
 sync
 case "$boottype" in
 legacy)

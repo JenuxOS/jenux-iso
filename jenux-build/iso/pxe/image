@@ -76,6 +76,16 @@ if echo $type|grep -qw w;then
 echo press b enter within 10 seconds to skip image and run bootloader repair
 read -t 10 nowrite
 if echo $nowrite|grep -qw b;then
+if [ -e /net/.scripts/bcdbooter ];then
+cd /net/.scripts
+./bcdbooter $disk
+for f in `efibootmgr|grep -i boot|grep \*|cut -f 1 -d \*|sed "s|Boot||g"`;do
+efibootmgr -b $f -B
+done
+efibootmgr -T
+sync
+reboot -f
+else
 qemu-nbd -t -f raw -x disk $disk &
 while true;do
 if pgrep -af qemu-nbd;then
@@ -101,6 +111,7 @@ done
 efibootmgr -T
 sync
 reboot -f
+fi
 else
 echo -n image started on\  
 date
