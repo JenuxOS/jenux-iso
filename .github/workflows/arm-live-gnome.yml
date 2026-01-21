@@ -3,7 +3,7 @@ name: arm-live-gnome
 on:
   push:
     branches:
-      dnl-nash/experimental-new-build-workflow
+      main
   workflow_dispatch:
 
 jobs:

@@ -3,7 +3,7 @@ name: arm-installer
 on:
   push:
     branches:
-      dnl-nash/experimental-new-build-workflow
+      main
   workflow_dispatch:
 
 jobs:

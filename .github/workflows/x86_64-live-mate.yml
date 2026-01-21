@@ -3,7 +3,7 @@ name: x86_64-live-mate
 on:
   push:
     branches:
-      dnl-nash/experimental-new-build-workflow
+      main
   workflow_dispatch:
 
 jobs:
