@@ -248,7 +248,7 @@ if [ $arch = "aarch64" ];then
 sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d" packages.${arch}
 fi
 if [ $arch = "i686" ];then
-sed -i "/qemu-img/d;s|qemu-base|qemu-headless|g" packages.${arch}
+sed -i "/qemu-img/d;/lvm/d;s|qemu-base|qemu-headless|g" packages.${arch}
 fi
 if echo $preset|grep -qw base ;then
 true
