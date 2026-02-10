@@ -163,9 +163,9 @@ fi
 done
 sed -i "s|#Server|Server|g;/mirror.datacenter.by/d;/archlinux32.agoctrl.org/d;/de.mirror.archlinux32.org/d;/\/mirror.archlinux32.org\//d;/mirror.archlinux32.oss/d" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
+while true;do
 export mirrorurl=`cat ${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist|grep -i server|head -n 1|sed "s|\\$arch|$arch|g;s|\\$repo|core|g;s|Server = ||g"`
 export keyringurl=`lynx --dump -listonly -nonumbers $mirrorurl|grep archlinux32-keyring|grep .tar|sed "/transition/d;/.sig/d"|tail -n 1|cut -f 4 -d \  `
-while true;do
 if curl -LO $keyringurl;then
 break
 else
@@ -197,9 +197,9 @@ fi
 done
 sed -i "s|#Server|Server|g" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
+while true;do
 export mirrorurl=`cat ${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist|grep -i server|head -n 1|sed "s|\\$arch|$arch|g;s|\\$repo|core|g;s|Server = ||g"`
 export keyringurl=`lynx --dump -listonly -nonumbers $mirrorurl|grep archlinux-keyring|grep .tar|sed "/transition/d;/.sig/d"|tail -n 1|cut -f 4 -d \  `
-while true;do
 if curl -LO $keyringurl;then
 break
 else
