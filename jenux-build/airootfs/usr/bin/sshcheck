@@ -35,10 +35,11 @@ cat /proc/cmdline|tr \  \\n|grep -w host|sed "s|host=||g"|tr -d \\n|read -r -s h
 cat /proc/cmdline|tr \  \\n|grep -w name|sed "s|name=||g"|tr -d \\n|tr _ \  |read -r -s name
 cat /proc/cmdline|tr \  \\n|grep -w user|sed "s|user=||g"|tr -d \\n|read -r -s user
 cat /proc/cmdline|tr \  \\n|grep -w pass|sed "s|pass=||g"|tr -d \\n|read -r -s pass
+cat /proc/cmdline|tr \  \\n|grep -w autologin|sed "s|autologin=||g"|tr -d \\n|read -r -s autologin
 cat /proc/cmdline|tr \  \\n|grep -w encrypthome|sed "s|encrypthome=||g"|tr -d \\n|read -r -s encrypthome
 if [ -z $encrypthome ];then
 if [ -z $livemode ];then
-export encrypthome=1
+export encrypthome=$encrypthome
 else
 export encrypthome=0
 fi
@@ -236,7 +237,7 @@ if mountpoint -q /mnt;then
 umount /mnt
 fi
 fi
-if [ -z $accessibility ]||[ -z $host ]||[ -z $name ]||[ -z $user ]||[ -z $pass ]||[ -z $encrypthome ];then
+if [ -z $accessibility ]||[ -z $host ]||[ -z $name ]||[ -z $user ]||[ -z $pass ]||[ -z $autologin ]||[ -z $encrypthome ];then
 if [ -e /root/unattend ];then
 echo some parameters needed to complete first time setup are missing. The unattend file has been left unmodified.
 else
@@ -248,6 +249,7 @@ echo export host=\'$host\' >> /root/unattend
 echo export name=\'$name\' >> /root/unattend
 echo export user=\'$user\' >> /root/unattend
 echo export pass=\'$pass\' >> /root/unattend
+echo export autologin=\'$autologin\' >> /root/unattend
 echo export encrypthome=\'$encrypthome\' >> /root/unattend
 fi
 if [ -z $sshkey ];then
