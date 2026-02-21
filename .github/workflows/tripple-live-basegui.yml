@@ -57,7 +57,10 @@ jobs:
         if: always()
         with:
           name: jenux-${{ matrix.arch }}.iso
-          path: ./art/*.iso
+          path: |
+            ./art/*.iso
+            ./art/*.iso.sha512
+            ./art/*.changelog
           compression-level: 9
           if-no-files-found: error
           retention-days: 90
@@ -67,7 +70,10 @@ jobs:
         if: always()
         with:
           name: jenux-${{ matrix.arch }}.vmdk
-          path: ./art/*.vmdk
+          path: |
+            ./art/*.vmdk
+            ./art/*.vmdk.sha512
+            ./art/*.changelog
           compression-level: 9
           if-no-files-found: error
           retention-days: 90
