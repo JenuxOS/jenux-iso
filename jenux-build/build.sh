@@ -872,14 +872,14 @@ else
 mkdir -p ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
-git -P log --all > "${iso_name}-${iso_version}-${buildtype}.iso.changelog"
+git -P log --all > "${iso_name}-${iso_version}-${buildtype}.changelog"
 if [ -e "${script_path}/iso" ];then
 cp -rf "${script_path}/iso" ..
 fi
 if echo $livebuild|grep -iqw livebuild;then
 echo livemode=1 > ./jenux_live
 fi
-cp "${iso_name}-${iso_version}-${buildtype}.iso.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso.changelog"
+cp "${iso_name}-${iso_version}-${buildtype}.changelog" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.changelog"
 export bufsize=800
 while true;do
 export rootsize=`du -m --total .|tail -n 1|cut -f 1`
@@ -918,6 +918,33 @@ umount "${script_path}/${work_dir}/${arch}/airootfs/proc"
 fi
 mount "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" "${script_path}/${work_dir}/${arch}/airootfs"
 if install_bootloader;then
+cd /mnt
+tar -cf "${script_path}/${out_dir}"/enroler.tar  EFI boot
+export enrolerdatasize=`du -h "${script_path}/${out_dir}"/enroler.tar|cut -f 1 -d M`
+export enrolerbufsize=2048
+export enrolersize=$(($enrolerdatasize+$enrolerbufsize))"M"
+truncate -s $enrolersize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso"
+export enrolerdev=`losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso" --show`
+sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:+750M:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $enrolerdev
+partprobe $enrolerdev
+mkdir /fs
+mkfs.vfat -n ISOEFI $enrolerdev"p2"
+echo y|mkfs.ext4 -L ${iso_label} $enrolerdev"p3"
+tune2fs -O encrypt -m 0 $enrolerdev"p3"
+mount $enrolerdev"p3" /fs
+mkdir -p /fs/EFI
+mount $enrolerdev"p2" /fs/EFI
+tar -C /fs -xf "${script_path}/${out_dir}"/enroler.tar
+cat > /fs/boot/grub/grub.cfg<<EOF
+echo key enrolement complete
+play 440 440 1
+play 880 880 1
+halt
+EOF
+umount /fs/EFI /fs
+losetup -d $enrolerdev
+rm "${script_path}/${out_dir}"/enroler.tar
+cd $OLDPWD
 umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
 break
@@ -937,9 +964,11 @@ fi
 done
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.iso" > "${iso_name}-${iso_version}-${buildtype}.enroler.iso.sha512"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
 cd ${script_path}
 ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
+ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.enroler.iso"
 }
 function install_bootloader
 {
@@ -1157,8 +1186,6 @@ cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/vmlinuz-linux.rpi kernel8.im
 cp ${script_path}/${work_dir}/iso/arch/boot/${arch}/archiso.rpi.img archiso.img
 cd $OLDPWD
 fi
-qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk"
-sha512sum "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 return 0
 }
 if [[ ${EUID} -ne 0 ]]; then
@@ -1208,4 +1235,10 @@ done
 
 # Do all stuff for "iso"
 run_once make_iso
+cd "${script_path}/${out_dir}"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.iso" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso.sha512"
+qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.vmdk"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.vmdk.sha512"
+qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 rm -rf ${work_dir} ${install_dir}
