@@ -3,7 +3,6 @@ export preset=$2
 if [ -z $preset ];then
 export preset=base
 fi
-cp -aT /etc/skel/ /root/
 cd /
 while true;do
 if curl https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz|tar -xz;then
@@ -12,6 +11,7 @@ else
 continue
 fi
 done
+cp -aT /etc/skel/ /root/
 /etc/postinstall.sh root_only $preset n
 systemctl disable speech-dispatcherd fenrirscreenreader swap avahi-daemon
 if [ -e /boot/vmlinuz-linux ];then
