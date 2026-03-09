@@ -95,7 +95,7 @@ else
 echo -n > ~/.unattend.$mytty
 fi
 for t in "2" "3" "4" "5" "6" "S0" "S1" "S2" "S3";do
-systemctl start getty@tty$t
+systemctl start getty@tty$t > /dev/null 2>/dev/null
 done
 if [ -e ~/.zlogin.firstboot ];then
 mv ~/.zlogin.firstboot ~/.zlogin
