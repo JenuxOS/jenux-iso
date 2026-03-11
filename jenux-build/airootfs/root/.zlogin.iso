@@ -95,7 +95,14 @@ else
 echo -n > ~/.unattend.$mytty
 fi
 for t in "2" "3" "4" "5" "6" "S0" "S1" "S2" "S3";do
+if [ -e /etc/systemd/system/getty@tty$t.service.d ];then
+sleep .01
+else
+mkdir -p /etc/systemd/system/getty@tty$t.service.d
+sed "s|\[Service\]|\[Service\]\nExecStart=|g" /etc/systemd/system/getty@tty1.service.d/firstboot.conf > /etc/systemd/system/getty@tty$t.service.d/firstboot.conf
+systemctl daemon-reload
 systemctl start getty@tty$t > /dev/null 2>/dev/null
+fi
 done
 if [ -e ~/.zlogin.firstboot ];then
 mv ~/.zlogin.firstboot ~/.zlogin

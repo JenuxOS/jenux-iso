@@ -324,7 +324,7 @@ mkdir -p "${work_dir}/${arch}/airootfs/usr/share/jenux"
 fi
 echo $preset > "${work_dir}/${arch}/airootfs/usr/share/jenux/preset"
 echo -en rsync -aAXH --info=progress2 \   > "${work_dir}/${arch}/airootfs/usr/share/jenux/offline-options"
-for f in `echo --exclude='/boot/vmlinuz-linux.rpi' --exclude='/boot/grub/grub.cfg' --exclude='/boot/archiso*' --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found/' '/usr/share/jenux/offline-options';find airootfs -type l -o -type f |sed "s|airootfs\/|\/|g"`;do
+for f in `echo --exclude='/etc/systemd/system/getty@tty2.service.d' --exclude='/etc/systemd/system/getty@tty3.service.d' --exclude='/etc/systemd/system/getty@tty4.service.d' --exclude='/etc/systemd/system/getty@tty5.service.d' --exclude='/etc/systemd/system/getty@tty6.service.d' --exclude='/etc/systemd/system/getty@ttyS0.service.d' --exclude='/etc/systemd/system/getty@ttyS1.service.d' --exclude='/etc/systemd/system/getty@ttyS2.service.d' --exclude='/etc/systemd/system/getty@ttyS3.service.d' --exclude='/boot/vmlinuz-linux.rpi' --exclude='/boot/grub/grub.cfg' --exclude='/boot/archiso*' --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found/' '/usr/share/jenux/offline-options';find airootfs -type l -o -type f |sed "s|airootfs\/|\/|g"`;do
 if echo $f|grep -qw - --exclude=;then
 echo $f|sed "s|--exclude=|--exclude=\'|g"|tr -d \\n
 echo -en \'\  
