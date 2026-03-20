@@ -463,7 +463,7 @@ echo \#export encrypthome=\'$encrypthome\' >> unattends/jenuxoffline/$presetname
 done
 done
 mkdir -p unattends/android
-for presetname in "current" "legacy" "custom";do
+for presetname in "current" "current-go" "current-surface" "legacy" "legacy-go" "legacy-surface" "custom";do
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 export presetname=$presetname
 export disk=$disk
@@ -474,17 +474,77 @@ export root="/dev/disk/by-partlabel/linux"
 export fmtboot=y
 export fmtfs=y
 export completeaction=poweroff
-case $presetname in
+case "$presetname" in
 current)
-export url="https://nashcentral.duckdns.org/autobuildres/android/$presetname.iso"
+export urlpattern=bliss-v
+;;
+current-go)
+export urlpattern=bliss-go-v
+;;
+current-surface)
+export urlpattern=bliss-surface-v
 ;;
 legacy)
-export url="https://nashcentral.duckdns.org/autobuildres/android/$presetname.iso"
+export urlpattern=bliss-v
 ;;
-custom)
-unset url
+legacy-go)
+export urlpattern=bliss-go-v
+;;
+legacy-surface)
+export urlpattern=bliss-surface-v
 ;;
 esac
+if [ -e /tmp/urls ];then
+sleep .01
+else
+echo -en > /tmp/urls
+while true;do
+export len=`wc -l /tmp/urls|cut -f 1 -d \  `
+if [ $len -ge 2 ];then
+echo -en > /tmp/images
+for u in `cat /tmp/urls`;do
+basename $u >> /tmp/images
+done
+break
+else
+echo retrieving image list
+echo > /tmp/urls
+for u in "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/OpenGApps/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/OpenGApps/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/OpenGApps/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/FOSS/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/Gapps/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/FOSS/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/Gapps/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/FOSS/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/Gapps/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/FOSS/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/FOSS/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/FOSS/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Surface";do
+export url=`lynx --dump -listonly -nonumbers $u|grep -w iso|sed "/sha256/d;/timeline/d;s|\/download||g"|sort|uniq`
+echo $url
+unset url
+done > /tmp/urls
+continue
+fi
+done
+fi
+echo -en > /tmp/d
+for pattern in "Bliss-v" "Bliss-Go-v" "Bliss-Surface";do
+cat /tmp/images|grep $pattern |sort|uniq >> /tmp/d
+done
+echo -en >>/tmp/d
+export imgln=`wc -l /tmp/images|cut -f 1 -d \  `
+export simgln=`wc -l /tmp/d|cut -f 1 -d \  `
+if echo $imgln|grep -qw $simgln;then
+mv /tmp/d /tmp/images
+else
+rm /tmp/d
+fi
+if echo $presetname|grep -iqw current-go;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|tail -n 1`
+elif echo $presetname|grep -iqw current-surface;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|tail -n 1`
+elif echo $presetname|grep -iqw current;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|tail -n 1`
+elif echo $presetname|grep -iqw legacy-go;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|head -n 1`
+elif echo $presetname|grep -iqw legacy-surface;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|head -n 1`
+elif echo $presetname|grep -iqw legacy;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|head -n 1`
+else
+unset url
+fi
 echo \#android > unattends/android/$presetname-$disk-erase
 echo export presetname=\'$presetname\' >> unattends/android/$presetname-$disk-erase
 if [ $presetname == "custom" ];then
