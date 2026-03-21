@@ -394,12 +394,20 @@ else
 break
 fi
 done
+if echo $buildtype|grep -iqw tripple ];then
+sleep .01
+else
 if [ -e "${script_path}/${out_dir}" ];then
 sleep .01
 else
 mkdir -p "${script_path}/${out_dir}"
 fi
+if [ -e "${script_path}/${out_dir}"/rootfs.tar.gz  ];then
+sleep .01
+else
 tar -czf "${script_path}/${out_dir}"/rootfs.tar.gz .
+fi
+fi
 while true;do
 if mksquashfs . "${script_path}/${work_dir}/iso/arch/${arch}/airootfs.sfs" -b 16384;then
 break
