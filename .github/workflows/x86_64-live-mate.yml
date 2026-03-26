@@ -96,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          path: ./art/*.tar.gz
+          path: ./art/*.tar
           compression-level: 9
           if-no-files-found: error
           retention-days: 90
