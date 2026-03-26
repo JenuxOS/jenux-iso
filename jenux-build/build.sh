@@ -405,7 +405,8 @@ fi
 if [ -e "${script_path}/${out_dir}"/rootfs.tar.gz  ];then
 sleep .01
 else
-tar -czf "${script_path}/${out_dir}"/rootfs.tar.gz .
+export taropts=`cat usr/share/jenux/offline-options|tr \\  \\\n|grep exclude|tr \\\n \\  |sed "s|'/|'|g"`
+echo tar $taropts -czf "${script_path}/${out_dir}"/rootfs.tar.gz .|sh
 fi
 fi
 while true;do
