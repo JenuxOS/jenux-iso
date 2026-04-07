@@ -1,5 +1,8 @@
 name: x86_64-live-plasma
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

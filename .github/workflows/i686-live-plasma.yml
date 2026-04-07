@@ -1,5 +1,8 @@
 name: i686-live-plasma
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

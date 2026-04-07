@@ -1,5 +1,8 @@
 name: tripple-installer
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

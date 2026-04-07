@@ -1,5 +1,8 @@
 name: arm-live-mate
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

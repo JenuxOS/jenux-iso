@@ -1,5 +1,8 @@
 name: arm-live-plasma
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

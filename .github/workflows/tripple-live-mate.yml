@@ -1,5 +1,8 @@
 name: tripple-live-mate
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

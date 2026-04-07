@@ -1,5 +1,8 @@
 name: i686-installer
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

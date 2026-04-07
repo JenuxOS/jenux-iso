@@ -1,5 +1,8 @@
 name: tripple-live-plasma
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

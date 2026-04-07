@@ -1,5 +1,8 @@
 name: arm-installer
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
