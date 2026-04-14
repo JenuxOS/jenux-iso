@@ -1022,6 +1022,8 @@ rm "${script_path}/${out_dir}"/enroler.tar
 cd $OLDPWD
 umount /mnt/EFI /mnt "${script_path}/${work_dir}/${arch}/airootfs"
 losetup -d $loopdev
+cp "${script_path}/${work_dir}/iso/rootpasswd.sample" "${script_path}/${out_dir}"
+cp -rf "${script_path}/${work_dir}/iso/unattends" "${script_path}/${out_dir}"
 break
 else
 cd ${script_path}/${work_dir}/iso

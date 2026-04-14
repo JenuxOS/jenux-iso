@@ -60,6 +60,8 @@ jobs:
           path: |
             ./art/*.iso
             ./art/*.iso.sha512
+            ./art/rootpasswd.sample
+            ./art/unattends
             ./art/*.changelog
           compression-level: 9
           if-no-files-found: error
