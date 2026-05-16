@@ -420,6 +420,9 @@ if cat /proc/cmdline|grep -qw nospeech;then
 sleep .01
 else
 arch-chroot /mnt speechctl enable
+if [ -e /mnt/etc/asound.conf ];then
+rm /mnt/etc/asound.conf
+fi
 fi
 if echo $encrypt|grep -qw y;then
 echo setting up automatic unlock after load of kernel and ramdisk
