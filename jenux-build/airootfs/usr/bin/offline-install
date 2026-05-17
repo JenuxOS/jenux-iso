@@ -423,7 +423,7 @@ arch-chroot /mnt speechctl enable
 if [ -e /mnt/etc/asound.conf ];then
 rm /mnt/etc/asound.conf
 if [ -e /mnt/var/lib/alsa ];then
-sleep .0`
+sleep .01
 else
 mkdir -p /mnt/var/lib/alsa
 fi
