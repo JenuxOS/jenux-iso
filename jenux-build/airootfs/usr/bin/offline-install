@@ -422,6 +422,12 @@ else
 arch-chroot /mnt speechctl enable
 if [ -e /mnt/etc/asound.conf ];then
 rm /mnt/etc/asound.conf
+if [ -e /mnt/var/lib/alsa ];then
+sleep .0`
+else
+mkdir -p /mnt/var/lib/alsa
+fi
+alsactl -f /mnt/var/lib/alsa/asound.state store
 fi
 fi
 if echo $encrypt|grep -qw y;then
