@@ -1,0 +1,108 @@
+name: arm-live-kodi
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      main
+  workflow_dispatch:
+  schedule:
+   - cron: 0 0 * * *
+
+jobs:
+  live-kodi:
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64]
+    
+    name: live-kodi-${{ matrix.arch}}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    timeout-minutes: 120
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      
+      - name: Create environment file
+        run: |
+          cat > .env << EOF
+          jenux_iso_arch=${{ matrix.arch }}
+          jenux_iso_livemode=1
+          jenux_iso_preset=kodi
+          EOF
+          
+      - name: Create output directory
+        run: mkdir -p ./art
+      
+      - name: Build Docker image
+        run: docker build -t jenux -f dockerfile $PWD
+      
+      - name: Run Docker container
+        run: |
+          docker run --privileged --env-file .env \
+            -v $PWD/art:/build/jenux-build/out \
+            -t jenux
+      
+      - name: Upload iso
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}.iso
+          path: |
+            ./art/*.iso
+            ./art/*.iso.sha512
+            ./art/rootpasswd.sample
+            ./art/unattends
+            ./art/*.changelog
+          compression-level: 9
+          if-no-files-found: error
+          retention-days: 90
+      
+      - name: Upload vmdk
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}.vmdk
+          path: |
+            ./art/*.vmdk
+            ./art/*.vmdk.sha512
+            ./art/*.changelog
+          compression-level: 9
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload sha512
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}.sha512
+          path: ./art/*.sha512
+          compression-level: 9
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload changelog
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: jenux-${{ matrix.arch }}.changelog
+          path: ./art/*.changelog
+          compression-level: 9
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload rootfs
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: rootfs.tar
+          path: ./art/*.tar
+          compression-level: 9
+          if-no-files-found: error
+          retention-days: 90
