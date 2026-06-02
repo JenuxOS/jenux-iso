@@ -245,7 +245,7 @@ while true;do
 curl https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
 if cat packages.${arch}|grep -iqw base;then
 if [ $arch = "aarch64" ];then
-sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d" packages.${arch}
+sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d;/gnome-boxes/d" packages.${arch}
 fi
 if [ $arch = "i686" ];then
 sed -i "/qemu-img/d;/vlc/d;s|qemu-base|qemu-headless|g" packages.${arch}
