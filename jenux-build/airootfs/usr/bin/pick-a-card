@@ -17,7 +17,10 @@ ctl.!default {
         card $c
 }
 EOF
+exit
 fi
+export verb=`alsaucm list _verbs|grep :|cut -f 2 -d :|cut -f  2 -d \  |tr -s \\n|head -n 1`
+alsaucm set _verb $verb > /dev/null 2>/dev/null
 if cat /proc/cmdline|grep -qw soundcard||cat /proc/cmdline|grep -qw soundcardindex;then
 exit 4
 fi
