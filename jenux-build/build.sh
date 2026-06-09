@@ -940,11 +940,58 @@ EOF
 for unattend in `find unattends -type f|sort|uniq`;do
 echo \#unattend=\""/"$unattend\" >> "${script_path}/${work_dir}/iso/rootpasswd.sample"
 done
+cd "${script_path}/${work_dir}/iso"
+for u in `find unattends -type f`;do
+export outname=`echo $u|sed "s|unattends|vmdisks|g"`
+export struct=`dirname $outname`
+if [ -e $struct ];then
+sleep .01
+else
+mkdir -p $struct
+fi
+export undiskname=$struct/`basename $u`
+dd if=/dev/zero of=$undiskname bs=1M count=8
+while true;do
+export loopdev=`losetup -P -f --show $undiskname`
+if [ -z $loopdev ];then
+continue
+else
+break
+fi
+done
+sgdisk -o -n 1:2048:-2048s:8300 -c 1:unattend $loopdev
+while true;do
+partprobe
+if [ -e $loopdev"p1" ];then
+mkfs.ext4 -q -L unattend $loopdev"p1"
+break
+else
+continue
+fi
+done
+mount $loopdev"p1" /mnt
+while true;do
+if mountpoint -q /mnt;then
+break
+else
+mkfs.ext4 -q -L unattend $loopdev"p1"
+continue
+fi
+done
+echo -en lowram=1\\nnochecksum=1\\nunattend=/unattend=/unattend\\nunattenddev=/dev/disk/by-label/unattend > /mnt/rootpasswd
+cp -rf $u /mnt/unattend
+umount /mnt
+losetup -d $loopdev
+qemu-img convert -p -f raw -O vmdk $undiskname $undiskname.vmdk
+rm $undiskname
+unset loopdev
+done
 cd ${script_path}
 if [ -e ${out_dir} ];then
 sleep .01
 else
 mkdir -p ${out_dir}
+cp -rf ${script_path}/${work_dir}/iso/vmdisks ${out_dir}
 fi
 cd ${script_path}/${work_dir}/iso
 git -P log --all > "${iso_name}-${iso_version}-${buildtype}.changelog"
