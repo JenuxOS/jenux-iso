@@ -1,0 +1,11 @@
+#android
+export presetname='current'
+export url='https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Generic/Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso'
+export disk='/dev/vdc'
+export partmethod='e'
+export disklayout=' -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI -N 3 -t 3:8300 -c 3:linux '
+export boot='/dev/disk/by-partlabel/EFI'
+export root='/dev/disk/by-partlabel/linux'
+export fmtboot='y'
+export fmtfs='y'
+export completeaction='poweroff'

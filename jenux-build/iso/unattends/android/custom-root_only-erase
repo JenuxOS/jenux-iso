@@ -1,0 +1,4 @@
+#android
+export presetname='custom'
+export disk='root_only'
+export completeaction='poweroff'

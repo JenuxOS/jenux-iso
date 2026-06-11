@@ -1,0 +1,5 @@
+#android
+export presetname='legacy-go'
+export url='https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Go/Bliss-Go-v14.10.1-x86_64-OFFICIAL-foss-20240116.iso'
+export disk='root_only'
+export completeaction='poweroff'

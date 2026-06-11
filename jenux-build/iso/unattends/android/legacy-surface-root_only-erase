@@ -1,0 +1,5 @@
+#android
+export presetname='legacy-surface'
+export url='https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Surface/Bliss-Surface-v14.10.1-x86_64-OFFICIAL-foss-20240116.iso'
+export disk='root_only'
+export completeaction='poweroff'

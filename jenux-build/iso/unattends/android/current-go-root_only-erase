@@ -1,0 +1,5 @@
+#android
+export presetname='current-go'
+export url='https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Go/Bliss-Go-v16.9.7-x86_64-OFFICIAL-gapps-20241012.iso'
+export disk='root_only'
+export completeaction='poweroff'

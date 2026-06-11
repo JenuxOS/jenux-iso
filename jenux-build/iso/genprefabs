@@ -1,0 +1,556 @@
+mkdir -p unattends/jenuxoffline
+for preset in "base" "basegui" "gnome" "kodi" "mate" "plasma" "retroarch";do
+for crypttype in "encrypted" "unencrypted";do
+for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
+export disk=$disk
+export partmethod=e
+export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
+export boot="/dev/disk/by-partlabel/EFI"
+export root="/dev/disk/by-partlabel/linux"
+if echo $crypttype|grep -qw encrypted;then
+export encrypt=y
+else
+export encrypt=n
+fi
+export cryptkey=
+export fmtboot=y
+export fmtfs=y
+export presetname=$preset
+export kerntype=linux
+export completeaction=poweroff
+export accessibility="1"
+export host="myhostname"
+export name="My_Name"
+export user=myname
+export pass=mysupersecretandsecurepassword12345
+export autologin=0
+export encrypthome=1
+echo \#jenuxoffline > unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+if echo $disk|grep -qw root_only;then
+echo export disk=\'$disk\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+else
+echo export disk=\'/dev/$disk\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+fi
+echo export partmethod=\'$partmethod\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export disklayout=\'$disklayout\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export boot=\'$boot\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export root=\'$root\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export fmtboot=\'$fmtboot\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export fmtfs=\'$fmtfs\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export encrypt=\'$encrypt\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export cryptkey=\'$cryptkey\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export presetname=\'$presetname\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export kerntype=\'$kerntype\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo export completeaction=\'$completeaction\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export accessibility=\'$accessibility\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export host=\'$host\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export name=\'$name\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export user=\'$user\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export pass=\'$pass\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export autologin=\'$autologin\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+echo \#export encrypthome=\'$encrypthome\' >> unattends/jenuxoffline/$presetname-$disk-$crypttype-erase
+done
+done
+done&
+mkdir -p unattends/android
+for presetname in "current" "current-go" "current-surface" "legacy" "legacy-go" "legacy-surface" "custom";do
+for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
+export presetname=$presetname
+export disk=$disk
+export partmethod=e
+export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
+export boot="/dev/disk/by-partlabel/EFI"
+export root="/dev/disk/by-partlabel/linux"
+export fmtboot=y
+export fmtfs=y
+export completeaction=poweroff
+case "$presetname" in
+current)
+export urlpattern=bliss-v
+;;
+current-go)
+export urlpattern=bliss-go-v
+;;
+current-surface)
+export urlpattern=bliss-surface-v
+;;
+legacy)
+export urlpattern=bliss-v
+;;
+legacy-go)
+export urlpattern=bliss-go-v
+;;
+legacy-surface)
+export urlpattern=bliss-surface-v
+;;
+esac
+if [ -e /tmp/urls ];then
+sleep .01
+else
+echo -en > /tmp/urls
+while true;do
+export len=`wc -l /tmp/urls|cut -f 1 -d \  `
+if [ $len -ge 2 ];then
+echo -en > /tmp/images
+for u in `cat /tmp/urls`;do
+basename $u >> /tmp/images
+done
+break
+else
+echo retrieving image list
+echo > /tmp/urls
+for u in "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/OpenGApps/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/OpenGApps/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/FOSS/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS14/OpenGApps/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/FOSS/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/Gapps/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/FOSS/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/Gapps/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/FOSS/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS15/Gapps/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/FOSS/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Generic" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/FOSS/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Go" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/FOSS/Surface" "https://sourceforge.net/projects/blissos-x86/files/Official/BlissOS16/Gapps/Surface";do
+export url=`lynx --dump -listonly -nonumbers $u|grep -w iso|sed "/sha256/d;/timeline/d;s|\/download||g"|sort|uniq`
+echo $url
+unset url
+done > /tmp/urls
+continue
+fi
+done
+fi
+echo -en > /tmp/d
+for pattern in "Bliss-v" "Bliss-Go-v" "Bliss-Surface";do
+cat /tmp/images|grep $pattern |sort|uniq >> /tmp/d
+done
+echo -en >>/tmp/d
+export imgln=`wc -l /tmp/images|cut -f 1 -d \  `
+export simgln=`wc -l /tmp/d|cut -f 1 -d \  `
+if echo $imgln|grep -qw $simgln;then
+mv /tmp/d /tmp/images
+else
+rm /tmp/d
+fi
+if echo $presetname|grep -iqw current-go;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|tail -n 1`
+elif echo $presetname|grep -iqw current-surface;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|tail -n 1`
+elif echo $presetname|grep -iqw current;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|tail -n 1`
+elif echo $presetname|grep -iqw legacy-go;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|head -n 1`
+elif echo $presetname|grep -iqw legacy-surface;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|head -n 1`
+elif echo $presetname|grep -iqw legacy;then
+export url=`cat /tmp/urls|tr \\  \\\n|grep -i $urlpattern|sort -V|head -n 1`
+else
+unset url
+fi
+echo \#android > unattends/android/$presetname-$disk-erase
+echo export presetname=\'$presetname\' >> unattends/android/$presetname-$disk-erase
+if [ $presetname == "custom" ];then
+sleep .01
+else
+echo export url=\'$url\' >> unattends/android/$presetname-$disk-erase
+fi
+if echo $disk|grep -qw root_only;then
+echo export disk=\'$disk\' >> unattends/android/$presetname-$disk-erase
+else
+echo export disk=\'/dev/$disk\' >> unattends/android/$presetname-$disk-erase
+fi
+echo export partmethod=\'$partmethod\' >> unattends/android/$presetname-$disk-erase
+echo export disklayout=\'$disklayout\' >> unattends/android/$presetname-$disk-erase
+echo export boot=\'$boot\' >> unattends/android/$presetname-$disk-erase
+echo export root=\'$root\' >> unattends/android/$presetname-$disk-erase
+echo export fmtboot=\'$fmtboot\' >> unattends/android/$presetname-$disk-erase
+echo export fmtfs=\'$fmtfs\' >> unattends/android/$presetname-$disk-erase
+echo export completeaction=\'$completeaction\' >> unattends/android/$presetname-$disk-erase
+done
+done&
+mkdir -p unattends/jenux
+for crypttype in "encrypted" "unencrypted";do
+for presetname in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch";do
+for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
+export disk=$disk
+export partmethod=e
+export disklayout="  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:1030143:EF00 -t 2:EF00 -c 2:EFI  -N 3 -t 3:8300 -c 3:linux  "
+export boot="/dev/disk/by-partlabel/EFI"
+export root="/dev/disk/by-partlabel/linux"
+if echo $crypttype|grep -qw encrypted;then
+export encrypt=y
+else
+export encrypt=n
+fi
+export cryptkey=
+export fmtboot=y
+export fmtfs=y
+export presetname=$presetname
+export kerntype=linux
+export completeaction=poweroff
+export accessibility="1"
+export host="myhostname"
+export name="My_Name"
+export user=myname
+export pass=mysupersecretandsecurepassword12345
+export autologin=0
+export encrypthome=1
+echo \#jenux > unattends/jenux/$presetname-$disk-$crypttype-erase
+if echo $disk|grep -qw root_only;then
+echo export disk=\'$disk\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+else
+echo export disk=\'/dev/$disk\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+fi
+echo export partmethod=\'$partmethod\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export disklayout=\'$disklayout\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export boot=\'$boot\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export root=\'$root\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export fmtboot=\'$fmtboot\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export fmtfs=\'$fmtfs\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export encrypt=\'$encrypt\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export cryptkey=\'$cryptkey\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export presetname=\'$presetname\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export kerntype=\'$kerntype\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo export completeaction=\'$completeaction\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export accessibility=\'$accessibility\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export host=\'$host\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export name=\'$name\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export user=\'$user\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export pass=\'$pass\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export autologin=\'$autologin\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+echo \#export encrypthome=\'$encrypthome\' >> unattends/jenux/$presetname-$disk-$crypttype-erase
+done
+done
+done&
+mkdir -p unattends/nbd
+for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "sr0" "sr1" "sr2" "sr3";do
+echo \#nbd > unattends/nbd/$disk
+echo /dev/$disk >> unattends/nbd/$disk
+done&
+mkdir -p unattends/pi
+for unattendarch in "armv7h" "aarch64";do
+case "$unattendarch" in
+armv7h)
+echo raspberry pi 2\|rpi_2 >> /tmp/devlist
+echo raspberry pi 2 with vendor firmware\|rpi-vfw_2 >> /tmp/devlist
+echo raspberry pi 3\|rpi_3 >> /tmp/devlist
+echo raspberry pi 3 with vendor firmware\|rpi-vfw_3 >> /tmp/devlist
+echo raspberry pi 4\|rpi_4 >> /tmp/devlist
+echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
+export transtype=arm
+;;
+aarch64)
+echo raspberry pi 02\|rpi_02 >> /tmp/devlist
+echo raspberry pi 02 with vendor firmware\|rpi-vfw_02 >> /tmp/devlist
+echo raspberry pi 3\|rpi_3 >> /tmp/devlist
+echo raspberry pi 3 with vendor firmware\|rpi-vfw_3 >> /tmp/devlist
+echo raspberry pi 4\|rpi_4 >> /tmp/devlist
+echo raspberry pi 4 with vendor firmware\|rpi-vfw_4 >> /tmp/devlist
+echo raspberry pi 5\|rpi_5 >> /tmp/devlist
+echo raspberry pi 5 with vendor firmware\|rpi-vfw_5 >> /tmp/devlist
+echo Pinephone\|pine_phone >> /tmp/devlist
+export transtype=aarch64
+;;
+esac
+for device in `cat /tmp/devlist|cut -f 2 -d \|`;do
+export devtype=`echo $device|cut -f 2 -d \||cut -f 1 -d _`
+export devid=`echo $device|cut -f 2 -d \|`
+case "$devid" in
+rpi_02)
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi-vfw_02)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi_2)
+export devpkgs="linux-armv7 linux-armv7-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi fbdetect"
+;;
+rpi-vfw_2)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi fbdetect"
+;;
+rpi_3)
+if echo $unattendarch|grep -qw armv7h;then
+export devpkgs="linux-armv7 linux-armv7-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+fi
+if echo $unattendarch|grep -qw aarch64;then
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+fi
+;;
+rpi-vfw_3)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi_4)
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi-vfw_4)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi_5)
+export devpkgs="linux-aarch64 linux-aarch64-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+rpi-vfw_5)
+export devpkgs="linux-rpi linux-rpi-headers raspberrypi-bootloader raspberrypi-bootloader-x firmware-raspberrypi pi-bluetooth hciattach-rpi3 fbdetect"
+;;
+pine_phone)
+export devpkgs="alsa-ucm-pinephone anx7688-firmware danctnix-tweaks danctnix-usb-tethering device-pine64-pinephone eg25-manager libgpiod linux-megi linux-megi-headers  ov5640-firmware rtl8723bt-firmware uboot-tools zramswap bluez-utils pi-bluetooth"
+;;
+esac
+export blueans="n"
+export macaddr=""
+export completeaction="poweroff"
+export accessibility="1"
+export host="myhostname"
+export name="My_Name"
+export user=myname
+export pass=mysupersecretandsecurepassword12345
+export autologin=0
+export encrypthome=1
+for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
+for preset in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch" "all";do
+echo \#pi > unattends/pi/$preset-$disk-$unattendarch-$devid
+if echo $disk|grep -qw root_only;then
+echo export disk=\'$disk\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+else
+echo export disk=\'/dev/$disk\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+fi
+echo export arch=\'$unattendarch\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export transtype=\'$transtype\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export device=\'$device\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export devid=\'$devid\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export devpkgs=\'$devpkgs\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export devtype=\'$devtype\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export preset=\'$preset\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export blueans=\'$blueans\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export macaddr=\'$macaddr\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo export completeaction=\'$completeaction\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export accessibility=\'$accessibility\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export host=\'$host\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export name=\'$name\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export user=\'$user\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export pass=\'$pass\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export autologin=\'$autologin\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+echo \#export encrypthome=\'$encrypthome\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
+done
+done
+done
+done
+rm /tmp/devlist
+for f in `find ./unattends|grep root_only`;do
+for edit in "partmethod=" "disklayout=" "boot=" "root=" "fmtboot=" "fmtfs=";do
+sed -i /$edit/d $f
+done
+done&
+cat > rootpasswd.sample<<EOF
+#This is a sample configuration which lists all variables currently supported by the jenux grub boot logic. To set any of these variables, place a file called rootpasswd in the root of any grub supported file system, i.e. ext4, ntfs, fat32, etc
+#supported variables:
+#lowram, if set, instructs the initial ramdisk not to copy the content of the airootfs.sfs, i.e. root file system, into ram. Note: if using an unattend file on this media, lowram must be set, unless using a separate device for unattend files, customizable using the unattenddev parameter.
+#example:
+#lowram=1
+#nochecksum
+#instructs the ramdisk not to check the integrity of the rootfs before either copying it into ram, the default, or running it from the media
+#example:
+#nochecksum=1
+#passwd
+#used to automatically enable ssh using a specific password, please note: this password will be visible in/proc/cmdline for the duration of the live system boot
+#example:
+#passwd=somesupersecretpassword
+#port
+#used to set the port on which ssh will listen, note: passwd must be defined to enable ssh, setting port without passwd will result in undefined behavior
+#example:
+#port=2222
+#fwdport
+#if connected to a network supporting upnp, requests that an IGD forward the ssh port to allow access from the internet
+#example:
+#fwdport=1
+#extport
+#if fwdport is set, specifies the external port that ssh will be available on. If not set, the external and internal ports will match
+#example:
+#extport=2222
+#torenable
+#if set to any value, remote access over ssh will also be enabled over the tor network
+#example:
+#torenable=1
+#kernelopts
+#used to pass parameters to the kernel
+#example:
+#kernelopts="console=ttyS0,115200"
+#wifissid
+#triggers automatic connection to a wifi network with the given ssid, if a wifi adapter is present
+#example:
+#wifissid=mynetwork
+#wifisectype
+#a wireless security type supported by NetworkManager's wifi-sec.key-mgmt property, if left empty, defaults to wpa-psk
+#example:
+#wifisectype=wpa-psk
+#wifisecproto
+#a security protocol supported by NetworkManager's wifi-sec.proto property, If left empty, defaults to rsn
+#example:
+#wifisecproto=rsn
+#wifipass
+#gives the password, wep, wpa, wpa2, wpa3, for the network specified with wifissid. Not setting wifissid will result in undefined behavior
+#example:
+#wifipass=mywifisupersecretandsecurepassword12345
+#nospeech
+#if set, turns off accessibility in the installer, also tells the installed android and jenux/arm systems not to activate accessibility features during first time configuration, can be reversed by the user during setup
+#example:
+#nospeech=1
+#soundcard:
+#if set to the name of a device, or a substring that may be in the device id, i.e. hdmi, PCH, HDA, etc, the value of this variable will be used to attempt to auto select the sound card for speech output during the live environment
+#example:
+#soundcard=pch
+#soundcard=es1370
+#soundcardindex:
+#if set to the index of a device, the value of this variable will be used to select the sound card for speech output during the live environment
+#example:
+#soundcardindex=0
+#overlay:
+#used to give the location of a gzip compressed tarball(.tar.gz) which will be extracted verbatim at / upon running sshcheck. This allows you to add content to the rootfs. Your optional scripts can then make further changes depending on and assuming that that content is present at the location that you specify in the tarball, as they are fetched and ran after successful extraction. Both the format and restrictions relating to this parameter match with the below unattend directive. 
+#examples:
+#overlay=/additional/stupid/wifidriver.tar.gz
+#overlay=https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz
+#overlaydev:
+#specifies the device to mount containing the overlay. If not supplied, it defaults to this media.
+#examples:
+#overlaydev=/dev/sda3
+#overlaydev=/dev/disk/by-label/data
+#script:
+#used to give the location of a script which will be executed after the package manager initialization, but before execution of the main menu. Both the format and restrictions relating to this parameter match with the below unattend directive. 
+#examples:
+#script=/scripts/unattend_create
+#script=http://192.168.1.35/internal_scripts/install-log-remote-monitor
+#scriptdev:
+#specifies the device to mount containing the post login script. If not supplied, it defaults to this media.
+#examples:
+#scriptdev=/dev/sda3
+#scriptdev=/dev/disk/by-label/data
+#postscript:
+#used to give the location of a script that will be run in the chroot after an installation of either android or jenux completes. Such a script may, for example, install packages that are not part of the presets, or customize the system in some other way. Your script will be run using /bin/sh.
+#examples:
+#postscript=/scripts/install_site_packages
+#postscript=http://192.168.1.35/internal_scripts/setup_root_ssh_key
+#postscriptdev:
+#specifies the device to mount containing the additional post install script. If not supplied, it defaults to this media.
+#examples:
+#postscriptdev=/dev/sda3
+#postscriptdev=/dev/disk/by-label/data
+#sshkey:
+#used to automatically copy a public key for ssh access, without having to use password authentication
+#examples:
+#sshkey=/mykey.pub
+#sshkey=http://192.168.120.1/mykey
+#sshkeydev:
+#specifies the device to mount containing the ssh public key. If not supplied, it defaults to this media.
+#examples:
+#sshkeydev=/dev/sda3
+#sshkeydev=/dev/disk/by-label/data
+#livemode
+#if set to any non empty value, this is a live boot, meaning that the system will behave as if the preset was an installed system.
+#like other live systems, data will be lost after power down. In addition, space free is dependent on free RAM
+#example:
+#livemode=live
+#livemode=1
+#btconnaddr
+#sets the mac addresses of bluetooth devices to keep a persistant connection open to, seperated by commas. This can be used, for example, to automatically connect to bluetooth headphones or a keyboard with no user interaction required
+#examples:
+#btconnaddr=00:01:02:03:04:05
+#btconnaddr=0a:1b:2c:3d:4e:5f,aa:bb:cc:dd:ee:ff
+#unattenddev:
+#specifies the device to mount containing the unattend file. If not supplied, it defaults to this media.
+#examples:
+#unattenddev=/dev/sda3
+#unattenddev=/dev/disk/by-label/data
+#host:
+#if installing jenux or creating an image for an arm device, specifies the hostname of the new system. If set, host, name, user, pass, autologin, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#host=myhostname
+#name:
+#if installing jenux or creating an image for an arm device, specifies the full name of the user of the new system. Underscores will be replaced with spaces for this field. If set, host, name, user, pass, autologin, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#name=my_name
+#user:
+#if installing jenux or creating an image for an arm device, specifies the system's username. If set, host, name, user, pass, autologin, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#user=myname
+#pass:
+#if installing jenux or creating an image for an arm device, specifies the password for the system's first user. If set, host, name, user, pass, autologin, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#pass=mysupersecretandsecurepassword12345
+#autologin:
+#if installing jenux or creating an image for an arm device, specifies if the system's first user should be logged in automatically. This option is mutually exclusive with encrypthome, discussed later. If set, host, name, user, pass, autologin, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#autologin=1
+#encrypthome:
+#if installing jenux or creating an image for an arm device, specifies if the system's first user should have home directory encryption. If set, host, name, user, pass, autologin, and encrypthome must be set to complete setup. If all values are not set, setup will run interactively.
+#example:
+#encrypthome=1
+#reader
+#used to select a specific screen reader, either fenrir, espeakup, or speechd-up if accessibility is enabled.
+#example:
+#reader=fenrir
+#reader=speechd-up
+#reader=espeakup
+#lang
+#A string of the format language_terratory.charset used to set the system language, for possible values, check https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for language values, and https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes for terratory values. Under most conditions, the charset should be UTF-8, unless you are dealing with legacy applications
+#examples:
+#lang=en_US.UTF-8
+#lang=pt_BR.UTF-8
+#nokeyrings
+#if set, instructs the login script responsible for loading the main menu not to initialize the pacman keyrings, assumes that any install or package management opperations will be handled by some external agent
+#example:
+#nokeyrings=1
+#kernel:
+#The path, in any format that grub can interpret, of a custom kernel image to load, either on this media, where root is set, or on any filesystem that grub can access
+#examples:
+#kernel=/arch/boot/x86_64/vmlinuz
+#kernel=/arch/boot/i686/vmlinuz
+#kernel='(hd0,gpt3)'/boot/vmlinuz-linux
+#kernel=/arch/boot/aarch64/vmlinuz-linux.rpi
+#ramdisk:
+#The path, in any format that grub can interpret, of a custom ramdisk to load, either on this media, where root is set, or on any filesystem that grub can access
+#examples:
+#ramdisk=/arch/boot/x86_64/archiso.img
+#ramdisk=/arch/boot/i686/archiso.img
+#ramdisk='(hd0,gpt3)'/boot/initramfs-linux-fallback.img
+#ramdisk=/arch/boot/aarch64/archiso.rpi.img
+#noamdmicrocode:
+#if set, skips loading of AMD microcode. Note: this will not effect the ability to boot on non-AMD platforms, since mismatching microcode will be ignored by the kernel.
+#example:
+#noamdmicrocode=1
+#nointelmicrocode:
+#if set, skips loading of Intel microcode. Note: this will not effect the ability to boot on non-Intel platforms, since mismatching microcode will be ignored by the kernel.
+#example:
+#nointelmicrocode=1
+#unattend:
+#used to give the location of an unattended setup file to trigger automatic installation of jenux, android, an arm device such as a raspberry pi, or a disk file for nbd access. Sample, prewritten unattend files are provided on this media. If a path is supplied, such as /unattends/nbd/sda, the unattend is searched for relative to the root of unattenddev. If unattenddev is unset, it defaults to this media. If unattend is a url, the location must be supported by curl. If unattend is a path, the file:// prefix must not be used. In order to access files on this media, lowram must be set. Multiple unattend directives are not supported and will result in undefined behavior.
+#examples, please uncomment only one:
+EOF
+for unattend in `find unattends -type f|sort|uniq`;do
+echo \#unattend=\""/"$unattend\" >> rootpasswd.sample
+done
+for u in `find unattends -type f`;do
+while true;do
+export outname=`echo $u|sed "s|unattends|vmdisks|g"`
+export undiskname=$struct/`basename $u`
+export struct=`dirname $outname`
+if [ -e $struct ];then
+sleep .01
+else
+mkdir -p $struct
+fi
+export mount=/mnt/`echo $u|tr / _`
+if [ -e template.img ];then
+sleep .01
+else
+dd if=/dev/zero of=template.img bs=1M count=2
+echo -en ,\\nwrite|sfdisk template.img
+mkfs.vfat -n unattend --offset=1 template.img
+fi
+cp template.img $undiskname
+if [ -e $mount ];then
+sleep .01
+else
+mkdir -p $mount
+fi
+mount -o offset=512 $undiskname $mount
+if mountpoint -q $mount;then
+echo -en lowram=1\\nnochecksum=1\\nunattend=/unattend=/unattend\\nunattenddev=/dev/disk/by-label/unattend > $mount/rootpasswd
+cp -rf $u $mount/unattend
+umount $mount
+rmdir $mount
+qemu-img convert -f raw -O vmdk $undiskname $undiskname.vmdk
+rm $undiskname 
+break
+else
+continue
+fi
+done
+done
+rm template.img
