@@ -1,4 +1,4 @@
-name: arm-live-gnome
+name: aarch64-live-plasma
 
 permissions:
   contents: read
@@ -12,14 +12,14 @@ on:
    - cron: 0 0 * * *
 
 jobs:
-  live-gnome:
+  live-plasma:
     
     strategy:
       fail-fast: false
       matrix:
         arch: [aarch64]
     
-    name: live-gnome-${{ matrix.arch}}
+    name: live-plasma-${{ matrix.arch}}
     runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     timeout-minutes: 240
     steps:
@@ -37,7 +37,7 @@ jobs:
           cat > .env << EOF
           jenux_iso_arch=${{ matrix.arch }}
           jenux_iso_livemode=1
-          jenux_iso_preset=gnome
+          jenux_iso_preset=plasma
           EOF
           
       - name: Create output directory

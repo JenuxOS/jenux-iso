@@ -1,4 +1,4 @@
-name: arm-live-retroarch
+name: aarch64-installer
 
 permissions:
   contents: read
@@ -12,14 +12,14 @@ on:
    - cron: 0 0 * * *
 
 jobs:
-  live-retroarch:
+  installer:
     
     strategy:
       fail-fast: false
       matrix:
         arch: [aarch64]
     
-    name: live-retroarch-${{ matrix.arch}}
+    name: installer-${{ matrix.arch}}
     runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     timeout-minutes: 240
     steps:
@@ -36,8 +36,8 @@ jobs:
         run: |
           cat > .env << EOF
           jenux_iso_arch=${{ matrix.arch }}
-          jenux_iso_livemode=1
-          jenux_iso_preset=retroarch
+          jenux_iso_livemode=0
+          jenux_iso_preset=base
           EOF
           
       - name: Create output directory
