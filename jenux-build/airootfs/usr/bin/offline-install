@@ -505,7 +505,7 @@ cp /root/postinstall /mnt
 chmod 755 /mnt/postinstall
 while true;do
 echo attempting to run postinstall script in system root
-if chroot /mnt /postinstall;then
+if arch-chroot /mnt /postinstall;then
 echo script successful, deleting
 rm /mnt/postinstall
 break
