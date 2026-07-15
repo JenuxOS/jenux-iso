@@ -327,7 +327,7 @@ fi
 if cat /proc/cmdline|grep -q console=;then
 true
 else
-systemctl start getty@tty1
+systemctl start getty@tty1 serial-getty@ttyS0
 fi
 if [ -z $soundcardindex ];then
 true
