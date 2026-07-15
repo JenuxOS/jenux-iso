@@ -531,7 +531,7 @@ sleep .01
 else
 dd if=/dev/zero of=template.img bs=1M count=2
 echo -en ,\\nwrite|sfdisk template.img
-mkfs.vfat -n unattend --offset=1 template.img
+mkfs.vfat -n AUTOINST --offset=1 template.img
 fi
 cp template.img $undiskname
 if [ -e $mount ];then
@@ -541,8 +541,8 @@ mkdir -p $mount
 fi
 mount -o offset=512 $undiskname $mount
 if mountpoint -q $mount;then
-echo -en lowram=1\\nnochecksum=1\\nunattend=/unattend=/unattend\\nunattenddev=/dev/disk/by-label/unattend > $mount/rootpasswd
-cp -rf $u $mount/unattend
+echo -en lowram=1\\nnochecksum=1\\nunattend=/sysinst\\nunattenddev=/dev/disk/by-label/AUTOINST > $mount/rootpasswd
+cp -rf $u $mount/sysinst
 umount $mount
 rmdir $mount
 qemu-img convert -f raw -O vmdk $undiskname $undiskname.vmdk
