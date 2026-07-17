@@ -334,8 +334,14 @@ cat > /etc/systemd/system/getty@$t.service.d/firstboot.conf<<EOF
 ExecStart=
 ExecStart=-/sbin/agetty -a root --noclear --nohostname --nonewline %I \$TERM
 EOF
+mkdir -p /etc/systemd/system/serial-getty@$t.service.d
+cat > /etc/systemd/system/serial-getty@$t.service.d/firstboot.conf<<EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -a root --noclear --nohostname --nonewline %I \$TERM
+EOF
 systemctl daemon-reload
-systemctl start getty@$t
+systemctl restart getty@$t serial-getty@$t
 done
 else
 systemctl start getty@tty1
@@ -405,6 +411,3 @@ continue
 fi
 done
 fi
-for t in `echo -en $console`;do
-rm -rf /etc/systemd/system/getty@$t.service.d
-done
