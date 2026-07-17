@@ -14,7 +14,6 @@ done
 cp -aT /etc/skel/ /root/
 /etc/postinstall.sh root_only $preset n
 systemctl disable speech-dispatcherd fenrirscreenreader swap avahi-daemon
-cp -rf /etc/systemd/system/getty@tty1.service.d /etc/systemd/system/serial-getty@ttyS0.service.d
 if [ -e /boot/vmlinuz-linux ];then
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 fi

@@ -1,4 +1,5 @@
 #!/bin/zsh
+cat /proc/cmdline|tr \  \\n|grep -w console|sed "s|console=||g"|tr -d \\n|head -n 1|cut -f 1 -d ,|read -r -s console
 cat /proc/cmdline|tr \  \\n|grep -w BOOT_IMAGE|sed "s|BOOT_IMAGE=||g"|tr -d \\n|head -n 1|read -r -s bootimage
 cat /proc/cmdline|tr \  \\n|grep -w archisolabel|sed "s|archisolabel=||g"|tr -d \\n|head -n 1|read -r -s label
 cat /proc/cmdline|tr \  \\n|grep -w passwd|sed "s|passwd=||g"|tr -d \\n|head -n 1|read -r -s passwd
@@ -325,9 +326,19 @@ umount /mnt
 fi
 fi
 if cat /proc/cmdline|grep -q console=;then
-true
+systemctl stop getty@tty1
+for t in `echo -en $console`;do
+mkdir -p /etc/systemd/system/getty@$t.service.d
+cat > /etc/systemd/system/getty@$t.service.d/firstboot.conf<<EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -a root --noclear --nohostname --nonewline %I \$TERM
+EOF
+systemctl daemon-reload
+systemctl start getty@$t
+done
 else
-systemctl start getty@tty1 serial-getty@ttyS0
+systemctl start getty@tty1
 fi
 if [ -z $soundcardindex ];then
 true
@@ -394,3 +405,6 @@ continue
 fi
 done
 fi
+for t in `echo -en $console`;do
+rm -rf /etc/systemd/system/getty@$t.service.d
+done
