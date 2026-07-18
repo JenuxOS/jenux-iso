@@ -406,7 +406,21 @@ if [ -e "${script_path}/${out_dir}"/rootfs.tar ];then
 sleep .01
 else
 export taropts=`cat usr/share/jenux/offline-options|tr \\  \\\n|grep exclude|tr \\\n \\  |sed "s|'/|'|g"`
+for rootfssvc in "avahi-daemon" "fenrirscreenreader" "getty@tty1" "speech-dispatcherd";do
+arch-chroot . systemctl enable $rootfssvc
+done
+cat > usr/bin/rootfsprep<<EOF
+cp -rf /usr/share/shim-signed/EFI /boot/EFI
+bootcrypt
+mkinitcpio -P
+grub-mkconfig -o /boot/grub/grub.cfg
+EOF
+chmod 755 usr/bin/rootfsprep
 echo tar $taropts -cf "${script_path}/${out_dir}"/rootfs.tar .|sh
+for rootfssvc in "avahi-daemon" "fenrirscreenreader" "getty@tty1" "speech-dispatcherd";do
+arch-chroot . systemctl disable $rootfssvc
+done
+rm usr/bin/rootfsprep
 fi
 fi
 while true;do
