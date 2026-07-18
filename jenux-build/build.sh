@@ -414,7 +414,9 @@ cp -rf /usr/share/shim-signed/EFI /boot/EFI
 bootcrypt
 mkinitcpio -P
 grub-mkconfig -o /boot/grub/grub.cfg
-fscrypt setup /
+echo y|fscrypt setup
+systemctl disable sshcheck
+rm /usr/bin/rootfsprep
 EOF
 chmod 755 usr/bin/rootfsprep
 echo tar $taropts -cf "${script_path}/${out_dir}"/rootfs.tar .|sh
