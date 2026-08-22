@@ -568,12 +568,12 @@ else
 return 3
 fi
 if echo $prepbuilds|grep -iqw x86_64;then
-if grub-install -d /usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI;then
+if grub-install -d /usr/lib/grub/x86_64-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp efinet" --no-nvram --sbat $tmpdir/sbat.csv --target x86_64-efi --efi-directory /mnt/EFI;then
 sleep .01
 else
 return 4
 fi
-if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp";then
+if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/x86_64-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp efinet";then
 sleep .01
 else
 return 5
@@ -585,12 +585,12 @@ return 6
 fi
 fi
 if echo $prepbuilds|grep -iqw x86_64||echo $prepbuilds|grep -iqw i686;then
-if grub-install -d /usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI;then
+if grub-install -d /usr/lib/grub/i386-efi --boot-directory /mnt/boot --force-file-id --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp efinet" --no-nvram --sbat $tmpdir/sbat.csv --target i386-efi --efi-directory /mnt/EFI;then
 sleep .01
 else
 return 7
 fi
-if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp";then
+if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d /usr/lib/grub/i386-efi --modules="echo play usbms cpuid part_gpt part_msdos ext2 udf fat search_fs_file search_label usb_keyboard all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp efinet";then
 sleep .01
 else
 return 8
@@ -626,12 +626,12 @@ else
 return 13
 fi
 fi
-if grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI;then
+if grub-install -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --boot-directory /mnt/boot --force-file-id --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp efinet" --no-nvram --sbat $tmpdir/sbat.csv --target arm64-efi --efi-directory /mnt/EFI;then
 sleep .01
 else
 return 14
 fi
-if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp";then
+if grub-mknetdir --net-directory=/mnt --sbat=$tmpdir/sbat.csv -d ${script_path}/${work_dir}/${arch}/airootfs/usr/lib/grub/arm64-efi --modules="echo part_gpt part_msdos ext2 udf fat search_fs_file search_label all_video test configfile normal linux ext2 ntfs exfat hfsplus net tftp efinet";then
 sleep .01
 else
 return 15
