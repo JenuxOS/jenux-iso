@@ -20,7 +20,7 @@ jobs:
         arch: [all]
     
     name: live-mate-${{ matrix.arch}}
-    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 240
     steps:
       - name: Checkout code
