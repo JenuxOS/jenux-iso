@@ -500,8 +500,8 @@ tar -cf "${script_path}/${out_dir}"/enroler.tar  EFI boot
 export enrolerdatasize=`du -h "${script_path}/${out_dir}"/enroler.tar|cut -f 1 -d M`
 export enrolerbufsize=2048
 export enrolersize=$(($enrolerdatasize+$enrolerbufsize))"M"
-truncate -s $enrolersize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso"
-export enrolerdev=`losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso" --show`
+truncate -s $enrolersize "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler"
+export enrolerdev=`losetup -P -f "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler" --show`
 sgdisk  -o -n 1:2048:4096:EF02 -t 1:EF02 -c 1:BIOS  -n 2:6144:+750M:EF00 -t 2:EF00 -c 2:ISOEFI -N 3 -t 3:0700 -c 3:linuxiso $enrolerdev
 partprobe $enrolerdev
 mkdir /fs
@@ -543,11 +543,11 @@ fi
 done
 rm -rf $tmpdir
 cd "${script_path}/${out_dir}"
-sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.iso" > "${iso_name}-${iso_version}-${buildtype}.enroler.iso.sha512"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler" > "${iso_name}-${iso_version}-${buildtype}.enroler.sha512"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.iso" > "${iso_name}-${iso_version}-${buildtype}.iso.sha512"
 cd ${script_path}
 ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.iso"
-ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.enroler.iso"
+ls -sh "${out_dir}/${iso_name}-${iso_version}-${buildtype}.enroler"
 }
 function install_bootloader
 {
@@ -668,7 +668,14 @@ sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
 rm $f.unsigned
 fi
 done
-mv $tmpdir/jenux-iso.cer /mnt/EFI
+if cp -rf/usr/share/shim-signed/EFI/boot/*.efi /mnt;then
+sleep .01
+else 
+return 16
+fi 
+cp $tmpdir/jenux-iso.cer /mnt
+cp $tmpdir/jenux-iso.cer /mnt/EFI
+cp $tmpdir/jenux-iso.cer "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.cer"
 mv $tmpdir/jenux.crt /mnt/EFI/jenux.sbverify.crt
 rm $tmpdir/jenux.key
 if echo $prepbuilds|grep -iqw aarch64;then
@@ -815,8 +822,8 @@ done
 # Do all stuff for "iso"
 run_once make_iso
 cd "${script_path}/${out_dir}"
-sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.iso" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso.sha512"
-qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.vmdk"
+sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.sha512"
+qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.vmdk"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.enroler.vmdk.sha512"
 qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"

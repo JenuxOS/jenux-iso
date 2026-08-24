@@ -5,7 +5,6 @@ mkdir -p /net/.scripts
 cd /iso
 curl -Lo /net/.scripts/winpe.iso https://nash-central.com/projects/bcdbooter/winpe.iso
 curl -L https://jenux.dev/get\?tripple-installer.iso|bsdtar -x
-rm *.enroler.iso
 export loopdev=`losetup -P -r --show -f Jenux-\`date +%Y.%m.%d\`-*.iso`
 mount $loopdev"p3" /mnt
 mount $loopdev"p2" /mnt/EFI
