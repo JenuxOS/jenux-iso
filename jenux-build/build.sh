@@ -666,7 +666,7 @@ sbsign --key $tmpdir/jenux.key --cert $tmpdir/jenux.crt --output $f $f.unsigned
 rm $f.unsigned
 fi
 done
-if cp -rf/usr/share/shim-signed/EFI/boot/*.efi /mnt;then
+if cp -rf /usr/share/shim-signed/EFI/boot/*.efi /mnt;then
 sleep .01
 else 
 return 16
