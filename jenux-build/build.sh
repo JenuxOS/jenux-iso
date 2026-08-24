@@ -644,9 +644,7 @@ else
 return 17
 fi
 fi
-if [ -e /mnt/EFI/EFI/boot/*.efi ];then
 cp -rf /mnt/EFI/EFI/boot/*.efi /mnt
-fi
 openssl req -new -x509 -newkey rsa:4096 -days 365000 -keyout $tmpdir/jenux.key -out $tmpdir/jenux.crt -nodes -subj "/CN=Jenux ISO Secure Boot/"
 openssl x509 -in $tmpdir/jenux.crt -out $tmpdir/jenux-iso.cer -outform DER
 for f in `find /mnt -type f|grep vmlinuz`;do
