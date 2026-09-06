@@ -18,7 +18,7 @@ else
 sed -i /$img/d /net/imglist
 fi
 done
-for f in `ls /net/*.qcow2|sort -V|uniq;ls /net/*.vmdk|sort -V|uniq`;do
+for f in `ls /net/*.qcow2|sort -V|uniq;ls /net/*.vmdk|sort -V|uniq;ls /net/*.img|sort|uniq`;do
 if cat /net/imglist|grep -iqw `basename $f`;then
 continue
 fi

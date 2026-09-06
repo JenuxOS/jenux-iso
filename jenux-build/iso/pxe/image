@@ -36,6 +36,14 @@ fi
 done
 cd
 export disk=`echo -n /dev/disk/by-id/;ls /dev/disk/by-id|sed "/usb/d;/wwn/d;/part/d;/DVD/d"|head -n 1`
+if basename $disk|grep -qw by-id;then
+sh -c 'echo -n "print devices"|parted|grep /dev|grep \(>/tmp/disk;cat /tmp/disk|tr \  \:>/tmp/disks;rm /tmp/disk'
+createdynamicmenu cat /tmp/disks
+export disk=`echo $itemname|cut -f 1 -d \:|cut -f 2 -d \"`
+unset choice
+else
+sleep .01
+fi
 rm ~/postlogin
 clear
 curl -LO http://192.168.120.1/imglist
