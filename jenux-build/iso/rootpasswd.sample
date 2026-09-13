@@ -60,6 +60,14 @@
 #if set to the index of a device, the value of this variable will be used to select the sound card for speech output during the live environment
 #example:
 #soundcardindex=0
+#soundcardverb:
+#for devices with software dsp controled through alsaucm, sets the verb, such as HiFi, pared with soundcarddev below to form _verb+_enadev command to get audio/speech
+#example:
+#soundcardverb=HiFi
+#soundcarddev:
+#for devices with software dsp controled through alsaucm, sets the device, such as Speaker, pared with soundcardverb above to form _verb+_enadev command to get audio/speech
+#example:
+#soundcarddev=Speaker
 #overlay:
 #used to give the location of a gzip compressed tarball(.tar.gz) which will be extracted verbatim at / upon running sshcheck. This allows you to add content to the rootfs. Your optional scripts can then make further changes depending on and assuming that that content is present at the location that you specify in the tarball, as they are fetched and ran after successful extraction. Both the format and restrictions relating to this parameter match with the below unattend directive. 
 #examples:

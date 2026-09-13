@@ -29,8 +29,8 @@ amixer sset $d 100 -c $c > /dev/null 2>/dev/null
 done
 done
 if ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"|wc -l|grep -qw 1;then
-exit 1
-fi
+true
+else
 for c in `ls /proc/asound|grep -i card|sed "/cards/d"|sed "s|card||g"`;do
 cat /proc/cmdline|tr \  \\n|grep lang=|sed "s|lang=||g"|tr -d \\n|read -r -s lang
 if [ -z $lang ];then
@@ -95,6 +95,54 @@ ctl.!default {
         card $c
 }
 EOF
-exit 0
 fi
 done
+fi
+if [ -z $soundcardverb ]&&[ -z $soundcarddev ];then
+export IFS=$(echo -en \\n\\b)
+for f in `alsaucm list _verbs|grep :|cut -f 2 -d :|tr -d \  |sort|uniq`;do
+export soundcardverb=$f
+for g in `alsaucm dump text|grep -iw device|sed "s|Device\.||g"|tr -d \\\t|tr -d \\\{|tr -d \  `;do
+export soundcarddev=$g
+alsaucm reset set _verb $soundcardverb set _enadev $soundcarddev
+echo Press enter within 10 seconds if you can hear audio from the following sound configuration: verb: $soundcardverb ", device: " $soundcarddev |RHVoice-test -p bdl -o sndsel.wav
+export durhours=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 1 -d :`
+export durmins=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 2 -d :`
+export dursecs=`soxi sndsel.wav|grep -w Duration|tr -s \  |sed "s|Duration : ||g"|cut -f 1 -d \  |cut -f 3 -d :`
+export dursleep=$(($durhours*3600+$durmins*60+$dursecs))
+if [ -z $dursleep ];then
+export dursleep=10
+fi
+echo Press enter within $dursleep seconds if you can hear audio from the following sound configuration: verb: $soundcardverb ", device: " $soundcarddev |RHVoice-test -p bdl -o vmsg.wav
+sox -n -r 24000 beep.wav -q synth sin 440 trim 00:00:00 00:00:00.05
+sox beep.wav vmsg.wav sndsel.wav
+rm beep.wav vmsg.wav
+play -q sndsel.wav&
+if read -t $(($dursleep+5)) var;then
+killall -9 play
+break
+fi
+done
+done
+rm sndsel.wav
+else
+alsaucm reset set _verb $soundcardverb set _enadev $soundcarddev
+fi
+if [ -e /usr/lib/systemd/system/jenux-alsaucm.service ];then
+sleep .01
+else
+cat > /usr/lib/systemd/system/jenux-alsaucm.service<<EOF
+[Unit]
+Description=set $soundcardverb/$soundcarddev as default sound configuration
+Wants=systemd-udev-settle.service
+After=systemd-udev-settle.service getty.target
+
+[Service]
+Type=oneshot
+ExecStart=alsaucm reset set _verb $soundcardverb set _enadev $soundcarddev
+[Install]
+WantedBy=getty.target
+EOF
+systemctl daemon-reload
+systemctl enable --now jenux-alsaucm.service
+fi
