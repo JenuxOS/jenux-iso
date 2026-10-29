@@ -46,6 +46,20 @@ verbose="-v"
 script_path=$(readlink -f ${0%/*})
 if [ -e /.dockerenv ];then
 mount -t devtmpfs /dev /dev
+mount -t proc /proc /proc
+if [ -e /proc/sys/fs/binfmt_misc/ ];then
+sleep .01
+else
+mkdir -p /proc/sys/fs/binfmt_misc/
+fi
+if mountpoint -q /proc/sys/fs/binfmt_misc/;then
+sleep .01
+else
+mount -t binfmt_misc /proc/sys/fs/binfmt_misc/ /proc/sys/fs/binfmt_misc/
+fi
+for f in `ls /lib/binfmt.d/*`;do
+/lib/systemd/systemd-binfmt  $f
+done
 fi
 _usage ()
 {
@@ -155,11 +169,19 @@ fi
 if [ $arch = "i686" ];then
 mkdir -p "${work_dir}/${arch}/airootfs/etc/pacman.d"
 while true;do
-if curl -Lo "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist" https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist;then
+export arch32mirrorurl=`lynx -listonly -nonumbers --dump https://mirror.math.princeton.edu/pub/archlinux32/i686/core|grep -i mirrorlist|sed /sig/d|tail -n 1`
+if [ -z $arch32mirrorurl ];then
+continue
+else
+break
+fi
+done
+while true;do
+if curl -L $arch32mirrorurl|tar -C "${work_dir}/${arch}/airootfs etc/pacman.d/mirrorlist;then
 break
 else
 continue
-fi
+fi 
 done
 sed -i "s|#Server|Server|g" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 sed -i "s|Include = \/etc\/pacman.d\/mirrorlist|Include = ${work_dir}\/${arch}\/airootfs\/etc\/pacman.d\/mirrorlist|g" "${work_dir}/pacman.${arch}.conf"
@@ -312,7 +334,22 @@ x86_64)
 curl -o ${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist 'https://archlinux.org/mirrorlist/?country=all&protocol=http&use_mirror_status=on'
 ;;
 i686)
-curl -sL https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist|sed "s|#Server|Server|g" > "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
+while true;do
+export arch32mirrorurl=`lynx -listonly -nonumbers --dump https://mirror.math.princeton.edu/pub/archlinux32/i686/core|grep -i mirrorlist|sed /sig/d|tail -n 1`
+if [ -z $arch32mirrorurl ];then
+continue
+else
+break
+fi
+done
+while true;do
+if curl -L $arch32mirrorurl|tar -C "${work_dir}/${arch}/airootfs" -x --zstd etc/pacman.d/mirrorlist;then
+break
+else
+continue
+fi 
+done
+sed -i "s|#Server|Server|g" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 ;;
 esac
 arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
