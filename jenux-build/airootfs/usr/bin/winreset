@@ -1,1 +1,67 @@
-autobuild
+#!/bin/zsh
+function createmenu
+{
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo whiptail --menu `cat $1|head -n 1` `echo -n $menudesc` `cat $1|tail -n 1`>/tmp/menu
+cat $1|tail -n 1|sed s/\"\ /\\n/g>/tmp/itemlist
+chmod 755 /tmp/menu
+/tmp/menu 2>/tmp/choice
+export choice=`cat /tmp/choice|cut -f 2 -d \;`
+export linecounter=1
+export numitems=`cat /tmp/itemlist|wc -l`
+for line in `cat /tmp/itemlist`;do if echo $line|grep -q \;;then sleep .01;else echo $line>>/tmp/items;fi;export linecounter=$(($linecounter+1));if echo $linecounter|grep -qw $(($numitems+1));then break;else continue;fi;done
+export itemname=`cat /tmp/items|head -n $choice|tail -n 1|sed s/\?/\ /g`
+rm /tmp/choice /tmp/menu /tmp/itemlist /tmp/items
+clear
+}
+function createdynamicmenu
+{
+$@|sed s/\ /\?/g>/tmp/itemlist
+export title="\"`cat /tmp/itemlist|wc -l` items available\""
+export counter="1"
+export menudesc=`stty -a|grep rows|cut -f 2-6 -d \;|cut -f 3,5,8 -d \ |tr \; \ |sed s/"  "/" "/|sed s/"  "/" "/`
+echo $title > /tmp/dynmenu
+for item in `cat /tmp/itemlist`;do echo -n "\"`echo $item|cut -c 1`;`echo -n $counter`\"" "\"$item\" " >>/tmp/dynmenu;export counter=$(($counter+1));done
+createmenu /tmp/dynmenu
+rm /tmp/dynmenu
+}
+echo "searching for windows partitions on all local disks..."
+lsblk -i -n -p|cut -f 1 -d :|cut -f 1 -d \ >/tmp/disks
+sed -i s/\|-//g /tmp/disks
+sed -i s/\`\-//g /tmp/disks
+for part in `cat /tmp/disks`;do if blkid $part|grep -qwi ntfs;then echo $part>>/tmp/parts;else continue;fi;done
+if cat /tmp/parts|grep -w /dev;then
+createdynamicmenu cat /tmp/parts
+export part=`echo $itemname|cut -f 1 -d \:|cut -f 2 -d \"`
+else
+echo "Cannot automatically detect a windows partition. Please enter the block device manually."
+read part
+fi
+rm /tmp/disks /tmp/parts
+echo mounting partition $part
+mount $part /mnt
+chntpw -l /mnt/Windows/System32/config/SAM>/dev/null 2>/tmp/msg
+while true;do
+if cat /tmp/msg|grep -qwi read-only;then
+echo "read-only file system detected. running ntfsfix to attempt to remove read-only status.. if second mounting fails, boot back into windows, click shut down on login screen, then select restart, and reboot into live environment. Press enter to continue..."
+read var
+clear
+umount /mnt
+ntfsfix $part
+mount $part /mnt
+chntpw -l /mnt/Windows/System32/config/SAM >/dev/null 2>/tmp/msg
+else
+break
+fi
+done
+chntpw -l /mnt/Windows/System32/config/SAM|grep \| >/tmp/users
+export numusers=`chntpw -l /mnt/Windows/System32/config/SAM|grep \||cut -f 2-3 -d \||wc -l`
+cat /tmp/users|tail -n $(($numusers-1))|cut -f 2-3 -d \|>/tmp/user
+sed s/\ \|\ /\ ,\ username\ /g /tmp/user>/tmp/userlist
+createdynamicmenu cat /tmp/userlist
+cp /mnt/Windows/System32/config/SAM /mnt/Windows/System32/config/SAM.old
+cp /mnt/Windows/System32/config/SAM.LOG1 /mnt/Windows/System32/config/SAM.LOG1.old
+cp /mnt/Windows/System32/config/SAM.LOG2 /mnt/Windows/System32/config/SAM.LOG2.old
+export user=`echo $itemname|cut -f 1 -d ,|cut -f 2 -d \ `
+chntpw -u 0x$user /mnt/Windows/System32/config/SAM
+umount /mnt

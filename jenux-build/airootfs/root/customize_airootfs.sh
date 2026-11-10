@@ -1,11 +1,13 @@
 #!/bin/bash
 export preset=$2
+export baseurl=$3
+sed -i "s|https:\/\/nashcentral.duckdns.org|$baseurl|g" /usr/bin/autobuild
 if [ -z $preset ];then
 export preset=base
 fi
 cd /
 while true;do
-if curl https://nashcentral.duckdns.org/autobuildres/linux/files.tar.gz|tar -xz;then
+if curl -L $baseurl"/autobuildres/linux/files.tar.gz"|tar -xz;then
 break
 else
 continue
@@ -31,7 +33,7 @@ done
 case "$1" in
 i686)
 while true;do
-if curl -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.i686.conf;then
+if curl -Lo /etc/pacman.conf $baseurl"/autobuildres/linux/pacman.i686.conf";then
 break
 else
 continue
@@ -43,7 +45,7 @@ sed -i "s|export reader=fenrir|export reader=espeakup|g" /bin/talk-to-me
 ;;
 aarch64)
 while true;do
-if curl -s -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.aarch64.conf;then
+if curl -s -Lo /etc/pacman.conf $baseurl"/autobuildres/pi/pacman.aarch64.conf";then
 break
 else
 continue
@@ -117,7 +119,7 @@ mv /boot/kernel8.img /boot/vmlinuz-linux.rpi
 mv /boot/Image /boot/vmlinuz-linux
 mkinitcpio -c /etc/mkinitcpio-archiso.conf -k /boot/vmlinuz-linux -g /boot/archiso.img
 while true;do
-if curl -s -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.aarch64.conf;then
+if curl -s -Lo /etc/pacman.conf $baseurl"/autobuildres/pi/pacman.aarch64.conf";then
 break
 else
 continue
@@ -173,7 +175,7 @@ cd /
 ;;
 x86_64)
 while true;do
-if curl -Lo /etc/pacman.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.conf;then
+if curl -Lo /etc/pacman.conf $baseurl"/autobuildres/linux/pacman.conf";then
 break
 else
 continue

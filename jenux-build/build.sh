@@ -22,6 +22,12 @@ fi
 echo environment error, see .venv.example, all vars must be set.
 exit 1
 fi
+if [ -z $baseurl ];then
+export baseurl=https://raw.githubusercontent.com/JenuxOS/jenux-resources/main
+echo no custom baseurl set, using $baseurl
+else
+echo baseurl: $baseurl
+fi
 if echo $jenux_iso_arch|grep -qw _detect_;then
 export jenux_iso_arch=`uname -m`
 fi
@@ -108,7 +114,7 @@ local _cache_dirs
     _cache_dirs=($(pacman -v 2>&1 | grep '^Cache Dirs:' | sed 's/Cache Dirs:\s*//g'))
     if [ $arch = "aarch64" ];then
     while true;do
-if curl -s -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/pi/pacman.$arch.conf;then
+if curl -s -Lo ${script_path}/pacman.${arch}.conf $baseurl"/autobuildres/pi/pacman."$arch".conf";then
 break
 else
 continue
@@ -151,7 +157,7 @@ rm *.pkg* mirrors.tar
 cd $prepkgdir
 else
 while true;do
-if curl -Lo ${script_path}/pacman.${arch}.conf https://nashcentral.duckdns.org/autobuildres/linux/pacman.${arch}.conf;then
+if curl -Lo ${script_path}/pacman.${arch}.conf $baseurl"/autobuildres/linux/pacman."${arch}".conf";then
 break
 else
 continue
@@ -264,7 +270,7 @@ export IFS=$oldifs
 }
 make_packages() {
 while true;do
-curl https://nashcentral.duckdns.org/autobuildres/linux/pkg.${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
+curl -L $baseurl"/autobuildres/linux/pkg."${preset}|tr \  \\n|sed "/pacstrap/d;/\/mnt/d;/--overwrite/d;/\\\\\*/d" > packages.${arch}
 if cat packages.${arch}|grep -iqw base;then
 if [ $arch = "aarch64" ];then
 sed -i "/qemu-system-arm/d;/qemu-system-x86/d;/qemu-emulators-full/d;/gnome-boxes/d" packages.${arch}
@@ -352,7 +358,7 @@ done
 sed -i "s|#Server|Server|g" "${work_dir}/${arch}/airootfs/etc/pacman.d/mirrorlist"
 ;;
 esac
-arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset}
+arch-chroot "${work_dir}/${arch}/airootfs" /root/customize_airootfs.sh ${arch} ${preset} ${baseurl}
 rm -rf ${work_dir}/${arch}/airootfs/etc/pacman.d/gnupg
 if [ -e "${work_dir}/${arch}/airootfs/usr/share/jenux" ];then
 sleep .01

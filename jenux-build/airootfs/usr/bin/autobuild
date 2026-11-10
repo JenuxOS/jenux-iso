@@ -1,5 +1,5 @@
 #!/bin/zsh
-export baseurl="https://nashcentral.duckdns.org/autobuildres"
+export baseurl="https://nashcentral.duckdns.org"
 case `basename $0` in
 androidbuild)
 export dirname="android"
@@ -32,7 +32,7 @@ wificonnect
 else
 echo "not using wifi, continuing to next step"
 fi
-if curl -s -o index.html https://nashcentral.duckdns.org;rm index.html; then
+if curl -s -o index.html $baseurl;rm index.html; then
 echo "connected to internet, proceding to install phase! "
 else
 echo "Sorry, your system cannot be automatically connected to the internet. Connect manually to try the installation again. Please press enter to return to the main menu."
@@ -41,8 +41,8 @@ exit 1
 fi
 fi
 while true;do
-echo Downloading $productname installation script...
-if curl -o $scriptname $baseurl/$dirname/$scriptname;then
+echo Downloading $productname installation script from $baseurl/$dirname/$scriptname
+if curl -Lo $scriptname $baseurl/$dirname/$scriptname;then
 break
 else
 continue
