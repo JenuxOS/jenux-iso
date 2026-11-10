@@ -431,7 +431,7 @@ else
 break
 fi
 done
-if echo $buildtype|grep -iqw tripple ];then
+if echo $buildtype|grep -iqw tripple;then
 sleep .01
 else
 if [ -e "${script_path}/${out_dir}" ];then
