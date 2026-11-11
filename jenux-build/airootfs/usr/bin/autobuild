@@ -43,6 +43,8 @@ else
 continue
 fi
 done
+export oldbase=`cat $scriptname|grep export\ baseurl=|sed "s|export baseurl=||g"`
+sed -i "s|$oldbase|$baseurl|g" $scriptname
 chmod 755 $scriptname
 clear
 ./$scriptname $@

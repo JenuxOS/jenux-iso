@@ -1,7 +1,8 @@
 #!/bin/bash
 export preset=$2
 export baseurl=$3
-sed -i "s|https:\/\/nashcentral.duckdns.org|$baseurl|g" /usr/bin/autobuild
+export oldbase=`cat /usr/bin/autobuild|grep export\ baseurl=|sed "s|export baseurl=||g"`
+sed -i "s|$oldbase|$baseurl|g" /usr/bin/autobuild
 if [ -z $preset ];then
 export preset=base
 fi
