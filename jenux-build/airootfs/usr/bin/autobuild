@@ -16,11 +16,6 @@ export dirname="pi"
 export productname="your raspberry pi"
 export scriptname="pibuild"
 ;;
-winreset)
-export dirname="winreset"
-export productname="Resetting Your Windows Password"
-export scriptname="winreset"
-;;
 esac
 if cat /proc/cmdline|grep -iq unattend;then
 source ~/unattend
@@ -41,8 +36,8 @@ exit 1
 fi
 fi
 while true;do
-echo Downloading $productname installation script from $baseurl/$dirname/$scriptname
-if curl -Lo $scriptname $baseurl/$dirname/$scriptname;then
+echo Downloading $productname installation script from $baseurl/autobuildres/$dirname/$scriptname
+if curl -Lo $scriptname $baseurl/autobuildres/$dirname/$scriptname;then
 break
 else
 continue
