@@ -38,6 +38,7 @@ jobs:
           jenux_iso_arch=${{ matrix.arch }}
           jenux_iso_livemode=1
           jenux_iso_preset=kodi
+          baseurl=https://raw.githubusercontent.com/JenuxOS/jenux-resources/main
           EOF
           
       - name: Create output directory
