@@ -1,8 +1,9 @@
 #!/bin/bash
 export preset=$2
 export baseurl=$3
-export oldbase=`cat /usr/bin/autobuild|grep export\ baseurl=|sed "s|export baseurl=||g"`
-sed -i "s|$oldbase|$baseurl|g" /usr/bin/autobuild
+export oldbase=`cat /usr/bin/autobuild|grep export\ baseurl=|head -n 1|sed "s|export baseurl=||g"|sed "s|\\\/|\\\\\/|g;s|\\\.|\\\\\.|g"`
+export newbase=`echo $baseurl|sed "s|\\\/|\\\\\/|g;s|\\\.|\\\\\.|g"`
+sed -i "s|$oldbase|$newbase|g" /usr/bin/autobuild
 if [ -z $preset ];then
 export preset=base
 fi
