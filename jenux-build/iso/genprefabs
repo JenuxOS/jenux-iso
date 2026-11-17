@@ -1,5 +1,5 @@
 mkdir -p unattends/jenuxoffline
-for preset in "base" "basegui" "gnome" "kodi" "mate" "plasma" "retroarch";do
+for preset in "base" "basegui" "gnome" "kodi" "mate" "plasma" "retroarch" "sonicde";do
 for crypttype in "encrypted" "unencrypted";do
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 export disk=$disk
@@ -158,7 +158,7 @@ done
 done&
 mkdir -p unattends/jenux
 for crypttype in "encrypted" "unencrypted";do
-for presetname in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch";do
+for presetname in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch" "sonicde";do
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
 export disk=$disk
 export partmethod=e
@@ -294,7 +294,7 @@ export pass=mysupersecretandsecurepassword12345
 export autologin=0
 export encrypthome=1
 for disk in "mmcblk0" "mmcblk1" "mmcblk2" "mmcblk3" "nvme0n1" "nvme1n1" "nvme2n1" "nvme3n1" "sda" "sdb" "sdc" "sdd" "vda" "vdb" "vdc" "vdd" "root_only";do
-for preset in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch" "all";do
+for preset in "base" "basegui" "gnome" "mate" "kodi" "plasma" "retroarch";do
 echo \#pi > unattends/pi/$preset-$disk-$unattendarch-$devid
 if echo $disk|grep -qw root_only;then
 echo export disk=\'$disk\' >> unattends/pi/$preset-$disk-$unattendarch-$devid
