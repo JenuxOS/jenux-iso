@@ -63,9 +63,13 @@ sleep .01
 else
 mount -t binfmt_misc /proc/sys/fs/binfmt_misc/ /proc/sys/fs/binfmt_misc/
 fi
+if ls /lib/binfmt.d|wc -l|grep -iqw 0;then
+sleep .01
+else
 for f in `ls /lib/binfmt.d/*`;do
 /lib/systemd/systemd-binfmt  $f
 done
+fi
 fi
 _usage ()
 {
@@ -88,6 +92,18 @@ _usage ()
     echo "    -h                 This help message"
     exit ${1}
 }
+mv /etc/pacman.d/hooks /etc/pacman.d/hooks.prejenuxiso
+mv /etc/pacman.conf /etc/pacman.conf.prejenuxiso
+curl -sLo /etc/pacman.conf $baseurl/autobuildres/linux/pacman.$arch.conf  
+pacman -Sy
+for f in `curl -sL $baseurl/autobuildres/linux/pkg.$preset|tr \\  \\\n|grep -iw keyring`;do
+if pacman -Si $f > /dev/null 2>/dev/null;then
+export keyringpkgs=$keyringpkgs" "$f
+fi
+done
+for f in `echo $keyringpkgs`;do
+pacman --needed --noconfirm --overwrite \* -Syu $f
+done
 run_once() {
     if [[ ! -e ${work_dir}/build.${1}_${arch} ]]; then
         $1
@@ -114,7 +130,7 @@ local _cache_dirs
     _cache_dirs=($(pacman -v 2>&1 | grep '^Cache Dirs:' | sed 's/Cache Dirs:\s*//g'))
     if [ $arch = "aarch64" ];then
     while true;do
-if curl -s -Lo ${script_path}/pacman.${arch}.conf $baseurl"/autobuildres/pi/pacman."$arch".conf";then
+if curl -s -Lo ${script_path}/pacman.${arch}.conf $baseurl"/autobuildres/linux/pacman."$arch".conf";then
 break
 else
 continue
@@ -288,6 +304,9 @@ fi
 done
 fi
 echo -n pacman --config ${work_dir}/pacman.${arch}.conf -r ${work_dir}/${arch}/airootfs -Syyp\   > installtest.${arch}
+for p in `echo -en $keyringpkgs`;do
+echo $p >> packages.${arch}
+done
 cat packages.${arch}|tr \\n \  >> installtest.${arch}
 chmod 700 installtest.${arch}
 for f in `./installtest.${arch} 2>/dev/stdout|grep -i "error: target not found: "|sed "s|error: target not found: ||g"`;do
@@ -869,3 +888,9 @@ sha512sum "${iso_name}-${iso_version}-${buildtype}.enroler.vmdk" > "${script_pat
 qemu-img convert -p -f raw -O vmdk "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.iso" "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk"
 sha512sum "${iso_name}-${iso_version}-${buildtype}.vmdk" > "${script_path}/${out_dir}"/"${iso_name}-${iso_version}-${buildtype}.vmdk.sha512"
 rm -rf ${work_dir} ${install_dir}
+if [ -e /etc/pacman.conf.prejenuxiso ];then
+mv /etc/pacman.conf.prejenuxiso /etc/pacman.conf
+fi
+if [ -e /etc/pacman.d/hooks.prejenuxiso ];then
+mv /etc/pacman.d/hooks.prejenuxiso /etc/pacman.d/hooks
+fi
